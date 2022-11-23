@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 from polarityjam.argument_parsing import startup
-from test_common import TestCommon
+from polarityjam.test.test_common import TestCommon
 from polarityjam.utils.io import get_doc_file_prefix
 
 

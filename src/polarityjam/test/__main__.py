@@ -1,6 +1,6 @@
 import argparse
 
-from test_all import start_tests
+from polarityjam.test.test_all import start_tests
 
 
 def main():

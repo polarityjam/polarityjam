@@ -2,12 +2,11 @@ import time
 import unittest
 from pathlib import Path
 
-import test_config as config
-
-import test_integration
-import test_feature_extraction
-from polarityjam.utils.io import create_path_recursively
+import polarityjam.test.test_config as config
+import polarityjam.test.test_feature_extraction as test_feature_extraction
+import polarityjam.test.test_integration as test_integration
 from polarityjam.polarityjam_logging import get_logger
+from polarityjam.utils.io import create_path_recursively
 
 
 def start_tests(target_folder=None):

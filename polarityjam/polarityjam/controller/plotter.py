@@ -16,8 +16,7 @@ from polarityjam.vizualization.plot import _add_single_cell_polarity_vector, \
     _calc_nuc_eccentricity, _add_nuclei_eccentricity, _add_single_cell_eccentricity_axis, _add_cell_orientation, \
     _calc_nuc_orientation, _add_nuclei_orientation, _add_single_cell_orientation_degree_axis, _add_scalebar
 
-# for figure plot resolution  # todo: parameters?
-CELL_OUTLINE_INTENSITY = 30
+CELL_OUTLINE_INTENSITY = 30  # todo: calculate automatically based on range, improves visualization
 
 
 class Plotter:
@@ -548,7 +547,7 @@ class Plotter:
         if close:
             plt.close(fig)
 
-    def plot_ratio_method(self, collection, img_name, close=False):
+    def plot_ratio_method(self, collection, img_name, close=False):  # todo: disable for automatic calc
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
 
@@ -726,7 +725,7 @@ class Plotter:
             if self.params.plot_orientation:
                 self.plot_eccentricity(collection, key, close)
 
-            if self.params.plot_ratio_method:
+            if self.params.plot_ratio_method:  # todo : disable here. leave code for NB API
                 self.plot_ratio_method(collection, key, close)
 
             if self.params.plot_cyclic_orientation:

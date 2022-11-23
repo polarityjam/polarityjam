@@ -16,7 +16,8 @@ class Extractor:
 
     def threshold(self, single_cell_mask, single_nucleus_mask=None, single_organelle_mask=None):
         """Thresholds given single_cell_mask. Returns True if falls under threshold."""
-        # TODO: check if this can be removed, we already remove small objects from the cellpose mask
+
+        # remove small cells
         if len(single_cell_mask[single_cell_mask == 1]) < self.params.min_cell_size:
             return True
 

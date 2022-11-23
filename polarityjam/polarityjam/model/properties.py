@@ -116,6 +116,12 @@ class SingleCellMarkerProps(SingleCellProps):
     def marker_centroid_orientation_deg(self):
         return compute_angle_deg(self.marker_centroid_orientation_rad)
 
+    @property
+    def marker_sum_expression(self):
+        return self.mean_intensity * self.area
+
+    # todo: ratio SingleCellMarkerNucleiProps.mean_intensity/SingleCellMarkerCytosolProps.mean_intensity
+
 
 class SingleCellMarkerMembraneProps(SingleCellProps):
     def __init__(self, single_membrane_mask, im_marker):

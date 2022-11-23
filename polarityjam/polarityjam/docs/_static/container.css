@@ -6,3 +6,19 @@ div.leftside {
 div.rightside {
     margin-left: 425px;
 }
+
+div.lside {
+    width: 200px;
+    float: left;
+}
+
+div.mside {
+    margin-left: 200px;
+    width: 200px;
+
+}
+
+div.mside {
+    margin-left: 400px;
+    width: 200px;
+}

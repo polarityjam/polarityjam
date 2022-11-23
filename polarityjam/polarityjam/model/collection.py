@@ -41,7 +41,7 @@ class PropertiesCollection:
         """Fills the dataset with the single cell marker properties."""
         self.dataset.at[self._index, "marker_mean_expr"] = props.mean_intensity
         self.dataset.at[
-            self._index, "marker_sum_expression"] = props.mean_intensity * props.area  # todo: move elsewhere
+            self._index, "marker_sum_expression"] = props.marker_sum_expression
         self.dataset.at[self._index, "marker_centroid_X"] = props.weighted_centroid[0]
         self.dataset.at[self._index, "marker_centroid_Y"] = props.weighted_centroid[1]
         self.dataset.at[self._index, "marker_centroid_orientation_rad"] = props.marker_centroid_orientation_rad
@@ -81,7 +81,7 @@ class PropertiesCollection:
         """Fills the dataset with the single cell organelle properties."""
         self.dataset.at[self._index, "organelle_X"] = organelle_props.centroid[0]
         self.dataset.at[self._index, "organelle_Y"] = organelle_props.centroid[1]
-        self.dataset.at[self._index, "organelle_distance"] = organelle_props.organelle_distance
+        self.dataset.at[self._index, "nuc_organelle_distance"] = organelle_props.organelle_distance  # todo: rename in properties
         self.dataset.at[self._index, "organelle_orientation_rad"] = organelle_props.organelle_orientation_rad
         self.dataset.at[self._index, "organelle_orientation_deg"] = organelle_props.organelle_orientation_deg
 

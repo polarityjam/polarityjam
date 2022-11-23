@@ -31,6 +31,12 @@ Welcome to polarityjam's documentation!
       :raw-html:`<br />`
       :raw-html:`<br />`
       :raw-html:`<br />`
+      :raw-html:`<br />`
+
+
+.. image:: images/collaboration_logo.png
+   :width: 800
+   :align: left
 
 
 .. toctree::

@@ -16,33 +16,34 @@ class PropertyCollector:
     def __init__(self):
         pass
 
-    def collect_sc_props(self, sc_props, props_collection: PropertiesCollection, filename, connected_component_label):
+    def collect_sc_props(self, sc_prop_collection: SingleCellPropertiesCollection, props_collection: PropertiesCollection,
+                         filename, connected_component_label):
 
-        props_collection.add_sc_general_props(filename, connected_component_label, sc_props.single_cell_props)
+        props_collection.add_sc_general_props(filename, connected_component_label, sc_prop_collection.single_cell_props)
 
-        if sc_props.marker_props:
-            props_collection.add_sc_marker_polarity_props(sc_props.marker_props)
+        if sc_prop_collection.marker_props:
+            props_collection.add_sc_marker_polarity_props(sc_prop_collection.marker_props)
 
-        if sc_props.nucleus_props:
-            props_collection.add_sc_nucleus_props(sc_props.nucleus_props)
+        if sc_prop_collection.nucleus_props:
+            props_collection.add_sc_nucleus_props(sc_prop_collection.nucleus_props)
 
-        if sc_props.organelle_props:
-            props_collection.add_sc_organelle_props(sc_props.organelle_props)
+        if sc_prop_collection.organelle_props:
+            props_collection.add_sc_organelle_props(sc_prop_collection.organelle_props)
 
-        if sc_props.marker_nuc_props:
-            props_collection.add_sc_marker_nuclei_props(sc_props.marker_nuc_props)
+        if sc_prop_collection.marker_nuc_props:
+            props_collection.add_sc_marker_nuclei_props(sc_prop_collection.marker_nuc_props)
 
-        if sc_props.marker_nuc_cyt_props:
-            props_collection.add_sc_marker_nuclei_cytosol_props(sc_props.marker_nuc_cyt_props)
+        if sc_prop_collection.marker_nuc_cyt_props:
+            props_collection.add_sc_marker_nuclei_cytosol_props(sc_prop_collection.marker_nuc_cyt_props)
 
-        if sc_props.marker_membrane_props:
-            props_collection.add_sc_marker_membrane_props(sc_props.marker_membrane_props)
+        if sc_prop_collection.marker_membrane_props:
+            props_collection.add_sc_marker_membrane_props(sc_prop_collection.marker_membrane_props)
 
-        if sc_props.junction_props:
-            props_collection.add_sc_junction_props(sc_props.junction_props)
+        if sc_prop_collection.junction_props:
+            props_collection.add_sc_junction_props(sc_prop_collection.junction_props)
 
-        if sc_props.junction_props:
-            props_collection.add_sc_junction_sec_stat_props(sc_props.junction_props)
+        if sc_prop_collection.junction_props:
+            props_collection.add_sc_junction_sec_stat_props(sc_prop_collection.junction_props)
 
         props_collection.increase_index()
 

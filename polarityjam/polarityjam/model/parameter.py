@@ -72,6 +72,7 @@ class ImageParameter(Parameter):
         self.channel_nucleus = None
         self.channel_organelle = None
         self.channel_expression_marker = None
+        self.pixel_to_micron_ratio = None  # todo: implement mum scaling param
 
         super().__init__(**attrs)
 

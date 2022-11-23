@@ -6,7 +6,7 @@ from pathlib import Path
 import yaml
 from pyunpack import Archive
 
-import test.test_config as config
+import test_config as config
 from polarityjam.polarityjam_logging import close_logger
 from polarityjam.utils.io import list_files_recursively
 
@@ -69,7 +69,7 @@ class TestCommon(unittest.TestCase):
         return self.current_path.joinpath("resources", "test_key_file.csv")
 
     def load_parameters(self):
-        param_base_file = Path(self.current_path).joinpath("../polarityjam", "polarityjam/utils", "resources", "parameters.yml")
+        param_base_file = Path(self.current_path).joinpath("..", "utils", "resources", "parameters.yml")
 
         with open(param_base_file, 'r') as yml_f:
             parameters = yaml.safe_load(yml_f)

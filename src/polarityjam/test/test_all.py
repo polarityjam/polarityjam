@@ -2,7 +2,7 @@ import time
 import unittest
 from pathlib import Path
 
-import test.test_config as config
+import test_config as config
 
 import test_integration
 import test_feature_extraction

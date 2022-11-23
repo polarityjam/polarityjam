@@ -31,7 +31,6 @@ jobs:
         
     - name: Running_linux
       run: |
-        cd polarityjam/
         python -m unittest
 
         
@@ -54,7 +53,6 @@ jobs:
         
     - name: Running_windows
       run: |
-        cd polarityjam/
         python -m unittest
         
   build_macos:
@@ -76,5 +74,4 @@ jobs:
         
     - name: Running_macos
       run: |
-        cd polarityjam/
         python -m unittest

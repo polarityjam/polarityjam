@@ -66,7 +66,7 @@ class Extractor:
 
     @staticmethod
     def get_image_hash(img):
-        return sha1(img).hexdigest()
+        return sha1(img.copy(order='C')).hexdigest()
 
     def extract(self, img, img_params, cells_mask, filename, output_path, collection):
         """ Extracts the features from an input image."""

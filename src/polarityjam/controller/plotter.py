@@ -275,7 +275,8 @@ class Plotter:
 
         # plot mean expression value of cell and membrane as text
         for index, row in single_cell_dataset.iterrows():
-            ax[0].text(row["cell_Y"], row["cell_X"], str(np.round(row["marker_mean_expr"], 1)), color="w", fontsize=7)
+            ax[0].text(row["cell_Y"], row["cell_X"], str(np.round(row["marker_mean_expression"], 1)), color="w",
+                       fontsize=7)
             ax[1].text(row["cell_Y"], row["cell_X"], str(np.round(row["marker_mean_expression_mem"], 1)), color="w",
                        fontsize=7)
             if nuclei_mask is not None:

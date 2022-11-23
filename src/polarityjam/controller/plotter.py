@@ -65,7 +65,6 @@ class Plotter:
         return [outlines_cell, outlines_mem_accumulated]
 
     def plot_channels(self, seg_img, seg_img_params: ImageParameter, output_path, filename, close=False):
-        # todo: rewrite to "plot_channels" and plot based on seg_img_params
         """Plots the separate channels from the input file given."""
         get_logger().info("Plotting: input channels")
 

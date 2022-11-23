@@ -6,7 +6,7 @@ from pathlib import Path
 import yaml
 from pyunpack import Archive
 
-import test_config as config
+import polarityjam.test.test_config as config
 from polarityjam.polarityjam_logging import close_logger
 from polarityjam.utils.io import list_files_recursively
 

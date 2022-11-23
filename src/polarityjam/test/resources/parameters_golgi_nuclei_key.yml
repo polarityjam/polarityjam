@@ -1,0 +1,19 @@
+## plot options
+
+plot_polarity: True
+plot_marker: True
+plot_orientation: True
+plot_cyclic_orientation: True
+
+outline_width : 2
+show_polarity_angles: True
+
+# segmentation parameters
+channel_junction: 3
+channel_nucleus : 2
+channel_organelle : 0
+channel_expression_marker : 1
+estimated_cell_diameter : 100
+
+membrane_thickness : 4
+

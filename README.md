@@ -1,5 +1,7 @@
-# Polarityjam-app
+# Feature extraction pipeline
 
-Polarityjam is a web app to study endothelial cell behaviour and more.
+The feature extraction pipeline to study vascular cell dynamics and more. 
 
-For installation, usage, and everything else please read our [wiki](https://github.com/wgiese/polarityjam/wiki).
+For installation, usage, and more read our [wiki](https://polarityjam.readthedocs.io/en/latest/).
+
+Administrators and Maintainers please look here: [admin-wiki](https://github.com/wgiese/polarityjam/wiki)

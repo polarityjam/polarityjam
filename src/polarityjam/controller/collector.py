@@ -17,9 +17,9 @@ class PropertyCollector:
         pass
 
     def collect_sc_props(self, sc_prop_collection: SingleCellPropertiesCollection, props_collection: PropertiesCollection,
-                         filename, connected_component_label):
+                         filename, img_hash, connected_component_label):
 
-        props_collection.add_sc_general_props(filename, connected_component_label, sc_prop_collection.single_cell_props)
+        props_collection.add_sc_general_props(filename, img_hash, connected_component_label, sc_prop_collection.single_cell_props)
 
         if sc_prop_collection.marker_props:
             props_collection.add_sc_marker_polarity_props(sc_prop_collection.marker_props)

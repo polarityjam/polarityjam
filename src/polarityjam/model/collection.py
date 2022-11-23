@@ -62,9 +62,10 @@ class PropertiesCollection:
         self.dataset.at[self._index, "nuc_eccentricity"] = props.eccentricity
         self.dataset.at[self._index, "nuc_major_to_minor_ratio"] = props.nuc_major_to_minor_ratio
 
-    def add_sc_general_props(self, filename, connected_component_label, props):
+    def add_sc_general_props(self, filename, img_hash, connected_component_label, props):
         """Fills the dataset with the general single cell properties."""
         self.dataset.at[self._index, "filename"] = filename
+        self.dataset.at[self._index, "file_img_hash"] = img_hash
         self.dataset.at[self._index, "label"] = connected_component_label
         self.dataset.at[self._index, "cell_X"] = props.centroid[0]
         self.dataset.at[self._index, "cell_Y"] = props.centroid[1]

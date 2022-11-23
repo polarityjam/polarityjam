@@ -98,11 +98,11 @@ Organelle features
 +----------------------------+--------------------------------------------------------+
 | Feature                    | Explanation                                            |
 +============================+========================================================+
-| organelle_X_golgi          | The X coordinate of the center of the cell organelle.  |
+| organelle_X                | The X coordinate of the center of the cell organelle.  |
 +----------------------------+--------------------------------------------------------+
-| organelle_Y_golgi          | The Y coordinate of the center of the cell organelle.  |
+| organelle_Y                | The Y coordinate of the center of the cell organelle.  |
 +----------------------------+--------------------------------------------------------+
-| organelle_distance         | Distance from cell organelle to the nucleus.           |
+| nuc_organelle_distance     | Distance from cell organelle to the nucleus.           |
 +----------------------------+--------------------------------------------------------+
 | organelle_orientation_rad  | The orientation in rad of the organelle to the nucleus |
 +----------------------------+--------------------------------------------------------+
@@ -114,33 +114,38 @@ Organelle features
 
 Marker features
 ---------------
-+-----------------------------+-----------------------------------------------------------+
-| Feature                     | Explanation                                               |
-+=============================+===========================================================+
-| marker_mean_expr            | Mean expression of the channel with the marker.           |
-+-----------------------------+-----------------------------------------------------------+
-| marker_sum_expr             | The absolute sum of the expression of the marker.         |
-+-----------------------------+-----------------------------------------------------------+
-| marker_centroid_X           | The X coordinate of the center of the marker expression.  |
-+-----------------------------+-----------------------------------------------------------+
-| marker_centroid_Y           | The Y coordinate of the center of the marker expression.  |
-+-----------------------------+-----------------------------------------------------------+
-| marker_polarity_rad         | Intrinsic asymmetry of the cell.                          |
-+-----------------------------+-----------------------------------------------------------+
-| marker_polarity_deg         | Intrinsic asymmetry of the cell.                          |
-+-----------------------------+-----------------------------------------------------------+
-| marker_mean_expression_mem  | Mean membrane expression.                                 |
-+-----------------------------+-----------------------------------------------------------+
-| marker_sum_expression_mem   | The absolut sum of the membrane expression.               |
-+-----------------------------+-----------------------------------------------------------+
-| marker_mean_expression_nuc  | The mean expression of the nucleus.                       |
-+-----------------------------+-----------------------------------------------------------+
-| marker_sum_expression_nuc   | The absolut sum of the nucleus expression.                |
-+-----------------------------+-----------------------------------------------------------+
-| marker_mean_expression_cyt  | The mean expression of the cell cytosol.                  |
-+-----------------------------+-----------------------------------------------------------+
-| marker_sum_expression_cyt   | The absolut sum of the cell cytosol expression.           |
-+-----------------------------+-----------------------------------------------------------+
++---------------------------------+---------------------------------------------------------------+
+| Feature                         | Explanation                                                   |
++=================================+===============================================================+
+| marker_mean_expression          | Mean expression of the channel with the marker.               |
++---------------------------------+---------------------------------------------------------------+
+| marker_sum_expression           | The absolute sum of the expression of the marker.             |
++---------------------------------+---------------------------------------------------------------+
+| marker_centroid_X               | The X coordinate of the center of the marker expression.      |
++---------------------------------+---------------------------------------------------------------+
+| marker_centroid_Y               | The Y coordinate of the center of the marker expression.      |
++---------------------------------+---------------------------------------------------------------+
+| marker_centroid_orientation_rad | Intrinsic asymmetry of the cell.                              |
++---------------------------------+---------------------------------------------------------------+
+| marker_centroid_orientation_deg | Intrinsic asymmetry of the cell.                              |
++---------------------------------+---------------------------------------------------------------+
+| marker_mean_expression_mem      | Mean membrane expression.                                     |
++---------------------------------+---------------------------------------------------------------+
+| marker_sum_expression_mem       | The absolut sum of the membrane expression.                   |
++---------------------------------+---------------------------------------------------------------+
+| marker_mean_expression_nuc      | The mean expression of the nucleus.                           |
++---------------------------------+---------------------------------------------------------------+
+| marker_sum_expression_nuc       | The absolut sum of the nucleus expression.                    |
++---------------------------------+---------------------------------------------------------------+
+| marker_mean_expression_cyt      | The mean expression of the cell cytosol.                      |
++---------------------------------+---------------------------------------------------------------+
+| marker_sum_expression_cyt       | The absolut sum of the cell cytosol expression.               |
++---------------------------------+---------------------------------------------------------------+
+| marker_nucleus_orientation_rad  | The orientation in rad of the marker centroid to the nucleus. |
++---------------------------------+---------------------------------------------------------------+
+| marker_nucleus_orientation_deg  | The orientation in rad of the marker centroid to the nucleus. |
++---------------------------------+---------------------------------------------------------------+
+
 
 
 
@@ -163,7 +168,7 @@ Junction features
 +----------------------------------------+----------------------------------------------------------------+
 | junction_protein_intensity             | The mean protein intensity by area.                            |
 +----------------------------------------+----------------------------------------------------------------+
-| junction_interface_occupancy           | The  ratio between junction area and junction protein area.    |
+| junction_interface_occupancy           | The ratio between junction area and junction protein area.     |
 +----------------------------------------+----------------------------------------------------------------+
 | junction_intensity_per_interface_area  | tba                                                            |
 +----------------------------------------+----------------------------------------------------------------+

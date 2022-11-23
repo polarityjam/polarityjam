@@ -133,7 +133,6 @@ class CellposeSegmenter(Segmenter):
 
             get_logger().info("Removed number of cellpose borders: %s" % number_of_cellpose_borders)
 
-            # TODO: remove small objects here
             cellpose_mask_remove_small_objects = morphology.remove_small_objects(
                 cellpose_mask, self.params.min_cell_size, connectivity=2
             )

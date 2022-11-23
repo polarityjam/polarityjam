@@ -123,6 +123,6 @@ class PlotParameter(Parameter):
         self.dpi = None
         self.graphics_width = None
         self.graphics_height = None
-        self.membrane_thickness = None  # todo: remove me
+        self.membrane_thickness = None
 
         super().__init__(**attrs)

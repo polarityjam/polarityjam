@@ -27,7 +27,7 @@ jobs:
     - name: Install_linux
       run: |
         python -m pip install --upgrade pip
-        pip install -e polarityjam
+        pip install -e .
         
     - name: Running_linux
       run: |
@@ -50,7 +50,7 @@ jobs:
     - name: Install_windows
       run: |
         python -m pip install --upgrade pip
-        pip install -e polarityjam
+        pip install -e .
         
     - name: Running_windows
       run: |
@@ -72,7 +72,7 @@ jobs:
     - name: Install_macos
       run: |
         python -m pip install --upgrade pip
-        pip install -e polarityjam
+        pip install -e .
         
     - name: Running_macos
       run: |

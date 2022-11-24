@@ -53,7 +53,7 @@ a color gradient transparently tints the cells based on their organelle polarity
 
 Ratio method
 ------------
-TBA
+This is currently under construction. We are working on it. Please come back later.
 
 .. image:: images/060721_EGM2_18dyn_02_ratio_method.png
    :width: 600

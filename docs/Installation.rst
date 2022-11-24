@@ -23,9 +23,9 @@ Execute the following steps to manually install the polarityjam feature extracti
 
 .. code-block:: console
 
-    git clone https://github.com/wgiese/polarityjam # via git or download via browser
-    cd polarityjam/polarityjam
-    pip install -e polarityjam
+    git clone https://github.com/polarityjam/polarityjam.git # via git or download via browser
+    cd polarityjam
+    pip install -e .
 
 
 .. tip::
@@ -54,11 +54,13 @@ Manual installation
 
 Make sure you have `conda <https://anaconda.com/>`_ installed.
 
-Clone the repository and then execute the following steps on the commandline:
+Execute the following steps on the commandline:
 
 .. code-block:: console
 
-    cd polarityjam
+    git clone https://github.com/polarityjam/polarityjam-app.git # via git or download via browser
+
+    cd polarityjam-app
     conda env create -f polarityjam.yml
     conda activate polarityjam
     Rscript app/app.R

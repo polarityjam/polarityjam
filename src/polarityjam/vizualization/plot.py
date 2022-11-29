@@ -169,7 +169,7 @@ def _calc_nuc_orientation(single_cell_props, cell_mask, nuclei_mask):
             continue
         single_cell_mask = np.where(cell_mask == row_label, True, 0)
         single_nuclei_mask_ = np.logical_and(single_cell_mask, nuclei_mask)
-        nuclei_orientation += np.where(single_nuclei_mask_ == True, 1, 0) * row['nuc_shape_orientation'] * 180.0 / np.pi
+        nuclei_orientation += np.where(single_nuclei_mask_ == True, 1, 0) * row['nuc_shape_orientation_rad'] * 180.0 / np.pi
 
     get_logger().info("Maximal nuclei orientation: %s" % str(np.max(nuclei_orientation)))
     get_logger().info("Minimal nuclei orientation: %s" % str(np.min(nuclei_orientation)))

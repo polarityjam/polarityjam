@@ -217,6 +217,10 @@ class SingleCellJunctionProps:
         return skimage.measure.perimeter(self.sc_mask)
 
     @property
+    def junction_interface_linearity_index(self):
+        return self.interface_perimeter / self.straight_line_junction_length
+
+    @property
     def junction_interface_occupancy(self):
         return self.sc_junction_protein_props.area / self.sc_junction_interface_props.area
 

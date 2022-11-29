@@ -69,7 +69,8 @@ class PropertiesCollection:
         self.dataset.at[self._index, "label"] = connected_component_label
         self.dataset.at[self._index, "cell_X"] = props.centroid[0]
         self.dataset.at[self._index, "cell_Y"] = props.centroid[1]
-        self.dataset.at[self._index, "cell_shape_orientation"] = props.cell_shape_orientation
+        self.dataset.at[self._index, "cell_shape_orientation_rad"] = props.cell_shape_orientation_rad
+        self.dataset.at[self._index, "cell_shape_orientation_deg"] = props.cell_shape_orientation_deg
         self.dataset.at[self._index, "cell_major_axis_length"] = props.major_axis_length
         self.dataset.at[self._index, "cell_minor_axis_length"] = props.minor_axis_length
         self.dataset.at[self._index, "cell_eccentricity"] = props.eccentricity

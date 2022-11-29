@@ -4,7 +4,7 @@ from skimage.measure._regionprops import RegionProperties
 
 from polarityjam import RuntimeParameter
 from polarityjam.compute.compute import map_single_cell_to_circle, compute_reference_target_orientation_rad, \
-    compute_angle_deg, compute_marker_vector_norm, compute_shape_orientation, \
+    compute_angle_deg, compute_marker_vector_norm, compute_shape_orientation_rad, \
     straight_line_length
 from polarityjam.compute.corner import get_corner
 
@@ -37,9 +37,14 @@ class SingleCellCellProps(SingleCellProps):
         super().__init__(single_cell_mask)
 
     @property
-    def cell_shape_orientation(self):
+    def cell_shape_orientation_rad(self):
         # note, the values of orientation from props are in [-pi/2,pi/2] with zero along the y-axis
-        return compute_shape_orientation(self.orientation)
+        return compute_shape_orientation_rad(self.orientation)
+
+    @property
+    def cell_shape_orientation_deg(self):
+        # note, the values of orientation from props are in [-pi/2,pi/2] with zero along the y-axis
+        return compute_angle_deg(self.cell_shape_orientation_rad)
 
     @property
     def cell_major_to_minor_ratio(self):
@@ -69,7 +74,7 @@ class SingleCellNucleusProps(SingleCellProps):
     @property
     def nuc_shape_orientation_rad(self):
         # note, the values of orientation from props are in [-pi/2,pi/2] with zero along the y-axis
-        return compute_shape_orientation(self.orientation)
+        return compute_shape_orientation_rad(self.orientation)
 
     @property
     def nuc_shape_orientation_deg(self):

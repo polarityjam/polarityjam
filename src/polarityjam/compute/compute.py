@@ -20,7 +20,7 @@ def compute_angle_deg(angle_rad):
     return 180.0 * angle_rad / np.pi
 
 
-def compute_shape_orientation(orientation):
+def compute_shape_orientation_rad(orientation):
     """Computes the shape orientation with zero based on x-axis"""
     # note, the values of orientation from props are in [-pi/2,pi/2] with zero along the y-axis
     return np.pi / 2.0 + orientation

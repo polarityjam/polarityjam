@@ -507,7 +507,7 @@ class Plotter:
                     ax[0],
                     row['cell_Y'],
                     row['cell_X'],
-                    row['cell_shape_orientation'],
+                    row['cell_shape_orientation_rad'],
                     row['cell_major_axis_length'],
                     row['cell_minor_axis_length'],
                     row["cell_eccentricity"]
@@ -518,7 +518,7 @@ class Plotter:
                     ax[1],
                     row['nuc_Y'],
                     row['nuc_X'],
-                    row['nuc_shape_orientation'],
+                    row['nuc_shape_orientation_rad'],
                     row['nuc_major_axis_length'],
                     row['nuc_minor_axis_length'],
                     row["nuc_eccentricity"]
@@ -528,7 +528,7 @@ class Plotter:
                     ax,
                     row['cell_Y'],
                     row['cell_X'],
-                    row['cell_shape_orientation'],
+                    row['cell_shape_orientation_rad'],
                     row['cell_major_axis_length'],
                     row['cell_minor_axis_length'],
                     row["cell_eccentricity"]
@@ -655,7 +655,7 @@ class Plotter:
                     ax[0],
                     row['cell_Y'],
                     row['cell_X'],
-                    row['cell_shape_orientation'],
+                    row['cell_shape_orientation_rad'],
                     row['cell_major_axis_length'],
                     row['cell_minor_axis_length']
                 )
@@ -665,7 +665,7 @@ class Plotter:
                     ax[1],
                     row['nuc_Y'],
                     row['nuc_X'],
-                    row['nuc_shape_orientation'],
+                    row['nuc_shape_orientation_rad'],
                     row['nuc_major_axis_length'],
                     row['nuc_minor_axis_length']
                 )
@@ -675,7 +675,7 @@ class Plotter:
                     ax,
                     row['cell_Y'],
                     row['cell_X'],
-                    row['cell_shape_orientation'],
+                    row['cell_shape_orientation_rad'],
                     row['cell_major_axis_length'],
                     row['cell_minor_axis_length']
                 )

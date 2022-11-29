@@ -1,4 +1,5 @@
 import numpy as np
+from hashlib import sha1
 
 from polarityjam.compute.moran import run_morans
 from polarityjam.compute.neighborhood import k_neighbor_dif
@@ -63,6 +64,10 @@ class Extractor:
             return img[:, :, img_params.channel_organelle]
         return None
 
+    @staticmethod
+    def get_image_hash(img):
+        return sha1(img.copy(order='C')).hexdigest()
+
     def extract(self, img, img_params, cells_mask, filename, output_path, collection):
         """ Extracts the features from an input image."""
 
@@ -70,6 +75,7 @@ class Extractor:
         img_junction = self.get_image_junction(img, img_params)
         img_nucleus = self.get_image_nucleus(img, img_params)
         img_organelle = self.get_image_organelle(img, img_params)
+        img_hash = self.get_image_hash(img)
 
         masks = MasksCollection(cells_mask)
 
@@ -115,7 +121,8 @@ class Extractor:
                 sc_masks, img_marker, img_junction
             )
 
-            self.collector.collect_sc_props(sc_props_collection, collection, filename, connected_component_label)
+            self.collector.collect_sc_props(sc_props_collection, collection, filename, img_hash,
+                                            connected_component_label)
 
             # append feature of interest to the RAG node for being able to do further analysis
             foi_val = self.collector.get_foi(collection, self.params.feature_of_interest)

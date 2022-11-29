@@ -53,7 +53,7 @@ class PropertiesCollection:
         self.dataset.at[self._index, "nuc_Y"] = props.centroid[1]
         self.dataset.at[self._index, "nuc_displacement_orientation_rad"] = props.nuc_displacement_orientation_rad
         self.dataset.at[self._index, "nuc_displacement_orientation_deg"] = props.nuc_displacement_orientation_deg
-        self.dataset.at[self._index, "nuc_shape_orientation"] = props.nuc_shape_orientation_rad
+        self.dataset.at[self._index, "nuc_shape_orientation_rad"] = props.nuc_shape_orientation_rad
         self.dataset.at[self._index, "nuc_shape_orientation_deg"] = props.nuc_shape_orientation_deg
         self.dataset.at[self._index, "nuc_major_axis_length"] = props.major_axis_length
         self.dataset.at[self._index, "nuc_minor_axis_length"] = props.minor_axis_length

@@ -166,7 +166,7 @@ class SingleCellMarkerCytosolProps(SingleCellProps):
 
     @property
     def marker_cytosol_ratio(self):
-        return SingleCellMarkerNucleiProps.mean_intensity/self.sc_marker_nuclei_props.mean_intensity
+        return self.sc_marker_nuclei_props.mean_intensity/self.mean_intensity
 
 
 class SingleCellJunctionInterfaceProps(SingleCellProps):

@@ -188,7 +188,9 @@ class SingleCellJunctionProteinCircularProps(SingleCellProps):
 
 
 class SingleCellJunctionProps:
-    def __init__(self, sc_junction_interface_props, sc_junction_protein_props, sc_junction_protein_circular_props,
+    def __init__(self, sc_junction_interface_props: SingleCellJunctionInterfaceProps,
+                 sc_junction_protein_props: SingleCellJunctionProteinProps,
+                 sc_junction_protein_circular_props: SingleCellJunctionProteinCircularProps,
                  sc_mask, params):
         self.sc_mask = sc_mask
         self.sc_junction_interface_props = sc_junction_interface_props

@@ -3,7 +3,7 @@ Python API
 
 You can use polarityjam within python to do your analysis. A good tool to get an impression for the data you are
 about to analyse is jupyter notebook (`https://jupyter.org/ <https://jupyter.org/>`_). Paired with python anaconda
-it is a powerful tool.
+it is a powerful option.
 The following will show how to use polarityjam in a python shell, or preferably in a jupyter notebook.
 
 
@@ -124,6 +124,6 @@ Visualization
 Building your pipeline
 ----------------------
 
-By combining everything from above your own pipeline can be build. Look at the `jupyter notebook <https://github.com/wgiese/polarityjam/blob/main/polartyjam-notebook.ipynb>`_ file to see
+By combining everything from above your own pipeline can be build. Look at the `jupyter notebook <https://github.com/polarityjam/polarityjam/blob/main/notebooks/polartyjam-notebook.ipynb>`_ file to see
 everything in action.
 

@@ -1,4 +1,5 @@
 import numpy as np
+import skimage.measure
 from scipy import ndimage as ndi
 from skimage.measure._regionprops import RegionProperties
 
@@ -213,7 +214,7 @@ class SingleCellJunctionProps:
 
     @property
     def interface_perimeter(self):
-        return 1  # todo: perimeter on dilated mask
+        return skimage.measure.perimeter(self.sc_mask)
 
     @property
     def junction_interface_occupancy(self):

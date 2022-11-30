@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import ndimage as ndi
 
+from polarityjam import RuntimeParameter
 from polarityjam.compute.compute import otsu_thresh_mask
 from polarityjam.model.collection import PropertiesCollection
 from polarityjam.model.masks import SingleCellMasksCollection
@@ -87,7 +88,7 @@ class PropertyCollector:
 
 class SingleCellPropertyCollector:
 
-    def __init__(self, param):
+    def __init__(self, param: RuntimeParameter):
         self.param = param
 
     def calc_sc_props(self, sc_masks, im_marker, im_junction):
@@ -124,7 +125,7 @@ class SingleCellPropertyCollector:
                 sc_marker_nuclei_props = self.calc_sc_marker_nuclei_props(sc_masks.sc_nucleus_mask.astype(int),
                                                                           im_marker, sc_nuc_props, sc_marker_props)
                 sc_marker_cytosol_props = self.calc_sc_marker_cytosol_props(sc_masks.sc_cytosol_mask.astype(int),
-                                                                            im_marker)
+                                                                            im_marker, sc_marker_nuclei_props)
 
         # properties for junctions
         if im_junction is not None:
@@ -149,15 +150,15 @@ class SingleCellPropertyCollector:
         )
 
     @staticmethod
-    def calc_sc_cell_props(sc_mask, param):
+    def calc_sc_cell_props(sc_mask, param: RuntimeParameter):
         return SingleCellCellProps(sc_mask, param)
 
     @staticmethod
-    def calc_sc_nucleus_props(sc_nucleus_maks, sc_props):
+    def calc_sc_nucleus_props(sc_nucleus_maks, sc_props: SingleCellCellProps):
         return SingleCellNucleusProps(sc_nucleus_maks, sc_props)
 
     @staticmethod
-    def calc_sc_organelle_props(sc_organelle_mask, sc_nucleus_props):
+    def calc_sc_organelle_props(sc_organelle_mask, sc_nucleus_props: SingleCellNucleusProps):
         return SingleCellOrganelleProps(sc_organelle_mask, sc_nucleus_props)
 
     @staticmethod
@@ -169,16 +170,17 @@ class SingleCellPropertyCollector:
         return SingleCellMarkerMembraneProps(sc_membrane_mask, im_marker)
 
     @staticmethod
-    def calc_sc_marker_nuclei_props(sc_nucleus_mask, im_marker, sc_nucleus_props, sc_marker_props):
+    def calc_sc_marker_nuclei_props(sc_nucleus_mask, im_marker, sc_nucleus_props: SingleCellNucleusProps,
+                                    sc_marker_props: SingleCellMarkerProps):
         return SingleCellMarkerNucleiProps(sc_nucleus_mask, im_marker, sc_nucleus_props, sc_marker_props)
 
     @staticmethod
-    def calc_sc_marker_cytosol_props(sc_cytosol_mask, im_marker):
-        return SingleCellMarkerCytosolProps(sc_cytosol_mask, im_marker)
+    def calc_sc_marker_cytosol_props(sc_cytosol_mask, im_marker, sc_marker_nuclei_props: SingleCellMarkerNucleiProps):
+        return SingleCellMarkerCytosolProps(sc_cytosol_mask, im_marker, sc_marker_nuclei_props)
 
     @staticmethod
     def calc_sc_junction_props(sc_mask, single_membrane_mask, single_junction_protein_area_mask,
-                               im_junction, cell_minor_axis_length, param):
+                               im_junction, cell_minor_axis_length, param: RuntimeParameter):
 
         im_junction_protein_single_cell = otsu_thresh_mask(single_membrane_mask, im_junction)
 

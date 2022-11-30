@@ -1,6 +1,5 @@
 import json
 import math
-from pathlib import Path
 
 import cmocean as cm
 import numpy as np
@@ -68,8 +67,6 @@ class Plotter:
         """Plots the separate channels from the input file given."""
         get_logger().info("Plotting: input channels")
 
-        output_path = Path(output_path)
-        filename_out = str(output_path.joinpath(filename + "_channels.png"))
         if seg_img_params.channel_junction is not None and seg_img_params.channel_nucleus is not None:
             fig, ax = plt.subplots(1, 2)
             if not self.params.show_graphics_axis:
@@ -84,7 +81,12 @@ class Plotter:
             if not self.params.show_graphics_axis:
                 ax.axis('off')
             ax.imshow(seg_img[:, :])
-        plt.savefig(filename_out)  # todo: refactor to own safe fkt
+
+        save_current_fig(
+            self.params.graphics_output_format,
+            output_path, filename,
+            "_channels",
+        )
 
         if close:
             plt.close(fig)
@@ -92,7 +94,6 @@ class Plotter:
     def plot_mask(self, mask, seg_img, seg_img_params, output_path, filename, close=False):
         """Plots the segmentation mask, together with the separate channels from the input image.
         """
-        # todo: rewrite to plot based on seg_img_params
         get_logger().info("Plotting: segmentation masks")
 
         # figure and axes
@@ -274,7 +275,8 @@ class Plotter:
 
         # plot mean expression value of cell and membrane as text
         for index, row in single_cell_dataset.iterrows():
-            ax[0].text(row["cell_Y"], row["cell_X"], str(np.round(row["marker_mean_expr"], 1)), color="w", fontsize=7)
+            ax[0].text(row["cell_Y"], row["cell_X"], str(np.round(row["marker_mean_expression"], 1)), color="w",
+                       fontsize=7)
             ax[1].text(row["cell_Y"], row["cell_X"], str(np.round(row["marker_mean_expression_mem"], 1)), color="w",
                        fontsize=7)
             if nuclei_mask is not None:
@@ -505,7 +507,7 @@ class Plotter:
                     ax[0],
                     row['cell_Y'],
                     row['cell_X'],
-                    row['cell_shape_orientation'],
+                    row['cell_shape_orientation_rad'],
                     row['cell_major_axis_length'],
                     row['cell_minor_axis_length'],
                     row["cell_eccentricity"]
@@ -516,7 +518,7 @@ class Plotter:
                     ax[1],
                     row['nuc_Y'],
                     row['nuc_X'],
-                    row['nuc_shape_orientation'],
+                    row['nuc_shape_orientation_rad'],
                     row['nuc_major_axis_length'],
                     row['nuc_minor_axis_length'],
                     row["nuc_eccentricity"]
@@ -526,7 +528,7 @@ class Plotter:
                     ax,
                     row['cell_Y'],
                     row['cell_X'],
-                    row['cell_shape_orientation'],
+                    row['cell_shape_orientation_rad'],
                     row['cell_major_axis_length'],
                     row['cell_minor_axis_length'],
                     row["cell_eccentricity"]
@@ -546,7 +548,7 @@ class Plotter:
         if close:
             plt.close(fig)
 
-    def plot_ratio_method(self, collection, img_name, close=False):  # todo: disable for automatic calc
+    def plot_ratio_method(self, collection, img_name, close=False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
 
@@ -653,7 +655,7 @@ class Plotter:
                     ax[0],
                     row['cell_Y'],
                     row['cell_X'],
-                    row['cell_shape_orientation'],
+                    row['cell_shape_orientation_rad'],
                     row['cell_major_axis_length'],
                     row['cell_minor_axis_length']
                 )
@@ -663,7 +665,7 @@ class Plotter:
                     ax[1],
                     row['nuc_Y'],
                     row['nuc_X'],
-                    row['nuc_shape_orientation'],
+                    row['nuc_shape_orientation_rad'],
                     row['nuc_major_axis_length'],
                     row['nuc_minor_axis_length']
                 )
@@ -673,7 +675,7 @@ class Plotter:
                     ax,
                     row['cell_Y'],
                     row['cell_X'],
-                    row['cell_shape_orientation'],
+                    row['cell_shape_orientation_rad'],
                     row['cell_major_axis_length'],
                     row['cell_minor_axis_length']
                 )
@@ -724,8 +726,9 @@ class Plotter:
             if self.params.plot_orientation:
                 self.plot_eccentricity(collection, key, close)
 
-            if self.params.plot_ratio_method:  # todo : disable here. leave code for NB API
-                self.plot_ratio_method(collection, key, close)
+            # Note: disabled for now.
+            # if self.params.plot_ratio_method:
+            #     self.plot_ratio_method(collection, key, close)
 
             if self.params.plot_cyclic_orientation:
                 self.plot_orientation(collection, key, close)

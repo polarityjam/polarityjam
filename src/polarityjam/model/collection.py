@@ -39,7 +39,7 @@ class PropertiesCollection:
 
     def add_sc_marker_polarity_props(self, props):
         """Fills the dataset with the single cell marker properties."""
-        self.dataset.at[self._index, "marker_mean_expr"] = props.mean_intensity
+        self.dataset.at[self._index, "marker_mean_expression"] = props.mean_intensity
         self.dataset.at[
             self._index, "marker_sum_expression"] = props.marker_sum_expression
         self.dataset.at[self._index, "marker_centroid_X"] = props.weighted_centroid[0]
@@ -53,7 +53,7 @@ class PropertiesCollection:
         self.dataset.at[self._index, "nuc_Y"] = props.centroid[1]
         self.dataset.at[self._index, "nuc_displacement_orientation_rad"] = props.nuc_displacement_orientation_rad
         self.dataset.at[self._index, "nuc_displacement_orientation_deg"] = props.nuc_displacement_orientation_deg
-        self.dataset.at[self._index, "nuc_shape_orientation"] = props.nuc_shape_orientation
+        self.dataset.at[self._index, "nuc_shape_orientation_rad"] = props.nuc_shape_orientation_rad
         self.dataset.at[self._index, "nuc_shape_orientation_deg"] = props.nuc_shape_orientation_deg
         self.dataset.at[self._index, "nuc_major_axis_length"] = props.major_axis_length
         self.dataset.at[self._index, "nuc_minor_axis_length"] = props.minor_axis_length
@@ -69,7 +69,8 @@ class PropertiesCollection:
         self.dataset.at[self._index, "label"] = connected_component_label
         self.dataset.at[self._index, "cell_X"] = props.centroid[0]
         self.dataset.at[self._index, "cell_Y"] = props.centroid[1]
-        self.dataset.at[self._index, "cell_shape_orientation"] = props.cell_shape_orientation
+        self.dataset.at[self._index, "cell_shape_orientation_rad"] = props.cell_shape_orientation_rad
+        self.dataset.at[self._index, "cell_shape_orientation_deg"] = props.cell_shape_orientation_deg
         self.dataset.at[self._index, "cell_major_axis_length"] = props.major_axis_length
         self.dataset.at[self._index, "cell_minor_axis_length"] = props.minor_axis_length
         self.dataset.at[self._index, "cell_eccentricity"] = props.eccentricity
@@ -82,7 +83,7 @@ class PropertiesCollection:
         """Fills the dataset with the single cell organelle properties."""
         self.dataset.at[self._index, "organelle_X"] = organelle_props.centroid[0]
         self.dataset.at[self._index, "organelle_Y"] = organelle_props.centroid[1]
-        self.dataset.at[self._index, "nuc_organelle_distance"] = organelle_props.organelle_distance  # todo: rename in properties
+        self.dataset.at[self._index, "nuc_organelle_distance"] = organelle_props.nuc_organelle_distance
         self.dataset.at[self._index, "organelle_orientation_rad"] = organelle_props.organelle_orientation_rad
         self.dataset.at[self._index, "organelle_orientation_deg"] = organelle_props.organelle_orientation_deg
 

@@ -2,8 +2,9 @@ import numpy as np
 from scipy import ndimage as ndi
 from skimage.measure._regionprops import RegionProperties
 
+from polarityjam import RuntimeParameter
 from polarityjam.compute.compute import map_single_cell_to_circle, compute_reference_target_orientation_rad, \
-    compute_angle_deg, compute_marker_vector_norm, compute_shape_orientation, \
+    compute_angle_deg, compute_marker_vector_norm, compute_shape_orientation_rad, \
     straight_line_length
 from polarityjam.compute.corner import get_corner
 
@@ -31,14 +32,19 @@ class SingleCellProps(RegionProperties):
 
 class SingleCellCellProps(SingleCellProps):
 
-    def __init__(self, single_cell_mask, param):
+    def __init__(self, single_cell_mask, param: RuntimeParameter):
         self.param = param
         super().__init__(single_cell_mask)
 
     @property
-    def cell_shape_orientation(self):
+    def cell_shape_orientation_rad(self):
         # note, the values of orientation from props are in [-pi/2,pi/2] with zero along the y-axis
-        return compute_shape_orientation(self.orientation)
+        return compute_shape_orientation_rad(self.orientation)
+
+    @property
+    def cell_shape_orientation_deg(self):
+        # note, the values of orientation from props are in [-pi/2,pi/2] with zero along the y-axis
+        return compute_angle_deg(self.cell_shape_orientation_rad)
 
     @property
     def cell_major_to_minor_ratio(self):
@@ -50,7 +56,7 @@ class SingleCellCellProps(SingleCellProps):
 
 
 class SingleCellNucleusProps(SingleCellProps):
-    def __init__(self, single_nucleus_mask, sc_props):
+    def __init__(self, single_nucleus_mask, sc_props: SingleCellCellProps):
         super().__init__(single_nucleus_mask)
 
         self._sc_props = sc_props
@@ -66,13 +72,13 @@ class SingleCellNucleusProps(SingleCellProps):
         return compute_angle_deg(self.nuc_displacement_orientation_rad)
 
     @property
-    def nuc_shape_orientation(self):
+    def nuc_shape_orientation_rad(self):
         # note, the values of orientation from props are in [-pi/2,pi/2] with zero along the y-axis
-        return compute_shape_orientation(self.orientation)  # TODO: should be nuc_shape_orientation_deg and rad ?
+        return compute_shape_orientation_rad(self.orientation)
 
     @property
     def nuc_shape_orientation_deg(self):
-        return compute_angle_deg(self.nuc_shape_orientation)
+        return compute_angle_deg(self.nuc_shape_orientation_rad)
 
     @property
     def nuc_major_to_minor_ratio(self):
@@ -80,13 +86,13 @@ class SingleCellNucleusProps(SingleCellProps):
 
 
 class SingleCellOrganelleProps(SingleCellProps):
-    def __init__(self, single_organelle_mask, nucleus_props):
+    def __init__(self, single_organelle_mask, nucleus_props: SingleCellNucleusProps):
         super().__init__(single_organelle_mask)
 
         self._nucleus_props = nucleus_props
 
     @property
-    def organelle_distance(self):
+    def nuc_organelle_distance(self):
         return compute_marker_vector_norm(
             self.centroid[0], self.centroid[1], self._nucleus_props.centroid[0], self._nucleus_props.centroid[1]
         )
@@ -120,8 +126,6 @@ class SingleCellMarkerProps(SingleCellProps):
     def marker_sum_expression(self):
         return self.mean_intensity * self.area
 
-    # todo: ratio SingleCellMarkerNucleiProps.mean_intensity/SingleCellMarkerCytosolProps.mean_intensity
-
 
 class SingleCellMarkerMembraneProps(SingleCellProps):
     def __init__(self, single_membrane_mask, im_marker):
@@ -133,7 +137,7 @@ class SingleCellMarkerMembraneProps(SingleCellProps):
 
 
 class SingleCellMarkerNucleiProps(SingleCellProps):
-    def __init__(self, single_nucleus_mask, im_marker, sc_nucleus_props, sc_marker_props):
+    def __init__(self, single_nucleus_mask, im_marker, sc_nucleus_props, sc_marker_props: SingleCellMarkerProps):
         super().__init__(single_nucleus_mask, im_marker)
         self._sc_nucleus_props = sc_nucleus_props
         self._sc_marker_props = sc_marker_props
@@ -157,12 +161,17 @@ class SingleCellMarkerNucleiProps(SingleCellProps):
 
 
 class SingleCellMarkerCytosolProps(SingleCellProps):
-    def __init__(self, single_cytosol_mask, im_marker):
+    def __init__(self, single_cytosol_mask, im_marker, sc_marker_nuclei_props: SingleCellMarkerNucleiProps):
         super().__init__(single_cytosol_mask, im_marker)
+        self.sc_marker_nuclei_props = sc_marker_nuclei_props
 
     @property
     def marker_sum_expression_cyt(self):
         return self.mean_intensity * self.area
+
+    @property
+    def marker_cytosol_ratio(self):
+        return self.sc_marker_nuclei_props.mean_intensity/self.mean_intensity
 
 
 class SingleCellJunctionInterfaceProps(SingleCellProps):
@@ -191,7 +200,7 @@ class SingleCellJunctionProps:
     def __init__(self, sc_junction_interface_props: SingleCellJunctionInterfaceProps,
                  sc_junction_protein_props: SingleCellJunctionProteinProps,
                  sc_junction_protein_circular_props: SingleCellJunctionProteinCircularProps,
-                 sc_mask, params):
+                 sc_mask, params: RuntimeParameter):
         self.sc_mask = sc_mask
         self.sc_junction_interface_props = sc_junction_interface_props
         self.sc_junction_protein_props = sc_junction_protein_props

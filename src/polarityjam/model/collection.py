@@ -120,6 +120,7 @@ class PropertiesCollection:
 
     def add_sc_junction_sec_stat_props(self, sc_junction_props):
         # dataset.at[index, "junction_coverage_index"] = sc_junction_props.junction_coverage_index
+        self.dataset.at[self._index, "junction_interface_linearity_index"] = sc_junction_props.junction_interface_linearity_index
         self.dataset.at[self._index, "junction_interface_occupancy"] = sc_junction_props.junction_interface_occupancy
         self.dataset.at[
             self._index, "junction_intensity_per_interface_area"] = sc_junction_props.junction_intensity_per_interface_area

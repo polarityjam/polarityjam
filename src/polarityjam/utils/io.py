@@ -1,5 +1,6 @@
 import glob
 import os
+import shutil
 import time
 from pathlib import Path
 
@@ -148,3 +149,16 @@ def get_doc_file_prefix():
     call_time = CALL_TIME
 
     return "run_%s" % call_time
+
+
+def copy(file, path_to) -> Path:
+    """Copies a file A to either folder B or file B. Makes sure folder structure for target exists."""
+    file = Path(file)
+    path_to = Path(path_to)
+
+    if os.path.exists(path_to) and os.path.samefile(file, path_to):
+        return path_to
+
+    create_path_recursively(path_to.parent)
+
+    return Path(shutil.copy(file, path_to))

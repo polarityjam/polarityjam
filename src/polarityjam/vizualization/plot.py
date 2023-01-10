@@ -22,6 +22,9 @@ def save_current_fig(graphics_output_format, output_path, filename, filename_suf
     # prevent text outside figure area
     plt.tight_layout()
 
+    filename = str(filename)
+    filename_suffix = str(filename_suffix)
+
     if "pdf" in graphics_output_format:
         plt.savefig(str(Path(output_path).joinpath(filename + filename_suffix + ".pdf")))
     if "svg" in graphics_output_format:

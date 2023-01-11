@@ -6,14 +6,15 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from polarityjam.model.collection import PropertiesCollection
-from polarityjam.model.masks import get_single_cell_mask, get_outline_from_mask
+from polarityjam.model.masks import get_single_cell_mask, get_outline_from_mask, get_single_cell_nuc_mask
 from polarityjam.model.parameter import PlotParameter, ImageParameter
 from polarityjam.polarityjam_logging import get_logger
 from polarityjam.vizualization.plot import _add_single_cell_polarity_vector, \
     _add_title, \
     save_current_fig, _add_cell_eccentricity, \
     _calc_nuc_eccentricity, _add_nuclei_eccentricity, _add_single_cell_eccentricity_axis, _add_cell_orientation, \
-    _calc_nuc_orientation, _add_nuclei_orientation, _add_single_cell_orientation_degree_axis, _add_scalebar
+    _calc_nuc_orientation, _add_nuclei_orientation, _add_single_cell_orientation_degree_axis, _add_scalebar, \
+    _add_colorbar
 
 CELL_OUTLINE_INTENSITY = 30  # todo: calculate automatically based on range, improves visualization
 
@@ -43,25 +44,39 @@ class Plotter:
 
         return polarity_angle
 
-    def _get_outline_and_membrane_thickness(self, im_marker, cell_mask):
+    def _get_outlines(self, im_marker, cell_mask, nuclei_mask, single_cell_dataset):
         outlines_cell = np.zeros((im_marker.shape[0], im_marker.shape[1]))
-        outlines_mem_accumulated = np.zeros((im_marker.shape[0], im_marker.shape[1]))
+        outlines_mem = np.zeros((im_marker.shape[0], im_marker.shape[1]))
+        outlines_nuc = np.zeros((im_marker.shape[0], im_marker.shape[1]))
 
-        for cell_label in np.unique(cell_mask):
-            # exclude background
-            if cell_label == 0:
-                continue
+        for cell_label in single_cell_dataset["label"]:
+            feature_row = single_cell_dataset.loc[single_cell_dataset["label"] == cell_label]
+            intensity_cell = feature_row["marker_mean_expression"].values[0]
+            intensity_mem = feature_row["marker_mean_expression_mem"].values[0]
+            intensity_nuc = None
+
+            if nuclei_mask is not None:
+                intensity_nuc = feature_row["marker_mean_expression_nuc"].values[0]
 
             single_cell_mask = get_single_cell_mask(cell_mask, cell_label)
+            single_cell_mask[single_cell_mask > 0] = intensity_cell
             outline_cell = get_outline_from_mask(single_cell_mask, self.params.outline_width)
-            outline_cell_ = np.where(outline_cell == True, 1, 0)
-            outlines_cell += outline_cell_
+            single_cell_mask_ = np.where(outline_cell == True, 0, single_cell_mask)
+            outlines_cell += single_cell_mask_
 
             outline_mem = get_outline_from_mask(single_cell_mask, self.params.membrane_thickness)
-            outline_mem_ = np.where(outline_mem == True, 1, 0)
-            outlines_mem_accumulated += outline_mem_
+            outline_mem_ = np.where(outline_mem == True, intensity_mem, 0)
+            outlines_mem += outline_mem_
 
-        return [outlines_cell, outlines_mem_accumulated]
+            # nuclei marker intensity
+            if nuclei_mask is not None:
+                single_nucleus_mask = get_single_cell_nuc_mask(nuclei_mask, cell_mask, cell_label)
+                single_nucleus_mask[single_nucleus_mask > 0] = intensity_nuc
+                outline_nuc = get_outline_from_mask(single_nucleus_mask, self.params.outline_width)
+                single_nuc_mask_ = np.where(outline_nuc == True, 0, single_nucleus_mask)
+                outlines_nuc += single_nuc_mask_
+
+        return [outlines_cell, outlines_mem, outlines_nuc]
 
     def plot_channels(self, seg_img, seg_img_params: ImageParameter, output_path, filename, close=False):
         """Plots the separate channels from the input file given."""
@@ -76,11 +91,18 @@ class Plotter:
             ax[0].set_title("junction channel")
             ax[1].imshow(seg_img[seg_img_params.channel_nucleus, :, :])
             ax[1].set_title("nuclei channel")
+
+            if self.params.plot_scalebar:
+                _add_scalebar(ax[0], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
+                _add_scalebar(ax[1], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
         else:
             fig, ax = plt.subplots()
             if not self.params.show_graphics_axis:
                 ax.axis('off')
             ax.imshow(seg_img[:, :])
+
+            if self.params.plot_scalebar:
+                _add_scalebar(ax, self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
 
         save_current_fig(
             self.params.graphics_output_format,
@@ -99,6 +121,20 @@ class Plotter:
         # figure and axes
         w, h = self.params.graphics_width, self.params.graphics_height
 
+        # color each cell differently
+        cell_idx = np.unique(mask)
+        cell_idx = np.delete(cell_idx, 0)
+        mask_ = np.copy(mask)
+
+        new_col = np.copy(cell_idx)
+        np.random.seed(42)  # set seed for reproducibility
+        np.random.shuffle(new_col)
+        for i in range(len(cell_idx)):
+            mask_[mask == cell_idx[i]] = new_col[i]
+
+        # ignore background
+        mask_ = np.where(mask > 0, mask_, np.nan)
+
         if seg_img_params.channel_junction is not None and seg_img_params.channel_nucleus is not None:
             fig, ax = plt.subplots(1, 3, figsize=(3 * w, h))
             ax[0].imshow(seg_img[0, :, :])
@@ -106,15 +142,25 @@ class Plotter:
             ax[1].imshow(seg_img[1, :, :])
             ax[1].set_title("nuclei channel")
             ax[2].imshow(seg_img[0, :, :])
-            ax[2].imshow(mask, cmap=plt.cm.Set3, alpha=0.5)
+            ax[2].imshow(mask_, cmap=plt.cm.gist_rainbow, alpha=0.5)
             ax[2].set_title("segmentation")
+
+            # plot scale bar
+            if self.params.plot_scalebar:
+                _add_scalebar(ax[0], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
+                _add_scalebar(ax[1], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
+                _add_scalebar(ax[2], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
+
         else:
             fig, ax = plt.subplots(1, 2, figsize=(2 * w, h))
             ax[0].imshow(seg_img[:, :])
             ax[0].set_title("junction channel")
             ax[1].imshow(seg_img[:, :])
-            ax[1].imshow(mask, cmap=plt.cm.Set3, alpha=0.5)
+            ax[1].imshow(mask_, cmap=plt.cm.gist_rainbow, alpha=0.5)
             ax[1].set_title("segmentation")
+
+            if self.params.plot_scalebar:
+                _add_scalebar(ax[0], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
 
         if not self.params.show_graphics_axis:
             for ax_ in ax:
@@ -225,6 +271,10 @@ class Plotter:
         # set title and ax limits
         _add_title(ax, "nucleus displacement orientation", im_junction, self.params.show_graphics_axis)
 
+        # plot scale bar
+        if self.params.plot_scalebar:
+            _add_scalebar(ax, self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
+
         # save output & close
         save_current_fig(
             self.params.graphics_output_format,
@@ -255,23 +305,36 @@ class Plotter:
         for i in range(number_sub_figs):
             ax[i].imshow(im_marker, cmap=plt.cm.gray, alpha=1.0)
 
-        outlines_cell, outlines_mem = self._get_outline_and_membrane_thickness(im_marker, cell_mask)
+        outlines_cell, outlines_mem, outlines_nuc = self._get_outlines(
+            im_marker, cell_mask, nuclei_mask, single_cell_dataset
+        )
 
         # cell and membrane outline
-        outlines_cell_ = np.where(outlines_cell > 0, CELL_OUTLINE_INTENSITY, 0)
-        ax[0].imshow(np.ma.masked_where(outlines_cell_ == 0, outlines_cell_), plt.cm.Wistia, vmin=0, vmax=100,
-                     alpha=0.5)
+        outlines_cell_ = np.where(outlines_cell > 0, outlines_cell, np.nan)
+        cax_1 = ax[0].imshow(outlines_cell_, plt.cm.bwr, alpha=0.5)
 
-        outlines_mem_ = np.where(outlines_mem > 0, CELL_OUTLINE_INTENSITY, 0)
-        ax[1].imshow(np.ma.masked_where(outlines_mem_ == 0, outlines_mem_), plt.cm.Wistia, vmin=0, vmax=100, alpha=0.5)
+        outlines_mem_ = np.where(outlines_mem > 0, outlines_mem, np.nan)
+        cax_2 = ax[1].imshow(outlines_mem_, plt.cm.bwr, alpha=0.5)
 
         # nuclei marker intensity
+        cax_3 = None
+        outlines_nuc_ = None
         if nuclei_mask is not None:
-            outline_nuc = get_outline_from_mask(nuclei_mask, self.params.outline_width)
-            outline_nuc_ = np.where(outline_nuc == True, CELL_OUTLINE_INTENSITY, 0)
-            ax[2].imshow(
-                np.ma.masked_where(outline_nuc_ == 0, outline_nuc_), plt.cm.Wistia, vmin=0, vmax=100, alpha=0.75
-            )  # always last axis
+            outlines_nuc_ = np.where(outlines_nuc > 0, outlines_nuc, np.nan)
+            cax_3 = ax[2].imshow(outlines_nuc_, plt.cm.bwr, alpha=0.75)  # always last axis
+
+        # colorbar for cell
+        yticks_cell = [np.nanmin(outlines_cell_), np.nanmax(outlines_cell_, )]
+        _add_colorbar(fig, cax_1, ax[0], yticks_cell, "intensity cell")
+
+        # colorbar for membrane
+        yticks_mem = [np.nanmin(outlines_mem_), np.nanmax(outlines_mem_, )]
+        _add_colorbar(fig, cax_2, ax[1], yticks_mem, "intensity membrane")
+
+        # colorbar for nucleus
+        if nuclei_mask is not None:
+            yticks_nuc = [np.nanmin(outlines_nuc_), np.nanmax(outlines_nuc_)]
+            _add_colorbar(fig, cax_3, ax[2], yticks_nuc, "intensity nucleus")
 
         # plot mean expression value of cell and membrane as text
         for index, row in single_cell_dataset.iterrows():
@@ -284,6 +347,13 @@ class Plotter:
                     row["nuc_Y"], row["nuc_X"], str(np.round(row["marker_mean_expression_nuc"], 1)), color="w",
                     fontsize=7
                 )
+
+        # plot scale bar
+        if self.params.plot_scalebar:
+            _add_scalebar(ax[0], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
+            _add_scalebar(ax[1], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
+            if nuclei_mask is not None:
+                _add_scalebar(ax[2], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
 
         # set title
         ax[0].set_title("mean intensity cell")
@@ -338,6 +408,10 @@ class Plotter:
         for index, row in collection.get_properties_by_img_name(img_name).iterrows():
             _add_single_cell_polarity_vector(ax, row["cell_X"], row["cell_Y"], row["marker_centroid_X"],
                                              row["marker_centroid_Y"])
+
+        # plot scale bar
+        if self.params.plot_scalebar:
+            _add_scalebar(ax, self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
 
         ax.set_title("marker polarity")
         if not self.params.show_graphics_axis:
@@ -437,6 +511,10 @@ class Plotter:
 
         ax.set_title("junction polarity")
 
+        # plot scale bar
+        if self.params.plot_scalebar:
+            _add_scalebar(ax, self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
+
         if not self.params.show_graphics_axis:
             ax.axis('off')
 
@@ -465,6 +543,10 @@ class Plotter:
 
         if not self.params.show_graphics_axis:
             ax.axis('off')
+
+        # plot scale bar
+        if self.params.plot_scalebar:
+            _add_scalebar(ax, self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
 
         save_current_fig(self.params.graphics_output_format, collection.out_path_dict[img_name], img_name,
                          "_cell_corners")
@@ -541,6 +623,14 @@ class Plotter:
         else:
             _add_title(ax, "cell elongation", im_junction, self.params.show_graphics_axis)
 
+        # plot scale bar
+        if self.params.plot_scalebar:
+            if nuclei_mask is not None:
+                _add_scalebar(ax[0], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
+                _add_scalebar(ax[1], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
+            else:
+                _add_scalebar(ax, self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
+
         # save output & close
         save_current_fig(
             self.params.graphics_output_format, collection.get_out_path_by_name(img_name), img_name, "_eccentricity"
@@ -607,6 +697,10 @@ class Plotter:
 
         if not self.params.show_graphics_axis:
             ax.axis('off')
+
+        # plot scale bar
+        if self.params.plot_scalebar:
+            _add_scalebar(ax, self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
 
         # save output & close
         save_current_fig(
@@ -686,6 +780,14 @@ class Plotter:
             _add_title(ax[1], "nuclei shape orientation", im_junction, self.params.show_graphics_axis)
         else:
             _add_title(ax, "cell shape orientation", im_junction, self.params.show_graphics_axis)
+
+        # plot scale bar
+        if self.params.plot_scalebar:
+            if nuclei_mask is not None:
+                _add_scalebar(ax[0], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
+                _add_scalebar(ax[1], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
+            else:
+                _add_scalebar(ax, self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio)
 
         # save output & close
         save_current_fig(

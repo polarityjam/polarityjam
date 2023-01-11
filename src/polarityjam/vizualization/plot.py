@@ -22,6 +22,9 @@ def save_current_fig(graphics_output_format, output_path, filename, filename_suf
     # prevent text outside figure area
     plt.tight_layout()
 
+    filename = str(filename)
+    filename_suffix = str(filename_suffix)
+
     if "pdf" in graphics_output_format:
         plt.savefig(str(Path(output_path).joinpath(filename + filename_suffix + ".pdf")))
     if "svg" in graphics_output_format:
@@ -71,15 +74,14 @@ def _add_scalebar(ax, length_scalebar_microns, pixel_to_micron_ratio):
     length_scalebar_pixels = length_scalebar_microns / pixel_to_micron_ratio
     text = "%s mu m" % length_scalebar_microns
 
-    scalebar = AnchoredSizeBar(ax.transData,
-                               length_scalebar_microns, text, 'lower right',
-                               pad=0.1,
-                               color='white',
-                               frameon=False,
-                               size_vertical=5)
-    # ,
-    # fontproperties=fontprops)
-
+    scalebar = AnchoredSizeBar(
+        ax.transData,
+        length_scalebar_microns, text, 'lower right',
+        pad=0.1,
+        color='white',
+        frameon=False,
+        size_vertical=5
+    )
     ax.add_artist(scalebar)
 
 
@@ -169,7 +171,8 @@ def _calc_nuc_orientation(single_cell_props, cell_mask, nuclei_mask):
             continue
         single_cell_mask = np.where(cell_mask == row_label, True, 0)
         single_nuclei_mask_ = np.logical_and(single_cell_mask, nuclei_mask)
-        nuclei_orientation += np.where(single_nuclei_mask_ == True, 1, 0) * row['nuc_shape_orientation_rad'] * 180.0 / np.pi
+        nuclei_orientation += np.where(single_nuclei_mask_ == True, 1, 0) * row[
+            'nuc_shape_orientation_rad'] * 180.0 / np.pi
 
     get_logger().info("Maximal nuclei orientation: %s" % str(np.max(nuclei_orientation)))
     get_logger().info("Minimal nuclei orientation: %s" % str(np.min(nuclei_orientation)))

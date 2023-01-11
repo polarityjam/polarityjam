@@ -57,6 +57,7 @@ class SegmentationParameter(Parameter):
         self.model_path = None
         self.estimated_cell_diameter = None
         self.flow_threshold = None
+        self.cellprob_threshold = None
         self.use_gpu = None
         self.clear_border = None
         self.min_cell_size = None

@@ -13,12 +13,9 @@ from polarityjam.model.parameter import RuntimeParameter, PlotParameter, Segment
 from polarityjam.polarityjam_logging import get_logger
 from polarityjam.utils.io import read_parameters, read_image, get_tif_list, read_key_file, \
     get_doc_file_prefix, write_dict_to_yml, create_path_recursively
-from polarityjam.vizualization.plot import set_figure_dpi
 
 
 def run(args):
-    set_figure_dpi()
-
     # read args
     param_file = args.param
     filepath = args.in_file
@@ -100,8 +97,6 @@ def _run(infile, param, output_path, fileout_name):
 
 
 def run_stack(args):
-    set_figure_dpi()
-
     # read args
     param_file = args.param
     inpath = args.in_path
@@ -139,8 +134,6 @@ def run_stack(args):
 
 
 def run_key(args):
-    set_figure_dpi()
-
     # read args
     param_file = args.param
     in_path = args.in_path

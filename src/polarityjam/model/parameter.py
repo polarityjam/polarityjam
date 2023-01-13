@@ -113,6 +113,7 @@ class PlotParameter(Parameter):
         self.plot_marker = None
         self.plot_ratio_method = None
         self.plot_cyclic_orientation = None
+        self.plot_foi = None
 
         self.outline_width = None
         self.show_polarity_angles = None

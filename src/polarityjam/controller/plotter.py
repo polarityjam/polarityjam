@@ -1,8 +1,9 @@
 import json
 import math
+import os
 
 import cmocean as cm
-import matplotlib.colors
+import matplotlib
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -17,13 +18,16 @@ from polarityjam.vizualization.plot import _add_single_cell_polarity_vector, \
     _calc_nuc_orientation, _add_nuclei_orientation, _add_single_cell_orientation_degree_axis, _add_scalebar, \
     _add_colorbar
 
-CELL_OUTLINE_INTENSITY = 30  # todo: calculate automatically based on range, improves visualization
-
 
 class Plotter:
 
     def __init__(self, params: PlotParameter):
         self.params = params
+        Plotter.set_figure_dpi(self.params.dpi)
+
+    @staticmethod
+    def set_figure_dpi(figure_dpi):
+        matplotlib.rcParams['figure.dpi'] = figure_dpi
 
     def _get_figure(self, n_subfigures):
         w, h = self.params.graphics_width, self.params.graphics_height
@@ -103,6 +107,8 @@ class Plotter:
         """Plots the separate channels from the input file given."""
         get_logger().info("Plotting: input channels")
 
+        filename, _ = os.path.splitext(os.path.basename(filename))
+
         if seg_img_params.channel_junction is not None and seg_img_params.channel_nucleus is not None:
             fig, ax = self._get_figure(2)
 
@@ -134,6 +140,8 @@ class Plotter:
     def plot_mask(self, mask, seg_img, seg_img_params, output_path, filename, close=False):
         """Plots the segmentation mask, together with the separate channels from the input image."""
         get_logger().info("Plotting: segmentation masks")
+
+        filename, _ = os.path.splitext(os.path.basename(filename))
 
         # color each cell differently
         cell_idx = np.unique(mask)
@@ -581,6 +589,39 @@ class Plotter:
 
         self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_ratio_method", [ax], close)
 
+    def plot_foi(self, collection, img_name, close=False):
+        """
+        Plot the figure of interest
+        """
+        get_logger().info("Plotting: figure of interest")
+
+        im_junction = collection.img_channel_dict[img_name]["junction"]
+        single_cell_dataset = collection.dataset.loc[collection.dataset["filename"] == img_name]
+        foi_name = collection.get_foi_by_img_name(img_name)
+        foi = single_cell_dataset[foi_name]
+        # figure and axes
+        fig, ax = self._get_figure(1)
+
+        cax = ax.imshow(im_junction, cmap=plt.cm.bwr, alpha=1.0)
+
+        # plot the figure of interest
+        for index, row in single_cell_dataset.iterrows():
+            ax.text(
+                row["cell_Y"],
+                row["cell_X"],
+                str(np.round(row[foi_name], 1)),
+                color="w",
+                fontsize=5
+            )
+
+        yticks = [np.nanmin(foi), np.nanmax(foi, )]
+        _add_colorbar(fig, cax, ax, yticks, "intensity cell")
+
+        # set title and ax limits
+        _add_title(ax, "feature of interest", im_junction, self.params.show_graphics_axis)
+
+        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_foi", [ax], close)
+
     def plot_orientation(self, collection, img_name, close=False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
@@ -662,7 +703,7 @@ class Plotter:
                     ax,
                     self.params.length_scalebar_microns,
                     self.params.pixel_to_micron_ratio,
-                    int(self.params.length_scalebar_microns/2)
+                    int(self.params.length_scalebar_microns / 2)
                 )
 
         # save output & close
@@ -713,3 +754,7 @@ class Plotter:
 
             if self.params.plot_cyclic_orientation:
                 self.plot_orientation(collection, key, close)
+
+            # Note: disabled for now.
+            # if self.params.plot_foi:
+            #     self.plot_foi(collection, key, close)

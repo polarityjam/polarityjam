@@ -70,8 +70,10 @@ class PropertyCollector:
         props_collection.set_reset_index()
 
     def add_out_path(self, props_collection, filename, path):
-        # todo: check for duplication
         props_collection.out_path_dict[filename] = path
+
+    def add_foi(self, props_collection, filename, foi):
+        props_collection.feature_of_interest_dict[filename] = foi
 
     def add_img(self, props_collection, filename, img_nucleus, img_junction, img_marker):
         # todo: check for duplication

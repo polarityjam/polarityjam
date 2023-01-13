@@ -35,7 +35,8 @@ plot_polarity : True
 plot_orientation : True
 plot_marker : True
 plot_ratio_method : False
-plot_cyclic_orientation : False
+plot_cyclic_orientation : True
+plot_foi : True
 outline_width : 2
 show_polarity_angles : True
 show_graphics_axis : False

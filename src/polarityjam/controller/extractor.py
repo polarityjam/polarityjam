@@ -1,5 +1,7 @@
-import numpy as np
+import os
 from hashlib import sha1
+
+import numpy as np
 
 from polarityjam.compute.moran import run_morans
 from polarityjam.compute.neighborhood import k_neighbor_dif
@@ -70,7 +72,7 @@ class Extractor:
 
     def extract(self, img, img_params, cells_mask, filename, output_path, collection):
         """ Extracts the features from an input image."""
-
+        filename, _ = os.path.splitext(os.path.basename(filename))
         img_marker = self.get_image_marker(img, img_params)
         img_junction = self.get_image_junction(img, img_params)
         img_nucleus = self.get_image_nucleus(img, img_params)
@@ -151,6 +153,7 @@ class Extractor:
         # mark the beginning of a new image that is potentially extracted
         self.collector.set_reset_index(collection)
         self.collector.add_out_path(collection, filename, output_path)
+        self.collector.add_foi(collection, filename, self.params.feature_of_interest)
         self.collector.add_img(collection, filename, img_nucleus, img_junction, img_marker)
         self.collector.add_masks(collection, filename, masks)
 

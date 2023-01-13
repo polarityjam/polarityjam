@@ -484,7 +484,7 @@ def run_morans(rag, foi):
     """
     get_logger().info("Calculating morans I group statistic...")
 
-    # extract FOI and weights
+    # extract weights
     weights = W.from_networkx(rag)
 
     # extract the feature of interest from the rag

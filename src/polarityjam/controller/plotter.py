@@ -47,8 +47,8 @@ class Plotter:
 
     def _get_outlines(self, im_marker, cell_mask, nuclei_mask, single_cell_dataset):
         outlines_cell = np.zeros((im_marker.shape[0], im_marker.shape[1]))
-        outlines_mem = np.zeros((im_marker.shape[0], im_marker.shape[1]))
-        outlines_nuc = np.zeros((im_marker.shape[0], im_marker.shape[1]))
+        outlines_mem = np.copy(outlines_cell)
+        outlines_nuc = np.copy(outlines_cell)
 
         for cell_label in single_cell_dataset["label"]:
             feature_row = single_cell_dataset.loc[single_cell_dataset["label"] == cell_label]
@@ -85,41 +85,34 @@ class Plotter:
 
         if seg_img_params.channel_junction is not None and seg_img_params.channel_nucleus is not None:
             fig, ax = plt.subplots(1, 2)
-            if not self.params.show_graphics_axis:
-                ax[0].axis('off')
-                ax[1].axis('off')
-            ax[0].imshow(seg_img[seg_img_params.channel_junction, :, :])
-            ax[0].set_title("junction channel")
-            ax[1].imshow(seg_img[seg_img_params.channel_nucleus, :, :])
-            ax[1].set_title("nuclei channel")
 
-            if self.params.plot_scalebar:
-                _add_scalebar(ax[0], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio,
-                              self.params.length_scalebar_microns)
-                _add_scalebar(ax[1], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio,
-                              self.params.length_scalebar_microns)
+            # junction channel
+            c_junction = seg_img_params.channel_junction
+            ax[0].imshow(seg_img[c_junction, :, :])
+            _add_title(
+                ax[0], "junction channel", seg_img[c_junction, :, :], self.params.show_graphics_axis
+            )
+
+            # nucleus channel
+            c_nucleus = seg_img_params.channel_nucleus
+            ax[1].imshow(seg_img[c_nucleus, :, :])
+            _add_title(
+                ax[1], "nuclei channel", seg_img[c_nucleus, :, :], self.params.show_graphics_axis
+            )
+
+            axes = [ax[0], ax[1]]
         else:
             fig, ax = plt.subplots()
-            if not self.params.show_graphics_axis:
-                ax.axis('off')
+
+            # first channel
             ax.imshow(seg_img[:, :])
+            _add_title(ax, "first channel", seg_img[:, :], self.params.show_graphics_axis)
+            axes = [ax]
 
-            if self.params.plot_scalebar:
-                _add_scalebar(ax, self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio,
-                              self.params.length_scalebar_microns)
-
-        save_current_fig(
-            self.params.graphics_output_format,
-            output_path, filename,
-            "_channels",
-        )
-
-        if close:
-            plt.close(fig)
+        self._finish_plot(fig, output_path, filename, "_channels", axes, close)
 
     def plot_mask(self, mask, seg_img, seg_img_params, output_path, filename, close=False):
-        """Plots the segmentation mask, together with the separate channels from the input image.
-        """
+        """Plots the segmentation mask, together with the separate channels from the input image."""
         get_logger().info("Plotting: segmentation masks")
 
         # figure and axes
@@ -141,47 +134,35 @@ class Plotter:
 
         if seg_img_params.channel_junction is not None and seg_img_params.channel_nucleus is not None:
             fig, ax = plt.subplots(1, 3, figsize=(3 * w, h))
+
             ax[0].imshow(seg_img[0, :, :])
-            ax[0].set_title("junction channel")
+            _add_title(ax[0], "junction channel", seg_img[0, :, :], self.params.show_graphics_axis)
+
             ax[1].imshow(seg_img[1, :, :])
-            ax[1].set_title("nuclei channel")
+            _add_title(ax[1], "nuclei channel", seg_img[1, :, :], self.params.show_graphics_axis)
+
             ax[2].imshow(seg_img[0, :, :])
             ax[2].imshow(mask_, cmap=plt.cm.gist_rainbow, alpha=0.5)
-            ax[2].set_title("segmentation")
+            _add_title(ax[2], "segmentation", seg_img[2, :, :], self.params.show_graphics_axis)
 
-            # plot scale bar
-            if self.params.plot_scalebar:
-                _add_scalebar(ax[0], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio,
-                              self.params.length_scalebar_microns)
-                _add_scalebar(ax[1], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio,
-                              self.params.length_scalebar_microns)
-                _add_scalebar(ax[2], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio,
-                              self.params.length_scalebar_microns)
-
+            axes = [ax[0], ax[1], ax[2]]
         else:
             fig, ax = plt.subplots(1, 2, figsize=(2 * w, h))
-            ax[0].imshow(seg_img[:, :])
-            ax[0].set_title("junction channel")
-            ax[1].imshow(seg_img[:, :])
+
+            s_img = seg_img[:, :]
+
+            # ax 1
+            ax[0].imshow(s_img)
+            _add_title(ax[0], "junction channel", s_img, self.params.show_graphics_axis)
+
+            # ax 2
+            ax[1].imshow(s_img)
             ax[1].imshow(mask_, cmap=plt.cm.gist_rainbow, alpha=0.5)
-            ax[1].set_title("segmentation")
+            _add_title(ax[1], "segmentation", s_img, self.params.show_graphics_axis)
 
-            if self.params.plot_scalebar:
-                _add_scalebar(ax[0], self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio,
-                              self.params.length_scalebar_microns)
+            axes = [ax[0], ax[1]]
 
-        if not self.params.show_graphics_axis:
-            for ax_ in ax:
-                ax_.axis('off')
-
-        # save output & close
-        save_current_fig(
-            self.params.graphics_output_format,
-            output_path, filename,
-            "_segmentation",
-        )
-        if close:
-            plt.close(fig)
+        self._finish_plot(fig, output_path, filename, "_segmentation", axes, close)
 
     def plot_organelle_polarity(self, collection, img_name, close=False):
         im_junction = collection.get_image_channel_by_img_name(img_name, "junction")
@@ -223,9 +204,8 @@ class Plotter:
         # set title and ax limits
         _add_title(ax, "organelle orientation", im_junction, self.params.show_graphics_axis)
 
-        self._finish_plot(
-            fig, collection, img_name, "_nuclei_organelle_vector", [ax], True, close, polarity_angle
-        )
+        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_nuclei_organelle_vector", [ax],
+                          close, polarity_angle)
 
     def plot_nuc_displacement_orientation(self, collection, img_name, close=False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
@@ -268,9 +248,9 @@ class Plotter:
         # set title and ax limits
         _add_title(ax, "nucleus displacement orientation", im_junction, self.params.show_graphics_axis)
 
-        self._finish_plot(
-            fig, collection, img_name, "_nucleus_displacement_orientation", [ax], True, close, nuc_polarity_angle
-        )
+        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_nucleus_displacement_orientation",
+                          [ax], close,
+                          nuc_polarity_angle)
 
     def plot_marker_expression(self, collection, img_name, close=False):
         im_marker = collection.img_channel_dict[img_name]["marker"]
@@ -342,7 +322,26 @@ class Plotter:
             _add_title(ax[2], "mean intensity nucleus", im_marker, self.params.show_graphics_axis)
             axes = [ax[0], ax[1], ax[2]]
 
-        self._finish_plot(fig, collection, img_name, "_marker_expression", axes, True, close)
+        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_expression", axes, close)
+
+    def _masked_cell_outlines(self, img, cell_mask):
+        # cell outlines
+        outlines_cells = np.zeros((img.shape[0], img.shape[1]))
+        for cell_label in np.unique(cell_mask):
+            # exclude background
+            if cell_label == 0:
+                continue
+
+            single_cell_mask = get_single_cell_mask(cell_mask, cell_label)
+            outline_cell = get_outline_from_mask(single_cell_mask, self.params.outline_width)
+            outlines_cells = np.logical_or(outlines_cells, outline_cell)
+
+        # convert cell outlines to image
+        outlines_cells_rgba = np.where(outlines_cells == True, 255, 0)
+        outlines_cells_rgba = np.dstack([outlines_cells_rgba] * 3)
+        outlines_cells_rgba_masked = np.ma.masked_where(np.dstack([outlines_cells] * 3) == False, outlines_cells_rgba)
+
+        return outlines_cells_rgba_masked
 
     def plot_marker_polarity(self, collection, img_name, close=False):
         im_marker = collection.img_channel_dict[img_name]["marker"]
@@ -357,30 +356,18 @@ class Plotter:
         # plot marker intensity
         ax.imshow(im_marker, cmap=plt.cm.gray, alpha=1.0)
 
-        # cumulative cell outlines
-        outlines_cell_accumulated = np.zeros((im_marker.shape[0], im_marker.shape[1]))
-        for cell_label in np.unique(cell_mask):
-            # exclude background
-            if cell_label == 0:
-                continue
-
-            single_cell_mask = get_single_cell_mask(cell_mask, cell_label)
-            outline_cell = get_outline_from_mask(single_cell_mask, self.params.outline_width)
-            outline_cell_ = np.where(outline_cell == True, 30, 0)
-            outlines_cell_accumulated += outline_cell_
-
-        # plot non-cumulative cell outlines
-        outlines_cell_ = np.where(outlines_cell_accumulated > 0, CELL_OUTLINE_INTENSITY, 0)
-        ax.imshow(np.ma.masked_where(outlines_cell_ == 0, outlines_cell_), plt.cm.Wistia, vmin=0, vmax=100, alpha=0.5)
+        # show cell outlines
+        ax.imshow(self._masked_cell_outlines(im_marker, cell_mask), alpha=0.5)
 
         # add all polarity vectors
         for index, row in collection.get_properties_by_img_name(img_name).iterrows():
-            _add_single_cell_polarity_vector(ax, row["cell_X"], row["cell_Y"], row["marker_centroid_X"],
-                                             row["marker_centroid_Y"])
+            _add_single_cell_polarity_vector(
+                ax, row["cell_X"], row["cell_Y"], row["marker_centroid_X"], row["marker_centroid_Y"]
+            )
 
         _add_title(ax, "marker polarity", im_marker, self.params.show_graphics_axis)
 
-        self._finish_plot(fig, collection, img_name, "_marker_polarity", [ax], True, close)
+        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_polarity", [ax], close)
 
     def plot_marker_nucleus_orientation(self, collection, img_name, close=False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
@@ -424,9 +411,8 @@ class Plotter:
         # set title and ax limits
         _add_title(ax, "marker nucleus orientation", im_junction, self.params.show_graphics_axis)
 
-        self._finish_plot(
-            fig, collection, img_name, "_marker_nucleus_orientation", [ax], True, close, nuc_polarity_angle
-        )
+        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_nucleus_orientation", [ax],
+                          close, nuc_polarity_angle)
 
     def plot_junction_polarity(self, collection, img_name, close=False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
@@ -440,23 +426,8 @@ class Plotter:
         # plot marker intensity
         ax.imshow(im_junction, cmap=plt.cm.gray, alpha=1.0)
 
-        # cumulative cell outlines
-        outlines_cells = np.zeros((im_junction.shape[0], im_junction.shape[1]))
-        for cell_label in np.unique(cell_mask):
-            # exclude background
-            if cell_label == 0:
-                continue
-
-            single_cell_mask = get_single_cell_mask(cell_mask, cell_label)
-            outline_cell = get_outline_from_mask(single_cell_mask, self.params.outline_width)
-            outlines_cells = np.logical_or(outlines_cells, outline_cell)
-
-        # convert cell outlines to image
-        outlines_cells_rgba = np.where(outlines_cells == True, 255, 0)
-        outlines_cells_rgba = np.dstack([outlines_cells_rgba] * 3)
-        outlines_cells_rgba_masked = np.ma.masked_where(np.dstack([outlines_cells] * 3) == False, outlines_cells_rgba)
-        # mask all False values
-        ax.imshow(outlines_cells_rgba_masked, alpha=0.5)
+        # show cell outlines
+        ax.imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
 
         # add all polarity vectors
         for index, row in collection.get_properties_by_img_name(img_name).iterrows():
@@ -470,13 +441,15 @@ class Plotter:
 
         _add_title(ax, "junction polarity", im_junction, self.params.show_graphics_axis)
 
-        self._finish_plot(fig, collection, img_name, "_junction_polarity", [ax], True, close)
+        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_junction_polarity", [ax], close)
 
     def plot_corners(self, collection, img_name, close=False):
         fig, ax = self._get_figure(1)
 
         # plot marker intensity
         im_junction = collection.img_channel_dict[img_name]["junction"]
+        cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
+
         ax.imshow(im_junction, cmap=plt.cm.gray, alpha=1.0)
 
         for index, row in collection.dataset.loc[collection.dataset["filename"] == img_name].iterrows():
@@ -484,9 +457,11 @@ class Plotter:
                         np.array(json.loads(row["cell_corner_points"]))[:, 1],
                         [4] * len(np.array(json.loads(row["cell_corner_points"]))[:, 1]))
 
+        ax.imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
+
         _add_title(ax, "cell corners", im_junction, self.params.show_graphics_axis)
 
-        self._finish_plot(fig, collection, img_name, "_cell_corners", [ax], True, close)
+        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_cell_corners", [ax], close)
 
     def plot_eccentricity(self, collection, img_name, close=False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
@@ -560,7 +535,7 @@ class Plotter:
             _add_title(ax, "cell elongation", im_junction, self.params.show_graphics_axis)
             axes = [ax]
 
-        self._finish_plot(fig, collection, img_name, "_eccentricity", axes, True, close)
+        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_eccentricity", axes, close)
 
     def plot_ratio_method(self, collection, img_name, close=False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
@@ -575,20 +550,8 @@ class Plotter:
         ax.imshow(im_junction, cmap=plt.cm.gray, alpha=1.0)
         ax.imshow(cell_mask, cmap=plt.cm.Set3, alpha=0.25)
 
-        cell_outlines_accumulated = np.zeros((im_junction.shape[0], im_junction.shape[1]))
-        for cell_label in np.unique(cell_mask):
-            # exclude background
-            if cell_label == 0:
-                continue
-
-            single_cell_mask = get_single_cell_mask(cell_mask, cell_label)
-            cell_outline = get_outline_from_mask(single_cell_mask, self.params.membrane_thickness)
-            # accumulates cell outlines. overlapping outlines have a higher value
-            cell_outlines_accumulated += np.where(cell_outline == True, 1, 0)
-
-        # overlapping accumulated outlines are ignored and set to 1.
-        cell_outlines = np.where(cell_outlines_accumulated > 0, CELL_OUTLINE_INTENSITY, 0)
-        ax.imshow(np.ma.masked_where(cell_outlines == 0, cell_outlines), plt.cm.bwr, vmin=0, vmax=100, alpha=0.5)
+        # show cell outlines
+        ax.imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
 
         # plot major axis around coordinates of each cell
         for index, row in collection.get_properties_by_img_name(img_name).iterrows():
@@ -617,7 +580,7 @@ class Plotter:
 
         _add_title(ax, "ratio method", im_junction, self.params.show_graphics_axis)
 
-        self._finish_plot(fig, collection, img_name, "_ratio_method", [ax], True, close)
+        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_ratio_method", [ax], close)
 
     def plot_orientation(self, collection, img_name, close=False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
@@ -690,21 +653,19 @@ class Plotter:
             _add_title(ax, "cell shape orientation", im_junction, self.params.show_graphics_axis)
             axes = [ax]
 
-        self._finish_plot(fig, collection, img_name, "_shape_orientation", axes, True, close)
+        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_shape_orientation", axes, close)
 
-    def _finish_plot(self, fig, collection, img_name, output_suffix, axes, plot_scalebar=False, close=False,
-                     image=None):
+    def _finish_plot(self, fig, output_path, img_name, output_suffix, axes, close=False, image=None):
         # plot scale bar for this figure
-        if plot_scalebar:
-            if self.params.plot_scalebar:
-                for ax in axes:
-                    _add_scalebar(ax, self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio,
-                                  self.params.length_scalebar_microns)
+        if self.params.plot_scalebar:
+            for ax in axes:
+                _add_scalebar(ax, self.params.length_scalebar_microns, self.params.pixel_to_micron_ratio,
+                              self.params.length_scalebar_microns)
 
         # save output & close
         save_current_fig(
             self.params.graphics_output_format,
-            collection.get_out_path_by_name(img_name),
+            output_path,
             img_name,
             output_suffix,
             image=image

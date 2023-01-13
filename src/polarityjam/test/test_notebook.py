@@ -10,6 +10,14 @@ from polarityjam.test.test_common import TestCommon
 
 
 class TestIntegration(TestCommon):
+    def setUp(self) -> None:
+        super().setUp()
+        if not self.data_path.exists():
+            self.extract_test_data()
+
+    def tearDown(self) -> None:
+        super().tearDown()
+
     def nb_to_py(self, path_nb, filename, outpath_py, prefix_str="tmp_"):
         outpath_py = Path(outpath_py)
 
@@ -31,7 +39,7 @@ class TestIntegration(TestCommon):
         p = self.nb_to_py(path_nb, path_nb.stem, self.tmp_dir)
 
         # remove ipython formatting and set data path
-        replace_cell_pattern = "### DELETE ME ###"
+        replace_cell_pattern = "### ADAPT ME ###"
         with fileinput.FileInput(p, inplace=True) as f:
             myiter = iter(f)
             for line in f:
@@ -57,8 +65,3 @@ class TestIntegration(TestCommon):
         spec = importlib.util.spec_from_file_location("nb_test", p)
         nb_test = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(nb_test)
-
-    def setUp(self) -> None:
-        super().setUp()
-        if not self.data_path.exists():
-            self.extract_test_data()

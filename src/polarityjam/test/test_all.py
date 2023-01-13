@@ -5,7 +5,7 @@ from pathlib import Path
 import polarityjam.test.test_config as config
 import polarityjam.test.test_feature_extraction as test_feature_extraction
 import polarityjam.test.test_integration as test_integration
-import polarityjam.test.test_integration as test_notebook
+
 from polarityjam.polarityjam_logging import get_logger
 from polarityjam.utils.io import create_path_recursively
 
@@ -22,7 +22,6 @@ def start_tests(target_folder=None):
 
     # integration tests
     suite.addTests(loader.loadTestsFromModule(test_integration))
-    suite.addTests(loader.loadTestsFromModule(test_notebook))
 
     runner = unittest.TextTestRunner(verbosity=3)
     result = runner.run(suite)

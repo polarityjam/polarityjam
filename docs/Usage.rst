@@ -61,7 +61,7 @@ Segmentation Parameter
 | parameter                | Category      | type                    | default  | options     | description                                                                                                                                                                                                |
 +==========================+===============+=========================+==========+=============+============================================================================================================================================================================================================+
 +--------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| manually_annotated_mask  | segmentation  | string                  |          |             | Polarityjam looks for an available segmentation in the input path. This parameter specifies the suffix for manually annotated masks. Usually "_seg.npy" (cellpose default). Leave empty to use default.    |
+| manually_annotated_mask  | segmentation  | string                  |          |             | PolarityJaM looks for an available segmentation in the input path. This parameter specifies the suffix for manually annotated masks. Leave empty to use the suffix "_seg.npy" (cellpose default).          |
 +--------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | store_segmentation       | segmentation  | bool                    | FALSE    |             | If true, stores the cellpose segmentation masks in the input path (CAUTION: not in the output path!).                                                                                                      |
 +--------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -74,6 +74,8 @@ Segmentation Parameter
 | estimated_cell_diameter  | segmentation  | integer                 | 100      |             | The estimated cell diameter of the cells in your input image(s). Default 100.                                                                                                                              |
 +--------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | flow_threshold           | segmentation  | float                   | 0.4      |             | Increase this threshold if cellpose is not returning as many ROIs as you would expect. Similarly, decrease this threshold if cellpose is returning too many ill-shaped ROIs.                               |
++--------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| cellprob_threshold       | segmentation  | float                   | 0.0      |             | Decrease this threshold if cellpose is not returning as many ROIs as you’d expect. Increase this threshold if cellpose is returning too many ROIs particularly from dim areas.                             |
 +--------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | use_gpu                  | segmentation  | bool                    | FALSE    |             | Indicates whether to use the GPU for faster segmentation. Default is false                                                                                                                                 |
 +--------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -178,7 +180,7 @@ Folder structure will also be created in the provided output path. Specify a sho
 .. warning::
     Using OS specific paths here might hurt reproducibility! (e.g. windows paths are different than unix paths!)
 
-Webb app
+Web app
 --------
 
 The R-shiny web app further analyses the results of the feature extraction process in the browser.

@@ -22,7 +22,8 @@ Welcome to polarityjam's documentation!
       :raw-html:`<br />`
       :raw-html:`<br />`
 
-      Polarityjam is a software suite to study endothelial cell behavior and more.
+
+      The PolarityJaM suite is a software package that lets you study cell polarity, junctions and morphology.
       :raw-html:`<br />`
       :raw-html:`<br />`
       Explore the `software suite <whatis>`_ here!
@@ -35,8 +36,8 @@ Welcome to polarityjam's documentation!
 
 
 .. image:: images/collaboration_logo.png
-   :width: 800
-   :align: left
+   :width: 400
+   :align: center
 
 
 .. toctree::

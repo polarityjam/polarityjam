@@ -44,7 +44,7 @@ Welcome to polarityjam's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   What is polarityjam?<whatis>
+   What is PolarityJaM?<whatis>
    Installation
    Usage
    Features

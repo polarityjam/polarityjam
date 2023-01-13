@@ -69,6 +69,7 @@ class CellposeSegmenter(Segmenter):
         """Gets the specified cellpose model"""
 
         if self.params.model_type == "custom":
+            get_logger().info("Loading custom model from: %s" % self.params.model_path)
             model = cellpose.models.CellposeModel(gpu=self.params.use_gpu, pretrained_model=self.params.model_path)
         else:
             model = cellpose.models.Cellpose(gpu=self.params.use_gpu, model_type=self.params.model_type)
@@ -78,7 +79,8 @@ class CellposeSegmenter(Segmenter):
     def _get_cellpose_segmentation(self, im_seg, filepath):
         """Gets the cellpose segmentation. Expects im_seg to have junction channel first, then nucleus channel."""
         get_logger().info("Calculate cellpose segmentation. This might take some time...")
-
+        get_logger().info("Using model type '%s' with estimated cell diameter %s, cellprob_threshold %s and flow threshold %s" % (
+        self.params.model_type, self.params.estimated_cell_diameter, self.params.cellprob_threshold, self.params.flow_threshold))
         model = self._get_cellpose_model()
         if im_seg.ndim > 1:
             channels = [1, 2]
@@ -88,9 +90,14 @@ class CellposeSegmenter(Segmenter):
         # masks, flows, styles, diams = model.eval(im_seg, channels=channels)
 
         if self.params.model_type == "custom":
-            masks, flows, styles = model.eval(im_seg, diameter=self.params.estimated_cell_diameter, channels=channels)
+            masks, flows, styles = model.eval(im_seg, diameter=self.params.estimated_cell_diameter,
+                                              flow_threshold=self.params.flow_threshold,
+                                              cellprob_threshold=self.params.cellprob_threshold,
+                                              channels=channels)
         else:
             masks, flows, styles, diams = model.eval(im_seg, diameter=self.params.estimated_cell_diameter,
+                                                     flow_threshold=self.params.flow_threshold,
+                                                     cellprob_threshold = self.params.cellprob_threshold,
                                                      channels=channels)
 
         if self.params.store_segmentation:
@@ -117,7 +124,7 @@ class CellposeSegmenter(Segmenter):
         segmentation, _ = self._get_segmentation_file_name(filepath)
 
         if segmentation.exists() and self.params.use_given_mask:
-            get_logger().info("Load cellpose segmentation...")
+            get_logger().info("Load existing segmentation from %s ..." % segmentation)
 
             # in case an annotated mask is available
             cellpose_seg = np.load(str(segmentation), allow_pickle=True)

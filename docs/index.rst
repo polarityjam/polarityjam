@@ -36,7 +36,7 @@ Welcome to polarityjam's documentation!
 
 
 .. image:: images/collaboration_logo.png
-   :width: 400
+   :width: 800
    :align: center
 
 

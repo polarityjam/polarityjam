@@ -47,7 +47,7 @@ def _add_single_cell_polarity_vector(ax, x_pos_p1, y_pos_p1, x_pos_p2, y_pos_p2)
         x_pos_p1,
         y_pos_p2 - y_pos_p1,
         x_pos_p2 - x_pos_p1,
-        color='white', width=2
+        color='white', width=4
     )
 
 
@@ -70,7 +70,7 @@ def _add_colorbar(fig, cax, ax, yticks, label):
     color_bar.ax.set_yticks(yticks)
 
 
-def _add_scalebar(ax, length_scalebar_microns, pixel_to_micron_ratio):
+def _add_scalebar(ax, length_scalebar_microns, pixel_to_micron_ratio, size_vertical):
     length_scalebar_pixels = length_scalebar_microns / pixel_to_micron_ratio
     text = "%s mu m" % length_scalebar_microns
 
@@ -80,7 +80,7 @@ def _add_scalebar(ax, length_scalebar_microns, pixel_to_micron_ratio):
         pad=0.1,
         color='white',
         frameon=False,
-        size_vertical=5
+        size_vertical=size_vertical
     )
     ax.add_artist(scalebar)
 

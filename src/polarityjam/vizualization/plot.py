@@ -76,11 +76,13 @@ def _add_scalebar(ax, length_scalebar_microns, pixel_to_micron_ratio, size_verti
 
     scalebar = AnchoredSizeBar(
         ax.transData,
-        length_scalebar_microns, text, 'lower right',
+        length_scalebar_pixels,
+        text,
+        'lower right',
         pad=0.1,
         color='white',
         frameon=False,
-        size_vertical=size_vertical
+        size_vertical=size_vertical,
     )
     ax.add_artist(scalebar)
 

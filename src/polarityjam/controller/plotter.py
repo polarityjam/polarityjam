@@ -36,7 +36,7 @@ class Plotter:
 
         return fig, ax
 
-    def _get_polarity_angle_mask(self, cell_mask, collection, img_name, feature):  # todo: place in extractor?
+    def _get_polarity_angle_mask(self, cell_mask, collection, img_name, feature):
         cell_angle = np.zeros((cell_mask.shape[0], cell_mask.shape[1]))
         for index, row in collection.get_properties_by_img_name(img_name).iterrows():
             row_label = int(row['label'])
@@ -596,26 +596,37 @@ class Plotter:
         get_logger().info("Plotting: figure of interest")
 
         im_junction = collection.img_channel_dict[img_name]["junction"]
+        mask = collection.masks_dict[img_name].cell_mask_rem_island
+
         single_cell_dataset = collection.dataset.loc[collection.dataset["filename"] == img_name]
         foi_name = collection.get_foi_by_img_name(img_name)
         foi = single_cell_dataset[foi_name]
         # figure and axes
         fig, ax = self._get_figure(1)
-
-        cax = ax.imshow(im_junction, cmap=plt.cm.bwr, alpha=1.0)
+        ax.imshow(im_junction, cmap=plt.cm.gray, alpha=1)
 
         # plot the figure of interest
+        m = np.copy(mask)
         for index, row in single_cell_dataset.iterrows():
+            foi_val = row[foi_name]
+            label = row["label"]
+
+            m = np.where(mask == label, foi_val, m)
+
             ax.text(
                 row["cell_Y"],
                 row["cell_X"],
                 str(np.round(row[foi_name], 1)),
                 color="w",
-                fontsize=5
+                fontsize=4
             )
 
-        yticks = [np.nanmin(foi), np.nanmax(foi, )]
-        _add_colorbar(fig, cax, ax, yticks, "intensity cell")
+        cax = ax.imshow(np.ma.masked_where(m == 0, m), cmap=plt.cm.bwr, alpha=0.8)
+
+        min = np.nanmin(foi)
+        max = np.nanmax(foi)
+        yticks = [min, np.round(min + (max - min)/2, 1), max]
+        _add_colorbar(fig, cax, ax, yticks, foi_name)
 
         # set title and ax limits
         _add_title(ax, "feature of interest", im_junction, self.params.show_graphics_axis)
@@ -755,6 +766,5 @@ class Plotter:
             if self.params.plot_cyclic_orientation:
                 self.plot_orientation(collection, key, close)
 
-            # Note: disabled for now.
-            # if self.params.plot_foi:
-            #     self.plot_foi(collection, key, close)
+            if self.params.plot_foi:
+                self.plot_foi(collection, key, close)

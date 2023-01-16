@@ -103,7 +103,7 @@ class Plotter:
 
         return outlines_cells_rgba_masked
 
-    def plot_channels(self, seg_img, seg_img_params: ImageParameter, output_path, filename, close=False):
+    def plot_channels(self, seg_img, seg_img_params: ImageParameter, output_path, filename, close=True):
         """Plots the separate channels from the input file given."""
         get_logger().info("Plotting: input channels")
 
@@ -135,9 +135,9 @@ class Plotter:
             _add_title(ax, "first channel", seg_img[:, :], self.params.show_graphics_axis)
             axes = [ax]
 
-        self._finish_plot(fig, output_path, filename, "_channels", axes, close)
+        return self._finish_plot(fig, output_path, filename, "_channels", axes, close)
 
-    def plot_mask(self, mask, seg_img, seg_img_params, output_path, filename, close=False):
+    def plot_mask(self, mask, seg_img, seg_img_params, output_path, filename, close=True):
         """Plots the segmentation mask, together with the separate channels from the input image."""
         get_logger().info("Plotting: segmentation masks")
 
@@ -187,9 +187,9 @@ class Plotter:
 
             axes = [ax[0], ax[1]]
 
-        self._finish_plot(fig, output_path, filename, "_segmentation", axes, close)
+        return self._finish_plot(fig, output_path, filename, "_segmentation", axes, close)
 
-    def plot_organelle_polarity(self, collection, img_name, close=False):
+    def plot_organelle_polarity(self, collection, img_name, close=True):
         im_junction = collection.get_image_channel_by_img_name(img_name, "junction")
         cell_mask = collection.get_mask_by_img_name(img_name).cell_mask_rem_island
         nuclei_mask = collection.get_mask_by_img_name(img_name).nuclei_mask
@@ -229,10 +229,10 @@ class Plotter:
         # set title and ax limits
         _add_title(ax, "organelle orientation", im_junction, self.params.show_graphics_axis)
 
-        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_nuclei_organelle_vector", [ax],
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_nuclei_organelle_vector", [ax],
                           close, polarity_angle)
 
-    def plot_nuc_displacement_orientation(self, collection, img_name, close=False):
+    def plot_nuc_displacement_orientation(self, collection, img_name, close=True):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
@@ -273,12 +273,12 @@ class Plotter:
         # set title and ax limits
         _add_title(ax, "nucleus displacement orientation", im_junction, self.params.show_graphics_axis)
 
-        self._finish_plot(
+        return self._finish_plot(
             fig, collection.get_out_path_by_name(img_name), img_name, "_nucleus_displacement_orientation", [ax], close,
             nuc_polarity_angle
         )
 
-    def plot_marker_expression(self, collection, img_name, close=False):
+    def plot_marker_expression(self, collection, img_name, close=True):
         im_marker = collection.img_channel_dict[img_name]["marker"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
         single_cell_dataset = collection.dataset.loc[collection.dataset["filename"] == img_name]
@@ -348,9 +348,9 @@ class Plotter:
             _add_title(ax[2], "mean intensity nucleus", im_marker, self.params.show_graphics_axis)
             axes = [ax[0], ax[1], ax[2]]
 
-        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_expression", axes, close)
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_expression", axes, close)
 
-    def plot_marker_polarity(self, collection, img_name, close=False):
+    def plot_marker_polarity(self, collection, img_name, close=True):
         im_marker = collection.img_channel_dict[img_name]["marker"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
         img_name = img_name
@@ -374,9 +374,9 @@ class Plotter:
 
         _add_title(ax, "marker polarity", im_marker, self.params.show_graphics_axis)
 
-        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_polarity", [ax], close)
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_polarity", [ax], close)
 
-    def plot_marker_nucleus_orientation(self, collection, img_name, close=False):
+    def plot_marker_nucleus_orientation(self, collection, img_name, close=True):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
@@ -418,10 +418,10 @@ class Plotter:
         # set title and ax limits
         _add_title(ax, "marker nucleus orientation", im_junction, self.params.show_graphics_axis)
 
-        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_nucleus_orientation", [ax],
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_nucleus_orientation", [ax],
                           close, nuc_polarity_angle)
 
-    def plot_junction_polarity(self, collection, img_name, close=False):
+    def plot_junction_polarity(self, collection, img_name, close=True):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
 
@@ -448,9 +448,9 @@ class Plotter:
 
         _add_title(ax, "junction polarity", im_junction, self.params.show_graphics_axis)
 
-        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_junction_polarity", [ax], close)
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_junction_polarity", [ax], close)
 
-    def plot_corners(self, collection, img_name, close=False):
+    def plot_corners(self, collection, img_name, close=True):
         fig, ax = self._get_figure(1)
 
         # plot marker intensity
@@ -468,9 +468,9 @@ class Plotter:
 
         _add_title(ax, "cell corners", im_junction, self.params.show_graphics_axis)
 
-        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_cell_corners", [ax], close)
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_cell_corners", [ax], close)
 
-    def plot_eccentricity(self, collection, img_name, close=False):
+    def plot_eccentricity(self, collection, img_name, close=True):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
@@ -542,9 +542,9 @@ class Plotter:
             _add_title(ax, "cell elongation", im_junction, self.params.show_graphics_axis)
             axes = [ax]
 
-        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_eccentricity", axes, close)
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_eccentricity", axes, close)
 
-    def plot_ratio_method(self, collection, img_name, close=False):
+    def plot_ratio_method(self, collection, img_name, close=True):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
 
@@ -587,9 +587,9 @@ class Plotter:
 
         _add_title(ax, "ratio method", im_junction, self.params.show_graphics_axis)
 
-        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_ratio_method", [ax], close)
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_ratio_method", [ax], close)
 
-    def plot_foi(self, collection, img_name, close=False):
+    def plot_foi(self, collection, img_name, close=True):
         """
         Plot the figure of interest
         """
@@ -631,9 +631,9 @@ class Plotter:
         # set title and ax limits
         _add_title(ax, "feature of interest", im_junction, self.params.show_graphics_axis)
 
-        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_foi", [ax], close)
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_foi", [ax], close)
 
-    def plot_orientation(self, collection, img_name, close=False):
+    def plot_orientation(self, collection, img_name, close=True):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
@@ -704,9 +704,9 @@ class Plotter:
             _add_title(ax, "cell shape orientation", im_junction, self.params.show_graphics_axis)
             axes = [ax]
 
-        self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_shape_orientation", axes, close)
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_shape_orientation", axes, close)
 
-    def _finish_plot(self, fig, output_path, img_name, output_suffix, axes, close=False, image=None):
+    def _finish_plot(self, fig, output_path, img_name, output_suffix, axes, close=True, image=None):
         # plot scale bar for this figure
         if self.params.plot_scalebar:
             for ax in axes:
@@ -729,8 +729,12 @@ class Plotter:
         # close figure
         if close:
             plt.close(fig)
+        else:
+            return fig
 
-    def plot_collection(self, collection: PropertiesCollection, close=False):
+        return None
+
+    def plot_collection(self, collection: PropertiesCollection, close=True):
         """Plots the properties dataset"""
         get_logger().info("Plotting...")
 

@@ -69,13 +69,13 @@ def _run(infile, param, output_path, fileout_name):
 
     # prepare segmentation and plot
     img_seg, img_seg_params = s.prepare(img, params_img)
-    p.plot_channels(img_seg, img_seg_params, output_path, fileout_name, True)
+    p.plot_channels(img_seg, img_seg_params, output_path, fileout_name, close=True)
 
     # segment
     mask = s.segment(img_seg, infile)
 
     # plot cellpose mask
-    p.plot_mask(mask, img_seg, img_seg_params, output_path, fileout_name)
+    p.plot_mask(mask, img_seg, img_seg_params, output_path, fileout_name, close=True)
 
     # feature extraction
     c = PropertiesCollection()
@@ -83,7 +83,7 @@ def _run(infile, param, output_path, fileout_name):
     e.extract(img, params_img, mask, fileout_name, output_path, c)
 
     # visualize
-    p.plot_collection(c)
+    p.plot_collection(c, close=True)
 
     get_logger().info("Head of created dataset: \n %s" % c.dataset.head())
 

@@ -13,6 +13,7 @@ channel_nucleus : -1
 channel_organelle : -1
 channel_expression_marker : 2
 estimated_cell_diameter : 200
+min_cell_size: 100
 
 membrane_thickness : 4
 

@@ -16,3 +16,6 @@ estimated_cell_diameter : 250
 
 membrane_thickness : 4
 
+pixel_to_micron_ratio: 4.8177
+
+

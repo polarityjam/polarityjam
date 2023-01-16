@@ -16,4 +16,4 @@ channel_expression_marker : 1
 estimated_cell_diameter : 100
 
 membrane_thickness : 4
-
+pixel_to_micron_ratio: 2.4089

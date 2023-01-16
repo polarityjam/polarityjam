@@ -73,6 +73,12 @@ def get_single_cell_mask(cell_mask, connected_component_label):
     return np.where(cell_mask == connected_component_label, 1, 0)  # convert connected_component_label to 1
 
 
+def get_single_cell_nuc_mask(nuclei_mask, cell_mask, connected_component_label):
+    """Gets the single nuclei mask from a mask where each cell has an increasing connected component value."""
+    single_cell_mask = get_single_cell_mask(cell_mask, connected_component_label)
+    return single_cell_mask * nuclei_mask
+
+
 def get_outline_from_mask(mask, width=1):
     """Computes outline for a mask with a single label"""
 

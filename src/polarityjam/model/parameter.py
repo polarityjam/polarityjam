@@ -74,7 +74,7 @@ class ImageParameter(Parameter):
         self.channel_nucleus = None
         self.channel_organelle = None
         self.channel_expression_marker = None
-        self.pixel_to_micron_ratio = None  # todo: implement mum scaling param
+        self.pixel_to_micron_ratio = None
 
         super().__init__(**attrs)
 
@@ -113,6 +113,7 @@ class PlotParameter(Parameter):
         self.plot_marker = None
         self.plot_ratio_method = None
         self.plot_cyclic_orientation = None
+        self.plot_foi = None
 
         self.outline_width = None
         self.show_polarity_angles = None
@@ -126,5 +127,9 @@ class PlotParameter(Parameter):
         self.graphics_width = None
         self.graphics_height = None
         self.membrane_thickness = None
+
+        self.fontsize_text_annotations = None
+        self.font_color = None
+        self.marker_size = None
 
         super().__init__(**attrs)

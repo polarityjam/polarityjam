@@ -13,12 +13,9 @@ from polarityjam.model.parameter import RuntimeParameter, PlotParameter, Segment
 from polarityjam.polarityjam_logging import get_logger
 from polarityjam.utils.io import read_parameters, read_image, get_tif_list, read_key_file, \
     get_doc_file_prefix, write_dict_to_yml, create_path_recursively
-from polarityjam.vizualization.plot import set_figure_dpi
 
 
 def run(args):
-    set_figure_dpi()
-
     # read args
     param_file = args.param
     filepath = args.in_file
@@ -72,13 +69,13 @@ def _run(infile, param, output_path, fileout_name):
 
     # prepare segmentation and plot
     img_seg, img_seg_params = s.prepare(img, params_img)
-    p.plot_channels(img_seg, img_seg_params, output_path, fileout_name, True)
+    p.plot_channels(img_seg, img_seg_params, output_path, fileout_name, close=True)
 
     # segment
     mask = s.segment(img_seg, infile)
 
     # plot cellpose mask
-    p.plot_mask(mask, img_seg, img_seg_params, output_path, fileout_name)
+    p.plot_mask(mask, img_seg, img_seg_params, output_path, fileout_name, close=True)
 
     # feature extraction
     c = PropertiesCollection()
@@ -86,7 +83,7 @@ def _run(infile, param, output_path, fileout_name):
     e.extract(img, params_img, mask, fileout_name, output_path, c)
 
     # visualize
-    p.plot_collection(c)
+    p.plot_collection(c, close=True)
 
     get_logger().info("Head of created dataset: \n %s" % c.dataset.head())
 
@@ -100,8 +97,6 @@ def _run(infile, param, output_path, fileout_name):
 
 
 def run_stack(args):
-    set_figure_dpi()
-
     # read args
     param_file = args.param
     inpath = args.in_path
@@ -139,8 +134,6 @@ def run_stack(args):
 
 
 def run_key(args):
-    set_figure_dpi()
-
     # read args
     param_file = args.param
     in_path = args.in_path

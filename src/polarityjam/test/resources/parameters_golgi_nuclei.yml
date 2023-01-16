@@ -27,3 +27,4 @@ plot_cyclic_orientation: true
 show_polarity_angles: true
 use_given_mask: false
 use_gpu: false
+pixel_to_micron_ratio: 2.4089

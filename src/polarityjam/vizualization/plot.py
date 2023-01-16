@@ -1,8 +1,8 @@
 import math
+import sys
 from pathlib import Path
 
 import cmocean as cm
-import matplotlib as mpl
 import numpy as np
 import tifffile
 from matplotlib import pyplot as plt
@@ -10,17 +10,13 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 
 from polarityjam.polarityjam_logging import get_logger
 
-# for figure plot resolution  # todo: parameters?
-FIGURE_DPI = 300
-FONTSIZE_TEXT_ANNOTATIONS = 3
-MARKERSIZE = 2
-ALPHA_MASKS = 0.5
-CELL_OUTLINE_INTENSITY = 30
-
 
 def save_current_fig(graphics_output_format, output_path, filename, filename_suffix, image=None):
     # prevent text outside figure area
     plt.tight_layout()
+
+    filename = str(filename)
+    filename_suffix = str(filename_suffix)
 
     if "pdf" in graphics_output_format:
         plt.savefig(str(Path(output_path).joinpath(filename + filename_suffix + ".pdf")))
@@ -32,24 +28,22 @@ def save_current_fig(graphics_output_format, output_path, filename, filename_suf
         tifffile.imwrite(str(Path(output_path).joinpath(filename + filename_suffix + ".tif")), image)
 
 
-def set_figure_dpi():
-    mpl.rcParams['figure.dpi'] = FIGURE_DPI
-
-
-def _add_single_cell_polarity_vector(ax, x_pos_p1, y_pos_p1, x_pos_p2, y_pos_p2):
-    ax.plot(y_pos_p1, x_pos_p1, '.g', markersize=MARKERSIZE)
-    ax.plot(y_pos_p2, x_pos_p2, '.m', markersize=MARKERSIZE)
+def _add_single_cell_polarity_vector(ax, x_pos_p1, y_pos_p1, x_pos_p2, y_pos_p2, markersize=2, font_color="w"):
+    ax.plot(y_pos_p1, x_pos_p1, '.g', markersize=markersize)
+    ax.plot(y_pos_p2, x_pos_p2, '.m', markersize=markersize)
     ax.arrow(
         y_pos_p1,
         x_pos_p1,
         y_pos_p2 - y_pos_p1,
         x_pos_p2 - x_pos_p1,
-        color='white', width=2
+        color=font_color,
+        width=4
     )
 
 
 def _add_single_cell_eccentricity_axis(
-        ax, y0, x0, orientation, major_axis_length, minor_axis_length, eccentricity
+        ax, y0, x0, orientation, major_axis_length, minor_axis_length, eccentricity, fontsize=3, font_color="w",
+        markersize=2
 ):
     x1_ma, x1_mi, x2_ma, x2_mi, y1_ma, y1_mi, y2_ma, y2_mi = _calc_single_cell_axis_orientation_vector(
         x0, y0, orientation, major_axis_length, minor_axis_length
@@ -57,8 +51,8 @@ def _add_single_cell_eccentricity_axis(
 
     ax.plot((y1_ma, y2_ma), (x1_ma, x2_ma), '--w', linewidth=0.5)
     ax.plot((y1_mi, y2_mi), (x1_mi, x2_mi), '--w', linewidth=0.5)
-    ax.plot(y0, x0, '.b', markersize=MARKERSIZE)
-    ax.text(y0, x0, str(np.round(eccentricity, 2)), color="yellow", fontsize=FONTSIZE_TEXT_ANNOTATIONS)
+    ax.plot(y0, x0, '.b', markersize=markersize)
+    ax.text(y0, x0, str(np.round(eccentricity, 2)), color=font_color, fontsize=fontsize)
 
 
 def _add_colorbar(fig, cax, ax, yticks, label):
@@ -67,19 +61,25 @@ def _add_colorbar(fig, cax, ax, yticks, label):
     color_bar.ax.set_yticks(yticks)
 
 
-def _add_scalebar(ax, length_scalebar_microns, pixel_to_micron_ratio):
-    length_scalebar_pixels = length_scalebar_microns / pixel_to_micron_ratio
-    text = "%s mu m" % length_scalebar_microns
+def _add_scalebar(ax, length_scalebar_microns, pixel_to_micron_ratio, size_vertical, font_color="w"):
+    length_scalebar_pixels = length_scalebar_microns * pixel_to_micron_ratio
 
-    scalebar = AnchoredSizeBar(ax.transData,
-                               length_scalebar_microns, text, 'lower right',
-                               pad=0.1,
-                               color='white',
-                               frameon=False,
-                               size_vertical=5)
-    # ,
-    # fontproperties=fontprops)
+    if sys.getdefaultencoding() == 'utf-8':
+        entity = "\u03BC"
+    else:
+        entity = "mu"
+    text = "%s %sm" % (length_scalebar_microns, entity)
 
+    scalebar = AnchoredSizeBar(
+        ax.transData,
+        length_scalebar_pixels,
+        text,
+        'lower right',
+        pad=0.1,
+        color=font_color,
+        frameon=False,
+        size_vertical=size_vertical,
+    )
     ax.add_artist(scalebar)
 
 
@@ -169,7 +169,8 @@ def _calc_nuc_orientation(single_cell_props, cell_mask, nuclei_mask):
             continue
         single_cell_mask = np.where(cell_mask == row_label, True, 0)
         single_nuclei_mask_ = np.logical_and(single_cell_mask, nuclei_mask)
-        nuclei_orientation += np.where(single_nuclei_mask_ == True, 1, 0) * row['nuc_shape_orientation_rad'] * 180.0 / np.pi
+        nuclei_orientation += np.where(single_nuclei_mask_ == True, 1, 0) * row[
+            'nuc_shape_orientation_rad'] * 180.0 / np.pi
 
     get_logger().info("Maximal nuclei orientation: %s" % str(np.max(nuclei_orientation)))
     get_logger().info("Minimal nuclei orientation: %s" % str(np.min(nuclei_orientation)))
@@ -212,7 +213,7 @@ def _add_nuclei_orientation(fig, ax, im_junction, nuclei_mask, nuclei_orientatio
 
 
 def _add_single_cell_orientation_degree_axis(
-        ax, y0, x0, orientation, major_axis_length, minor_axis_length,
+        ax, y0, x0, orientation, major_axis_length, minor_axis_length, fontsize=3, font_color="w", markersize=2
 ):
     x1_ma, x1_mi, x2_ma, x2_mi, y1_ma, y1_mi, y2_ma, y2_mi = _calc_single_cell_axis_orientation_vector(
         x0, y0, orientation, major_axis_length, minor_axis_length
@@ -221,5 +222,5 @@ def _add_single_cell_orientation_degree_axis(
 
     ax.plot((y1_ma, y2_ma), (x1_ma, x2_ma), '--w', linewidth=0.5)
     ax.plot((y1_mi, y2_mi), (x1_mi, x2_mi), '--w', linewidth=0.5)
-    ax.plot(y0, x0, '.b', markersize=MARKERSIZE)
-    ax.text(y0, x0, str(int(np.round(orientation_degree, 0))), color="yellow", fontsize=FONTSIZE_TEXT_ANNOTATIONS)
+    ax.plot(y0, x0, '.b', markersize=markersize)
+    ax.text(y0, x0, str(int(np.round(orientation_degree, 0))), color=font_color, fontsize=fontsize)

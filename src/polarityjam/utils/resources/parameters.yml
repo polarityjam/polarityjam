@@ -1,12 +1,16 @@
-## physical parameters
-length_unit: "pixel" # "microns"
-pixel_to_micron_ratio : 1.0
+# Default parameters file
+# This files contains all parameters and their default values.
 
-## cellpose/segmentation parameters
+# ImageParameters
+channel_junction : 0
+channel_nucleus : 1
+channel_organelle : 2
+channel_expression_marker : -1  # -1 means no expression marker
+
+# SegmentationParameter
 manually_annotated_mask : ""  # in case a manually annotated cellpose mask exists specify suffix here
 store_segmentation : False
 use_given_mask : True
-
 model_type : "cyto"  # "cyto", "cyto2", "custom"
 model_path : ""
 estimated_cell_diameter : 100
@@ -16,37 +20,33 @@ cellprob_threshold: 0.0 # default cellpose value
 use_gpu :  False
 clear_border : True
 min_cell_size : 50
+
+# RuntimeParameter
+membrane_thickness : 5
+feature_of_interest : "cell_area"
 min_nucleus_size : 10
 min_organelle_size : 10
-
-## spatial statistics
-feature_of_interest : "cell_area"
 dp_epsilon : 5
 
-## plot options
+# PlotParameter
 plot_junctions : True
 plot_polarity : True
 plot_orientation : True
 plot_marker : True
 plot_ratio_method : False
-plot_cyclic_orientation : False
-
+plot_cyclic_orientation : True
+plot_foi : True
 outline_width : 2
 show_polarity_angles : True
 show_graphics_axis : False
-
+pixel_to_micron_ratio : 1.0
+plot_scalebar : True
+length_scalebar_microns : 20.0
 graphics_output_format : ['png'] # 'png', 'pdf', 'svg'
 dpi : 300
 graphics_width : 5 # figure width in inches
 graphics_height : 5 # figure height in inches
-
-plot_scalebar : False
-length_scalebar_microns : 10.0
-
-# channel parameters
-channel_junction : 0
-channel_nucleus : 1
-channel_organelle : 2
-channel_expression_marker : -1
-membrane_thickness : 5
-
+length_unit: "pixel" # "microns"
+fontsize_text_annotations: 6
+font_color: "w"
+marker_size: 2

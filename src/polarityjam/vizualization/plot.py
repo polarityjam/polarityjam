@@ -62,7 +62,7 @@ def _add_colorbar(fig, cax, ax, yticks, label):
 
 
 def _add_scalebar(ax, length_scalebar_microns, pixel_to_micron_ratio, size_vertical, font_color="w"):
-    length_scalebar_pixels = length_scalebar_microns / pixel_to_micron_ratio
+    length_scalebar_pixels = length_scalebar_microns * pixel_to_micron_ratio
 
     if sys.getdefaultencoding() == 'utf-8':
         entity = "\u03BC"

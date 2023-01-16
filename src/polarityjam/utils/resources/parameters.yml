@@ -19,12 +19,11 @@ cellprob_threshold: 0.0 # default cellpose value
 
 use_gpu :  False
 clear_border : True
-# min_cell_size : 50  # can also be specified here
+min_cell_size : 50
 
 # RuntimeParameter
 membrane_thickness : 5
 feature_of_interest : "cell_area"
-min_cell_size : 50
 min_nucleus_size : 10
 min_organelle_size : 10
 dp_epsilon : 5

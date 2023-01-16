@@ -649,7 +649,7 @@ class Plotter:
         fig, ax = self._get_figure(number_sub_figs)
 
         # get cell_orientation
-        cell_orientation = self._get_polarity_angle_mask(cell_mask, collection, img_name, "nuc_shape_orientation_deg")
+        cell_orientation = self._get_polarity_angle_mask(cell_mask, collection, img_name, "cell_shape_orientation_deg")
         # cell_orientation = _calc_cell_orientation(collection.get_properties_by_img_name(img_name), cell_mask)
 
         # add cell (and nuclei) orientation to the figure

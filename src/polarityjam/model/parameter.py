@@ -128,4 +128,8 @@ class PlotParameter(Parameter):
         self.graphics_height = None
         self.membrane_thickness = None
 
+        self.fontsize_text_annotations = None
+        self.font_color = None
+        self.marker_size = None
+
         super().__init__(**attrs)

@@ -221,22 +221,29 @@ class Plotter:
 
         # plot polarity vector
         for index, row in collection.get_properties_by_img_name(img_name).iterrows():
-            _add_single_cell_polarity_vector(ax, row["nuc_X"], row["nuc_Y"], row["organelle_X"], row["organelle_Y"])
+            _add_single_cell_polarity_vector(
+                ax, row["nuc_X"], row["nuc_Y"], row["organelle_X"], row["organelle_Y"], self.params.marker_size,
+                self.params.font_color
+            )
             if self.params.show_polarity_angles:
                 ax.text(row["cell_Y"], row["cell_X"], str(int(np.round(row["organelle_orientation_deg"], 0))),
-                        color="yellow", fontsize=6)
+                        color=self.params.font_color, fontsize=self.params.fontsize_text_annotations)
 
         # set title and ax limits
         _add_title(ax, "organelle orientation", im_junction, self.params.show_graphics_axis)
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_nuclei_organelle_vector", [ax],
-                          close, polarity_angle)
+        return self._finish_plot(
+            fig, collection.get_out_path_by_name(img_name),
+            img_name,
+            "_nuclei_organelle_vector",
+            [ax],
+            close, polarity_angle
+        )
 
     def plot_nuc_displacement_orientation(self, collection, img_name, close=True):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
-        base_filename = img_name
 
         get_logger().info("Plotting: marker nucleus polarity")
 
@@ -263,11 +270,14 @@ class Plotter:
 
         # plot polarity vector
         for index, row in collection.get_properties_by_img_name(img_name).iterrows():
-            _add_single_cell_polarity_vector(ax, row["cell_X"], row["cell_Y"], row["nuc_X"], row["nuc_Y"])
+            _add_single_cell_polarity_vector(
+                ax, row["cell_X"], row["cell_Y"], row["nuc_X"], row["nuc_Y"], self.params.marker_size,
+                self.params.font_color
+            )
             if self.params.show_polarity_angles:
                 ax.text(
                     row["nuc_Y"], row["nuc_X"], str(int(np.round(row["nuc_displacement_orientation_deg"], 0))),
-                    color="yellow", fontsize=6
+                    color=self.params.font_color, fontsize=self.params.fontsize_text_annotations
                 )
 
         # set title and ax limits
@@ -330,14 +340,14 @@ class Plotter:
 
         # plot mean expression value of cell and membrane as text
         for index, row in single_cell_dataset.iterrows():
-            ax[0].text(row["cell_Y"], row["cell_X"], str(np.round(row["marker_mean_expression"], 1)), color="w",
-                       fontsize=7)
-            ax[1].text(row["cell_Y"], row["cell_X"], str(np.round(row["marker_mean_expression_mem"], 1)), color="w",
-                       fontsize=7)
+            ax[0].text(row["cell_Y"], row["cell_X"], str(np.round(row["marker_mean_expression"], 1)), color=self.params.font_color,
+                       fontsize=self.params.fontsize_text_annotations)
+            ax[1].text(row["cell_Y"], row["cell_X"], str(np.round(row["marker_mean_expression_mem"], 1)), color=self.params.font_color,
+                       fontsize=self.params.fontsize_text_annotations)
             if nuclei_mask is not None:
                 ax[2].text(
-                    row["nuc_Y"], row["nuc_X"], str(np.round(row["marker_mean_expression_nuc"], 1)), color="w",
-                    fontsize=7
+                    row["nuc_Y"], row["nuc_X"], str(np.round(row["marker_mean_expression_nuc"], 1)), color=self.params.font_color,
+                    fontsize=self.params.fontsize_text_annotations
                 )
 
         # set title
@@ -348,7 +358,8 @@ class Plotter:
             _add_title(ax[2], "mean intensity nucleus", im_marker, self.params.show_graphics_axis)
             axes = [ax[0], ax[1], ax[2]]
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_expression", axes, close)
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_expression", axes,
+                                 close)
 
     def plot_marker_polarity(self, collection, img_name, close=True):
         im_marker = collection.img_channel_dict[img_name]["marker"]
@@ -369,12 +380,14 @@ class Plotter:
         # add all polarity vectors
         for index, row in collection.get_properties_by_img_name(img_name).iterrows():
             _add_single_cell_polarity_vector(
-                ax, row["cell_X"], row["cell_Y"], row["marker_centroid_X"], row["marker_centroid_Y"]
+                ax, row["cell_X"], row["cell_Y"], row["marker_centroid_X"], row["marker_centroid_Y"],
+                self.params.marker_size, self.params.font_color
             )
 
         _add_title(ax, "marker polarity", im_marker, self.params.show_graphics_axis)
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_polarity", [ax], close)
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_polarity", [ax],
+                                 close)
 
     def plot_marker_nucleus_orientation(self, collection, img_name, close=True):
         im_junction = collection.img_channel_dict[img_name]["junction"]
@@ -407,19 +420,22 @@ class Plotter:
 
         # plot polarity vector
         for index, row in collection.get_properties_by_img_name(img_name).iterrows():
-            _add_single_cell_polarity_vector(ax, row["nuc_X"], row["nuc_Y"], row["marker_centroid_X"],
-                                             row["marker_centroid_Y"])
+            _add_single_cell_polarity_vector(
+                ax, row["nuc_X"], row["nuc_Y"], row["marker_centroid_X"], row["marker_centroid_Y"],
+                self.params.marker_size, self.params.font_color
+            )
             if self.params.show_polarity_angles:
                 ax.text(
                     row["nuc_Y"], row["nuc_X"], str(int(np.round(row["marker_nucleus_orientation_deg"], 0))),
-                    color="yellow", fontsize=6
+                    color=self.params.font_color, fontsize=self.params.fontsize_text_annotations
                 )
 
         # set title and ax limits
         _add_title(ax, "marker nucleus orientation", im_junction, self.params.show_graphics_axis)
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_nucleus_orientation", [ax],
-                          close, nuc_polarity_angle)
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name,
+                                 "_marker_nucleus_orientation", [ax],
+                                 close, nuc_polarity_angle)
 
     def plot_junction_polarity(self, collection, img_name, close=True):
         im_junction = collection.img_channel_dict[img_name]["junction"]
@@ -443,12 +459,15 @@ class Plotter:
                 row["cell_X"],
                 row["cell_Y"],
                 row["junction_centroid_X"],
-                row["junction_centroid_Y"]
+                row["junction_centroid_Y"],
+                self.params.marker_size,
+                self.params.font_color
             )
 
         _add_title(ax, "junction polarity", im_junction, self.params.show_graphics_axis)
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_junction_polarity", [ax], close)
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_junction_polarity", [ax],
+                                 close)
 
     def plot_corners(self, collection, img_name, close=True):
         fig, ax = self._get_figure(1)
@@ -509,7 +528,10 @@ class Plotter:
                     row['cell_shape_orientation_rad'],
                     row['cell_major_axis_length'],
                     row['cell_minor_axis_length'],
-                    row["cell_eccentricity"]
+                    row["cell_eccentricity"],
+                    self.params.fontsize_text_annotations,
+                    self.params.font_color,
+                    self.params.marker_size
                 )
 
                 # plot orientation degree nucleus
@@ -520,7 +542,10 @@ class Plotter:
                     row['nuc_shape_orientation_rad'],
                     row['nuc_major_axis_length'],
                     row['nuc_minor_axis_length'],
-                    row["nuc_eccentricity"]
+                    row["nuc_eccentricity"],
+                    self.params.fontsize_text_annotations,
+                    self.params.font_color,
+                    self.params.marker_size
                 )
             else:
                 _add_single_cell_eccentricity_axis(
@@ -530,7 +555,10 @@ class Plotter:
                     row['cell_shape_orientation_rad'],
                     row['cell_major_axis_length'],
                     row['cell_minor_axis_length'],
-                    row["cell_eccentricity"]
+                    row["cell_eccentricity"],
+                    self.params.fontsize_text_annotations,
+                    self.params.font_color,
+                    self.params.marker_size
                 )
 
         # set title and ax limits
@@ -617,15 +645,15 @@ class Plotter:
                 row["cell_Y"],
                 row["cell_X"],
                 str(np.round(row[foi_name], 1)),
-                color="w",
-                fontsize=4
+                color=self.params.font_color,
+                fontsize=self.params.fontsize_text_annotations
             )
 
         cax = ax.imshow(np.ma.masked_where(m == 0, m), cmap=plt.cm.bwr, alpha=0.8)
 
         min = np.nanmin(foi)
         max = np.nanmax(foi)
-        yticks = [min, np.round(min + (max - min)/2, 1), max]
+        yticks = [min, np.round(min + (max - min) / 2, 1), max]
         _add_colorbar(fig, cax, ax, yticks, foi_name)
 
         # set title and ax limits
@@ -672,7 +700,10 @@ class Plotter:
                     row['cell_X'],
                     row['cell_shape_orientation_rad'],
                     row['cell_major_axis_length'],
-                    row['cell_minor_axis_length']
+                    row['cell_minor_axis_length'],
+                    self.params.fontsize_text_annotations,
+                    self.params.font_color,
+                    self.params.marker_size
                 )
 
                 # plot orientation degree nucleus
@@ -682,7 +713,10 @@ class Plotter:
                     row['nuc_X'],
                     row['nuc_shape_orientation_rad'],
                     row['nuc_major_axis_length'],
-                    row['nuc_minor_axis_length']
+                    row['nuc_minor_axis_length'],
+                    self.params.fontsize_text_annotations,
+                    self.params.font_color,
+                    self.params.marker_size
                 )
             else:
                 # plot orientation degree
@@ -692,7 +726,10 @@ class Plotter:
                     row['cell_X'],
                     row['cell_shape_orientation_rad'],
                     row['cell_major_axis_length'],
-                    row['cell_minor_axis_length']
+                    row['cell_minor_axis_length'],
+                    self.params.fontsize_text_annotations,
+                    self.params.font_color,
+                    self.params.marker_size
                 )
 
         # set title and ax limits
@@ -704,7 +741,8 @@ class Plotter:
             _add_title(ax, "cell shape orientation", im_junction, self.params.show_graphics_axis)
             axes = [ax]
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_shape_orientation", axes, close)
+        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_shape_orientation", axes,
+                                 close)
 
     def _finish_plot(self, fig, output_path, img_name, output_suffix, axes, close=True, image=None):
         # plot scale bar for this figure
@@ -714,7 +752,8 @@ class Plotter:
                     ax,
                     self.params.length_scalebar_microns,
                     self.params.pixel_to_micron_ratio,
-                    int(self.params.length_scalebar_microns / 2)
+                    int(self.params.length_scalebar_microns / 2),
+                    self.params.font_color
                 )
 
         # save output & close
@@ -728,6 +767,7 @@ class Plotter:
 
         # close figure
         if close:
+            plt.show()
             plt.close(fig)
         else:
             return fig

@@ -48,3 +48,6 @@ dpi : 300
 graphics_width : 5 # figure width in inches
 graphics_height : 5 # figure height in inches
 length_unit: "pixel" # "microns"
+fontsize_text_annotations: 6
+font_color: "w"
+marker_size: 2

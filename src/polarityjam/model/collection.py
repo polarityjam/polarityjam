@@ -11,6 +11,7 @@ class PropertiesCollection:
         self.out_path_dict = {}
         self.img_channel_dict = {}
         self.feature_of_interest_dict = {}
+        self.image_parameter_dict = {}
         self._index = 1
         self._reset_index = 1
 
@@ -31,6 +32,9 @@ class PropertiesCollection:
 
     def get_foi_by_img_name(self, img_name):
         return self.feature_of_interest_dict[img_name]
+
+    def get_image_parameter_by_img_name(self, img_name):
+        return self.image_parameter_dict[img_name]
 
     def get_mask_by_img_name(self, img_name) -> np.ndarray:
         return self.masks_dict[img_name]

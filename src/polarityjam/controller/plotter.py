@@ -69,7 +69,8 @@ class Plotter:
             outlines_cell = np.where(single_cell_mask_ == True, intensity_cell, outlines_cell)
 
             outline_mem = get_outline_from_mask(single_cell_mask, self.params.membrane_thickness)
-            outlines_mem = np.where(np.logical_and(outline_mem, outlines_mem < intensity_mem), intensity_mem, outlines_mem)
+            outlines_mem = np.where(np.logical_and(outline_mem, outlines_mem < intensity_mem), intensity_mem,
+                                    outlines_mem)
 
             # nuclei marker intensity
             if nuclei_mask is not None:
@@ -131,7 +132,9 @@ class Plotter:
             _add_title(ax, "first channel", seg_img[:, :], self.params.show_graphics_axis)
             axes = [ax]
 
-        return self._finish_plot(fig, output_path, filename, "_channels", axes, close)
+        return self._finish_plot(
+            fig, output_path, filename, "_channels", axes, seg_img_params.pixel_to_micron_ratio, close
+        )
 
     def plot_mask(self, mask, seg_img, seg_img_params, output_path, filename, close=False):
         """Plots the segmentation mask, together with the separate channels from the input image."""
@@ -183,13 +186,17 @@ class Plotter:
 
             axes = [ax[0], ax[1]]
 
-        return self._finish_plot(fig, output_path, filename, "_segmentation", axes, close)
+        return self._finish_plot(
+            fig, output_path, filename, "_segmentation", axes, seg_img_params.pixel_to_micron_ratio, close
+        )
 
     def plot_organelle_polarity(self, collection, img_name, close=False):
         im_junction = collection.get_image_channel_by_img_name(img_name, "junction")
         cell_mask = collection.get_mask_by_img_name(img_name).cell_mask_rem_island
         nuclei_mask = collection.get_mask_by_img_name(img_name).nuclei_mask
         organelle_mask = collection.get_mask_by_img_name(img_name).organelle_mask
+
+        pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
         get_logger().info("Plotting: organelle polarity")
 
@@ -234,13 +241,17 @@ class Plotter:
             img_name,
             "_nuclei_organelle_vector",
             [ax],
-            close, polarity_angle
+            pixel_to_micron_ratio,
+            close,
+            polarity_angle
         )
 
     def plot_nuc_displacement_orientation(self, collection, img_name, close=False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
+
+        pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
         get_logger().info("Plotting: marker nucleus polarity")
 
@@ -281,7 +292,13 @@ class Plotter:
         _add_title(ax, "nucleus displacement orientation", im_junction, self.params.show_graphics_axis)
 
         return self._finish_plot(
-            fig, collection.get_out_path_by_name(img_name), img_name, "_nucleus_displacement_orientation", [ax], close,
+            fig,
+            collection.get_out_path_by_name(img_name),
+            img_name,
+            "_nucleus_displacement_orientation",
+            [ax],
+            pixel_to_micron_ratio,
+            close,
             nuc_polarity_angle
         )
 
@@ -290,6 +307,8 @@ class Plotter:
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
         single_cell_dataset = collection.dataset.loc[collection.dataset["filename"] == img_name]
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
+
+        pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
         get_logger().info("Plotting: marker expression")
         # figure and axes
@@ -337,13 +356,16 @@ class Plotter:
 
         # plot mean expression value of cell and membrane as text
         for index, row in single_cell_dataset.iterrows():
-            ax[0].text(row["cell_Y"], row["cell_X"], str(np.round(row["marker_mean_expression"], 1)), color=self.params.font_color,
+            ax[0].text(row["cell_Y"], row["cell_X"], str(np.round(row["marker_mean_expression"], 1)),
+                       color=self.params.font_color,
                        fontsize=self.params.fontsize_text_annotations)
-            ax[1].text(row["cell_Y"], row["cell_X"], str(np.round(row["marker_mean_expression_mem"], 1)), color=self.params.font_color,
+            ax[1].text(row["cell_Y"], row["cell_X"], str(np.round(row["marker_mean_expression_mem"], 1)),
+                       color=self.params.font_color,
                        fontsize=self.params.fontsize_text_annotations)
             if nuclei_mask is not None:
                 ax[2].text(
-                    row["nuc_Y"], row["nuc_X"], str(np.round(row["marker_mean_expression_nuc"], 1)), color=self.params.font_color,
+                    row["nuc_Y"], row["nuc_X"], str(np.round(row["marker_mean_expression_nuc"], 1)),
+                    color=self.params.font_color,
                     fontsize=self.params.fontsize_text_annotations
                 )
 
@@ -355,13 +377,20 @@ class Plotter:
             _add_title(ax[2], "mean intensity nucleus", im_marker, self.params.show_graphics_axis)
             axes = [ax[0], ax[1], ax[2]]
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_expression", axes,
-                                 close)
+        return self._finish_plot(
+            fig, collection.get_out_path_by_name(img_name),
+            img_name,
+            "_marker_expression",
+            axes,
+            pixel_to_micron_ratio,
+            close
+        )
 
     def plot_marker_polarity(self, collection, img_name, close=False):
         im_marker = collection.img_channel_dict[img_name]["marker"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
-        img_name = img_name
+
+        pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
         get_logger().info("Plotting: marker polarity")
 
@@ -383,14 +412,17 @@ class Plotter:
 
         _add_title(ax, "marker polarity", im_marker, self.params.show_graphics_axis)
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_marker_polarity", [ax],
-                                 close)
+        return self._finish_plot(
+            fig, collection.get_out_path_by_name(img_name), img_name, "_marker_polarity", [ax], pixel_to_micron_ratio,
+            close
+        )
 
     def plot_marker_nucleus_orientation(self, collection, img_name, close=False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
-        output_path = collection.out_path_dict[img_name]
+
+        pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
         get_logger().info("Plotting: marker nucleus polarity")
 
@@ -430,13 +462,21 @@ class Plotter:
         # set title and ax limits
         _add_title(ax, "marker nucleus orientation", im_junction, self.params.show_graphics_axis)
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name,
-                                 "_marker_nucleus_orientation", [ax],
-                                 close, nuc_polarity_angle)
+        return self._finish_plot(
+            fig,
+            collection.get_out_path_by_name(img_name),
+            img_name,
+            "_marker_nucleus_orientation",
+            [ax],
+            pixel_to_micron_ratio,
+            close, nuc_polarity_angle
+        )
 
     def plot_junction_polarity(self, collection, img_name, close=False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
+
+        pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
         get_logger().info("Plotting: junction polarity")
 
@@ -463,11 +503,20 @@ class Plotter:
 
         _add_title(ax, "junction polarity", im_junction, self.params.show_graphics_axis)
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_junction_polarity", [ax],
-                                 close)
+        return self._finish_plot(
+            fig,
+            collection.get_out_path_by_name(img_name),
+            img_name,
+            "_junction_polarity",
+            [ax],
+            pixel_to_micron_ratio,
+            close
+        )
 
     def plot_corners(self, collection, img_name, close=False):
         fig, ax = self._get_figure(1)
+
+        pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
         # plot marker intensity
         im_junction = collection.img_channel_dict[img_name]["junction"]
@@ -484,12 +533,22 @@ class Plotter:
 
         _add_title(ax, "cell corners", im_junction, self.params.show_graphics_axis)
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_cell_corners", [ax], close)
+        return self._finish_plot(
+            fig,
+            collection.get_out_path_by_name(img_name),
+            img_name,
+            "_cell_corners",
+            [ax],
+            pixel_to_micron_ratio,
+            close
+        )
 
     def plot_eccentricity(self, collection, img_name, close=False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
+
+        pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
         get_logger().info("Plotting: eccentricity")
 
@@ -567,11 +626,21 @@ class Plotter:
             _add_title(ax, "cell elongation", im_junction, self.params.show_graphics_axis)
             axes = [ax]
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_eccentricity", axes, close)
+        return self._finish_plot(
+            fig,
+            collection.get_out_path_by_name(img_name),
+            img_name,
+            "_eccentricity",
+            axes,
+            pixel_to_micron_ratio,
+            close
+        )
 
     def plot_ratio_method(self, collection, img_name, close=False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
+
+        pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
         get_logger().info("Plotting: ratio method")
 
@@ -612,7 +681,15 @@ class Plotter:
 
         _add_title(ax, "ratio method", im_junction, self.params.show_graphics_axis)
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_ratio_method", [ax], close)
+        return self._finish_plot(
+            fig,
+            collection.get_out_path_by_name(img_name),
+            img_name,
+            "_ratio_method",
+            [ax],
+            pixel_to_micron_ratio,
+            close
+        )
 
     def plot_foi(self, collection, img_name, close=False):
         """
@@ -622,6 +699,8 @@ class Plotter:
 
         im_junction = collection.img_channel_dict[img_name]["junction"]
         mask = collection.masks_dict[img_name].cell_mask_rem_island
+
+        pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
         single_cell_dataset = collection.dataset.loc[collection.dataset["filename"] == img_name]
         foi_name = collection.get_foi_by_img_name(img_name)
@@ -656,12 +735,22 @@ class Plotter:
         # set title and ax limits
         _add_title(ax, "feature of interest", im_junction, self.params.show_graphics_axis)
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_foi", [ax], close)
+        return self._finish_plot(
+            fig,
+            collection.get_out_path_by_name(img_name),
+            img_name,
+            "_foi",
+            [ax],
+            pixel_to_micron_ratio,
+            close
+        )
 
     def plot_orientation(self, collection, img_name, close=False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
         cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
+
+        pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
         get_logger().info("Plotting: orientation")
 
@@ -738,17 +827,25 @@ class Plotter:
             _add_title(ax, "cell shape orientation", im_junction, self.params.show_graphics_axis)
             axes = [ax]
 
-        return self._finish_plot(fig, collection.get_out_path_by_name(img_name), img_name, "_shape_orientation", axes,
-                                 close)
+        return self._finish_plot(
+            fig,
+            collection.get_out_path_by_name(img_name),
+            img_name,
+            "_shape_orientation",
+            axes,
+            pixel_to_micron_ratio,
+            close
+        )
 
-    def _finish_plot(self, fig, output_path, img_name, output_suffix, axes, close=False, image=None):
+    def _finish_plot(self, fig, output_path, img_name, output_suffix, axes, pixel_to_micron_ratio, close=False,
+                     image=None):
         # plot scale bar for this figure
         if self.params.plot_scalebar:
             for ax in axes:
                 _add_scalebar(
                     ax,
                     self.params.length_scalebar_microns,
-                    self.params.pixel_to_micron_ratio,
+                    pixel_to_micron_ratio,
                     int(self.params.length_scalebar_microns / 2),
                     self.params.font_color
                 )

@@ -154,6 +154,7 @@ class Extractor:
         self.collector.set_reset_index(collection)
         self.collector.add_out_path(collection, filename, output_path)
         self.collector.add_foi(collection, filename, self.params.feature_of_interest)
+        self.collector.add_image_params(collection, filename, img_params)
         self.collector.add_img(collection, filename, img_nucleus, img_junction, img_marker)
         self.collector.add_masks(collection, filename, masks)
 

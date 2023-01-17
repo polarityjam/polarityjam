@@ -8,9 +8,10 @@ The following visualizations can be generated:
 - cellpose segmentation
 - cell elongation
 - organelle polarity
-- ratio method
 - marker expression
 - marker polarity
+- nucleus displacement orientation
+- feature of interest
 
 
 Segmentation
@@ -21,7 +22,7 @@ showing the given channel configuration and the corresponding segmentation. An e
 Here, first image (from left to right) is the junction channel, second the nuclei channel, and third the
 segmentation mask.
 
-.. image:: images/060721_EGM2_18dyn_02_cellpose_seg.png
+.. image:: images/060721_EGM2_18dyn_02_segmentation.png
    :width: 600
 
 
@@ -54,9 +55,6 @@ a color gradient transparently tints the cells based on their organelle polarity
 Ratio method
 ------------
 This is currently under construction. We are working on it. Please come back later.
-
-.. image:: images/060721_EGM2_18dyn_02_ratio_method.png
-   :width: 600
 
 Cell shape and nuclei shape orientation
 ---------------------------------------
@@ -104,4 +102,23 @@ junction channel can be calculated. The result can be visualized in the same way
 in the image below.
 
 .. image:: images/060721_EGM2_18dyn_02_junction_polarity.png
+   :width: 600
+
+Nucleus displacement orientation
+--------------------------------
+
+The nucleus displacement orientation shows where the nucleus is moving in relation to the cell center.
+The angle between the center of the cell and the nucleus center is calculated.
+The result of this calculation is shown in the image below.
+
+.. image:: images/060721_EGM2_18dyn_02_nucleus_displacement_orientation.png
+   :width: 600
+
+Feature of interest
+-------------------
+
+For the analysis, a feature of interest can be chosen. For each cell this feature is then calculated and visualized.
+This plot is still under construction and will be updated soon. Here is already a sneak peak:
+
+.. image:: images/060721_EGM2_18dyn_02_foi.png
    :width: 600

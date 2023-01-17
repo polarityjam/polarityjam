@@ -27,6 +27,7 @@ jobs:
     - name: Install_linux
       run: |
         python -m pip install --upgrade pip
+        python -m pip install nbconvert==7.2.7 jupyter==1.0.0
         pip install -e .
         
     - name: Running_linux
@@ -49,6 +50,7 @@ jobs:
     - name: Install_windows
       run: |
         python -m pip install --upgrade pip
+        python -m pip install nbconvert==7.2.7 jupyter==1.0.0
         pip install -e .
         
     - name: Running_windows
@@ -70,6 +72,7 @@ jobs:
     - name: Install_macos
       run: |
         python -m pip install --upgrade pip
+        python -m pip install nbconvert==7.2.7 jupyter==1.0.0
         pip install -e .
         
     - name: Running_macos

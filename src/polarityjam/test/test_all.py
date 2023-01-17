@@ -5,6 +5,7 @@ from pathlib import Path
 import polarityjam.test.test_config as config
 import polarityjam.test.test_feature_extraction as test_feature_extraction
 import polarityjam.test.test_integration as test_integration
+
 from polarityjam.polarityjam_logging import get_logger
 from polarityjam.utils.io import create_path_recursively
 

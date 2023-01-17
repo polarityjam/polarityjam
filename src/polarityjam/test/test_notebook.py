@@ -52,6 +52,9 @@ class TestIntegration(TestCommon):
                 elif replace_cell_pattern:
                     if line.startswith(replace_cell_pattern):
                         print("output_path = Path(\"%s\")" % self.data_path.parent)
+                        print("input_file = Path(\"%s\")" % self.data_path.parent.joinpath(
+                            "data", "golgi_nuclei", "set_1", "060721_EGM2_18dyn_01.tif"))
+                        print("output_file_prefix = \"060721_EGM2_18dyn_01\"")
                         while not next(myiter, "None").startswith(replace_cell_pattern):
                             print("")
                     else:

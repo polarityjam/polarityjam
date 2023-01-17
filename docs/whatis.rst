@@ -6,6 +6,13 @@ PolarityJaM suite
 
 The PolarityJaM suite is a software package that lets you study cell polarity, junctions and morphology.
 
+.. image:: images/sketch-data-analysis-organization-v5_.png
+
+At the heart lies your data that you wish to explore. That usually involves three steps: (1) you extract relevant
+features from your data, (2) you analyze the features and (3) you visualize your results. Moreover, you want your work
+to be reproducible and easy to understand and eventually extend by others. PolarityJaM is designed to help you with
+all of these tasks.
+
 The analysis of images performed by PolarityJaM is divided into two individual processing parts that
 can be executed individually from each other. First, all necessary information from the input is
 extracted via a feature extraction pipeline. The output will be a csv file that can be easily
@@ -14,8 +21,8 @@ analysed in the web-app and interesting patterns can be reviled. Usually, explor
 a high amount of time and domain knowledge.
 To minimize the amount of time needed to quickly look at complex cell patterns and potentially
 discover interesting collective behavior, visualizing the features can be done interactively in an
-online setting. Simply visit `www.polarityjam.com <www.polarityjam.com>`_ to get a first feeling of what is possible without
-the need to execute anything, or simply continue reading.
+online setting. Simply visit `www.polarityjam.com <www.polarityjam.com>`_ to get a first feeling of what is possible
+without the need to execute anything.
 
 
 Feature Extraction Pipeline

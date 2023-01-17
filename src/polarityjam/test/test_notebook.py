@@ -1,7 +1,8 @@
 import fileinput
 import importlib.util
 import os
-import sys
+import platform
+import unittest
 from pathlib import Path
 
 from nbconvert import PythonExporter
@@ -31,6 +32,7 @@ class TestIntegration(TestCommon):
 
         return p
 
+    @unittest.skipIf(platform.system().lower() == 'windows', "Plotting too memory extensive. Skipping test!")
     def test_nb(self):
         # copy to notebook tmp dir
         path_nb = Path(os.path.dirname(os.path.realpath(__file__))).parent.parent.parent.joinpath(

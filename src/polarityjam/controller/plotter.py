@@ -209,12 +209,12 @@ class Plotter:
 
         # plot differently colored organelle (red) and nuclei (blue)
         zero = np.zeros((im_junction.shape[0], im_junction.shape[1]))
-        rgb_organelle = np.dstack(
-            (organelle_mask.astype(int) * 256, zero, zero, organelle_mask.astype(float) * 0.5)
+        rgba_organelle = np.dstack(
+            (organelle_mask.astype(bool) * 1, zero, zero, organelle_mask.astype(bool))
         )
-        rgb_nuclei = np.dstack((zero, zero, nuclei_mask.astype(bool) * 256, nuclei_mask.astype(float) * 0.5))
-        ax.imshow(rgb_nuclei)
-        ax.imshow(rgb_organelle)
+        rgba_nuclei = np.dstack((zero, zero, nuclei_mask.astype(bool) * 1, nuclei_mask.astype(bool)))
+        ax.imshow(rgba_nuclei)
+        ax.imshow(rgba_organelle)
 
         # plot polarity vector
         for index, row in collection.get_properties_by_img_name(img_name).iterrows():
@@ -262,8 +262,8 @@ class Plotter:
 
         # plot nuclei (blue)
         zero = np.zeros((im_junction.shape[0], im_junction.shape[1]))
-        rgb_nuclei = np.dstack((zero, zero, nuclei_mask.astype(int) * 256, nuclei_mask.astype(float) * 0.5))
-        ax.imshow(rgb_nuclei)
+        rgba_nuclei = np.dstack((zero, zero, nuclei_mask.astype(bool) * 1, nuclei_mask.astype(bool)))
+        ax.imshow(rgba_nuclei)
 
         # plot polarity vector
         for index, row in collection.get_properties_by_img_name(img_name).iterrows():
@@ -412,8 +412,8 @@ class Plotter:
 
         # plot nuclei (blue)
         zero = np.zeros((im_junction.shape[0], im_junction.shape[1]))
-        rgb_nuclei = np.dstack((zero, zero, nuclei_mask.astype(int) * 256, nuclei_mask.astype(float) * 0.5))
-        ax.imshow(rgb_nuclei)
+        rgba_nuclei = np.dstack((zero, zero, nuclei_mask.astype(bool) * 1, nuclei_mask.astype(bool)))
+        ax.imshow(rgba_nuclei)
 
         # plot polarity vector
         for index, row in collection.get_properties_by_img_name(img_name).iterrows():

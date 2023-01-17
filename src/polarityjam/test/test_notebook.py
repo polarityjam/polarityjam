@@ -2,6 +2,7 @@ import fileinput
 import importlib.util
 import os
 import platform
+import sys
 import unittest
 from pathlib import Path
 

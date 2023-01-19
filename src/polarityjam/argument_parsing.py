@@ -1,10 +1,11 @@
 import argparse
 import sys
+from typing import Callable
 
 import polarityjam
 from polarityjam.commandline import run, run_stack, run_key
-from polarityjam.utils.io import create_path_recursively
 from polarityjam.polarityjam_logging import configure_logger, get_logger, get_log_file, close_logger
+from polarityjam.utils.io import create_path_recursively
 
 
 def startup():
@@ -38,6 +39,7 @@ def __run_subcommand(args, parser):
 
 
 def create_parser():
+    """Creates the parser for the command line interface."""
     parser = PolarityjamParser()
 
     # run action
@@ -72,7 +74,7 @@ def create_parser():
 class ArgumentParser(argparse.ArgumentParser):
     """Override default error method of all parsers to show help of sub-command."""
 
-    def error(self, message):
+    def error(self, message: str):
         self.print_help()
         self.exit(2, '%s: error: %s\n' % (self.prog, message))
 
@@ -85,7 +87,7 @@ class PolarityjamParser(ArgumentParser):
         self.subparsers = self.parser.add_subparsers(title='actions', help='sub-command help')
 
     @staticmethod
-    def create_parent_parser():
+    def create_parent_parser() -> ArgumentParser:
         """Parent parser for all subparsers to have the same set of arguments."""
         parent_parser = ArgumentParser(add_help=False)
         parent_parser.add_argument('--version', '-V', action='version', version="%s " % polarityjam.__version__)
@@ -99,7 +101,7 @@ class PolarityjamParser(ArgumentParser):
         )
         return parent_parser
 
-    def create_parser(self):
+    def create_parser(self) -> ArgumentParser:
         """Creates the main parser for the framework."""
         parser = ArgumentParser(
             add_help=True,
@@ -107,13 +109,14 @@ class PolarityjamParser(ArgumentParser):
             parents=[self.parent_parser])
         return parser
 
-    def create_command_parser(self, command_name, command_function, command_help):
+    def create_command_parser(self, command_name: str, command_function: Callable, command_help: str) -> ArgumentParser:
         """Creates a parser for a Polarityjam command, specified by a name, a function and a help description."""
         parser = self.subparsers.add_parser(command_name, help=command_help, parents=[self.parent_parser])
         parser.set_defaults(func=command_function)
         return parser
 
-    def create_file_command_parser(self, command_name, command_function, command_help):
+    def create_file_command_parser(self, command_name: str, command_function: Callable,
+                                   command_help: str) -> ArgumentParser:
         """Creates a parser for a Polarityjam command dealing with a file.
 
         Parser is specified by a name, a function and a help description.

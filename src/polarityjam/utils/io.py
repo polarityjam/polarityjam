@@ -3,6 +3,7 @@ import os
 import shutil
 import time
 from pathlib import Path
+from typing import List, Union
 
 import numpy as np
 import pandas as pd
@@ -16,18 +17,14 @@ Global variable to save program call time.
 CALL_TIME = None
 
 
-def read_parameters(parameter_file):
+def read_parameters(parameter_file: str) -> dict:
     """Reads in default parameters and replaces user defined parameters.
 
-
-    Parameters
-    ----------
-    parameter_file:     string
-                        Path to the parameter file.
-
-    Returns
-    -------
-    dictionary where all missing parameter values are replaced with the default values.
+    Args:
+        parameter_file:
+            Path to the parameter file.
+    Returns:
+        dictionary where all missing parameter values are replaced with the default values.
 
     """
     current_path = Path(os.path.dirname(os.path.realpath(__file__)))
@@ -47,18 +44,15 @@ def read_parameters(parameter_file):
     return parameters
 
 
-def read_image(filename):
+def read_image(filename: Union[Path, str]) -> np.ndarray:
     """Reads an RGB or grayscale image with the scikit-learn library. Swaps axis if channels are not on last position.
 
-    Parameters
-    ----------
-    filename:   string
-                Path to the image.
+    Args:
+        filename:
+            Path to the image file.
 
-    Returns
-    -------
-    image with channels on last position.
-
+    Returns:
+        image with channels on last position.
     """
     img_ = skimage.io.imread(filename)
 
@@ -74,8 +68,19 @@ def read_image(filename):
     return img
 
 
-def write_dict_to_yml(yml_file, d):
-    """Writes a dictionary to a file in yml format."""
+def write_dict_to_yml(yml_file: Union[str, Path], d: dict) -> bool:
+    """Writes a dictionary to a file in yml format.
+
+    Args:
+        yml_file:
+            Path to the yml file.
+        d:
+            Dictionary to be written to the yml file.
+
+    Returns:
+        True if successful.
+
+    """
     yml_file = Path(yml_file)
     p = Path(yml_file.parent)
     p.mkdir(parents=True, exist_ok=True)
@@ -86,15 +91,34 @@ def write_dict_to_yml(yml_file, d):
     return True
 
 
-def create_path_recursively(path):
-    """Creates a path. Creates missing parent folders."""
+def create_path_recursively(path: Union[str, Path]) -> bool:
+    """Creates a path. Creates missing parent folders.
+
+    Args:
+        path:
+            Path to be created.
+
+    Returns:
+        True if successful.
+
+    """
     p = Path(path)
     p.mkdir(parents=True, exist_ok=True)
 
     return True
 
 
-def get_tif_list(path):
+def get_tif_list(path: Union[str, Path]) -> List[str]:
+    """Get a list of all tif files in a folder.
+
+    Args:
+        path:
+            Path to the folder.
+
+    Returns:
+        List of all tif files in the folder.
+
+    """
     path = str(path)
     if not path.endswith(os.path.sep):
         path = path + os.path.sep
@@ -102,30 +126,41 @@ def get_tif_list(path):
     return glob.glob(path + "*.tif")
 
 
-def read_key_file(path):
+def read_key_file(path: Union[str, Path]) -> pd.DataFrame:
+    """Read the key file and return a pandas dataframe.
+
+    Args:
+        path:
+            Path to the key file.
+
+    Returns:
+        Pandas dataframe with the key file.
+
+    """
     return pd.read_csv(path)
 
 
-def list_files_recursively(path, root=None, relative=False) -> list:
-    """Lists all files in a repository recursively
+def list_files_recursively(path: Union[str, Path], root: Union[str, Path] = None, relative: bool = False) -> List[Path]:
+    """List all files in a folder recursively.
 
+    Args:
+        path:
+            Path to the folder.
+        root:
+            Root path to be removed from the file path.
+        relative:
+            If True, the root path is removed from the file path.
 
-    Parameters
-    ----------
-    path
-    root
-    relative
-
-    Returns
-    -------
+    Returns:
+        List of all files in the folder.
 
     """
-    path = Path(path)
+    path_ = Path(path)
     if not root:
-        root = path
+        root = path_
     files_list = []
 
-    for cur_root, dirs, files in os.walk(path):
+    for cur_root, dirs, files in os.walk(path_):
         cur_root = Path(cur_root)
 
         for d in dirs:
@@ -140,7 +175,13 @@ def list_files_recursively(path, root=None, relative=False) -> list:
     return files_list
 
 
-def get_doc_file_prefix():
+def get_doc_file_prefix() -> str:
+    """Get the time when the program was called.
+
+    Returns:
+        Time when the program was called.
+
+    """
     global CALL_TIME
 
     if not CALL_TIME:
@@ -151,8 +192,19 @@ def get_doc_file_prefix():
     return "run_%s" % call_time
 
 
-def copy(file, path_to) -> Path:
-    """Copies a file A to either folder B or file B. Makes sure folder structure for target exists."""
+def copy(file: Union[str, Path], path_to: Union[str, Path]) -> Path:
+    """Copies a file A to either folder B or file B. Makes sure folder structure for target exists.
+
+    Args:
+        file:
+            Path to the file to be copied.
+        path_to:
+            Path to the target folder or file.
+
+    Returns:
+        Path to the copied file.
+
+    """
     file = Path(file)
     path_to = Path(path_to)
 

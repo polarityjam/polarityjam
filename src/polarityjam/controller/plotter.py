@@ -1,10 +1,13 @@
 import json
 import math
 import os
+from pathlib import Path
+from typing import List, Union
 
 import cmocean as cm
 import matplotlib
 import numpy as np
+import pandas
 from matplotlib import pyplot as plt
 
 from polarityjam.model.collection import PropertiesCollection
@@ -28,14 +31,15 @@ class Plotter:
     def set_figure_dpi(self):
         matplotlib.rcParams['figure.dpi'] = self.params.dpi
 
-    def _get_figure(self, n_subfigures):
+    def _get_figure(self, n_subfigures: int):
         w, h = self.params.graphics_width, self.params.graphics_height
         fig, ax = plt.subplots(1, n_subfigures, figsize=(w * n_subfigures, h))
         plt.tight_layout()
 
         return fig, ax
 
-    def _get_polarity_angle_mask(self, cell_mask, collection, img_name, feature):
+    def _get_polarity_angle_mask(self, cell_mask: np.ndarray, collection: PropertiesCollection, img_name: str,
+                                 feature: str) -> np.ndarray:
         cell_angle = np.zeros((cell_mask.shape[0], cell_mask.shape[1]))
         for index, row in collection.get_properties_by_img_name(img_name).iterrows():
             row_label = int(row['label'])
@@ -49,7 +53,8 @@ class Plotter:
 
         return polarity_angle
 
-    def _get_outlines(self, im_marker, cell_mask, nuclei_mask, single_cell_dataset):
+    def _get_outlines(self, im_marker: np.ndarray, cell_mask: np.ndarray, nuclei_mask: np.ndarray,
+                      single_cell_dataset: pandas.DataFrame) -> List[np.ndarray]:
         outlines_cell = np.zeros((im_marker.shape[0], im_marker.shape[1]))
         outlines_mem = np.copy(outlines_cell)
         outlines_nuc = np.copy(outlines_cell)
@@ -81,7 +86,7 @@ class Plotter:
 
         return [outlines_cell, outlines_mem, outlines_nuc]
 
-    def _masked_cell_outlines(self, img, cell_mask):
+    def _masked_cell_outlines(self, img: np.ndarray, cell_mask: np.ndarray) -> np.ndarray:
         # cell outlines
         outlines_cells = np.zeros((img.shape[0], img.shape[1]))
         for cell_label in np.unique(cell_mask):
@@ -100,7 +105,8 @@ class Plotter:
 
         return outlines_cells_rgba_masked
 
-    def plot_channels(self, seg_img, seg_img_params: ImageParameter, output_path, filename, close=False):
+    def plot_channels(self, seg_img: np.ndarray, seg_img_params: ImageParameter, output_path: Union[str, Path],
+                      filename: Union[str, Path], close=False):
         """Plots the separate channels from the input file given."""
         get_logger().info("Plotting: input channels")
 
@@ -136,7 +142,8 @@ class Plotter:
             fig, output_path, filename, "_channels", axes, seg_img_params.pixel_to_micron_ratio, close
         )
 
-    def plot_mask(self, mask, seg_img, seg_img_params, output_path, filename, close=False):
+    def plot_mask(self, mask: np.ndarray, seg_img: np.ndarray, seg_img_params: ImageParameter,
+                  output_path: Union[str, Path], filename: Union[str, Path], close: bool = False):
         """Plots the segmentation mask, together with the separate channels from the input image."""
         get_logger().info("Plotting: segmentation masks")
 
@@ -190,9 +197,9 @@ class Plotter:
             fig, output_path, filename, "_segmentation", axes, seg_img_params.pixel_to_micron_ratio, close
         )
 
-    def plot_organelle_polarity(self, collection, img_name, close=False):
+    def plot_organelle_polarity(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_junction = collection.get_image_channel_by_img_name(img_name, "junction")
-        cell_mask = collection.get_mask_by_img_name(img_name).cell_mask_rem_island
+        cell_mask = collection.get_mask_by_img_name(img_name).cell_mask_connected
         nuclei_mask = collection.get_mask_by_img_name(img_name).nuclei_mask
         organelle_mask = collection.get_mask_by_img_name(img_name).organelle_mask
 
@@ -246,9 +253,9 @@ class Plotter:
             polarity_angle
         )
 
-    def plot_nuc_displacement_orientation(self, collection, img_name, close=False):
+    def plot_nuc_displacement_orientation(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
+        cell_mask = collection.masks_dict[img_name].cell_mask_connected
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
@@ -302,9 +309,9 @@ class Plotter:
             nuc_polarity_angle
         )
 
-    def plot_marker_expression(self, collection, img_name, close=False):
+    def plot_marker_expression(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_marker = collection.img_channel_dict[img_name]["marker"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
+        cell_mask = collection.masks_dict[img_name].cell_mask_connected
         single_cell_dataset = collection.dataset.loc[collection.dataset["filename"] == img_name]
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
 
@@ -386,9 +393,9 @@ class Plotter:
             close
         )
 
-    def plot_marker_polarity(self, collection, img_name, close=False):
+    def plot_marker_polarity(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_marker = collection.img_channel_dict[img_name]["marker"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
+        cell_mask = collection.masks_dict[img_name].cell_mask_connected
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
@@ -417,9 +424,9 @@ class Plotter:
             close
         )
 
-    def plot_marker_nucleus_orientation(self, collection, img_name, close=False):
+    def plot_marker_nucleus_orientation(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
+        cell_mask = collection.masks_dict[img_name].cell_mask_connected
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
@@ -472,9 +479,9 @@ class Plotter:
             close, nuc_polarity_angle
         )
 
-    def plot_junction_polarity(self, collection, img_name, close=False):
+    def plot_junction_polarity(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
+        cell_mask = collection.masks_dict[img_name].cell_mask_connected
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
@@ -513,14 +520,14 @@ class Plotter:
             close
         )
 
-    def plot_corners(self, collection, img_name, close=False):
+    def plot_corners(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         fig, ax = self._get_figure(1)
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
         # plot marker intensity
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
+        cell_mask = collection.masks_dict[img_name].cell_mask_connected
 
         ax.imshow(im_junction, cmap=plt.cm.gray, alpha=1.0)
 
@@ -543,9 +550,9 @@ class Plotter:
             close
         )
 
-    def plot_eccentricity(self, collection, img_name, close=False):
+    def plot_eccentricity(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
+        cell_mask = collection.masks_dict[img_name].cell_mask_connected
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
@@ -636,9 +643,9 @@ class Plotter:
             close
         )
 
-    def plot_ratio_method(self, collection, img_name, close=False):
+    def plot_ratio_method(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
+        cell_mask = collection.masks_dict[img_name].cell_mask_connected
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
@@ -691,14 +698,14 @@ class Plotter:
             close
         )
 
-    def plot_foi(self, collection, img_name, close=False):
+    def plot_foi(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         """
         Plot the figure of interest
         """
         get_logger().info("Plotting: figure of interest")
 
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        mask = collection.masks_dict[img_name].cell_mask_rem_island
+        mask = collection.masks_dict[img_name].cell_mask_connected
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
@@ -745,9 +752,9 @@ class Plotter:
             close
         )
 
-    def plot_orientation(self, collection, img_name, close=False):
+    def plot_orientation(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_rem_island
+        cell_mask = collection.masks_dict[img_name].cell_mask_connected
         nuclei_mask = collection.masks_dict[img_name].nuclei_mask
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
@@ -863,7 +870,7 @@ class Plotter:
         if close:
             plt.close(fig)
 
-    def plot_collection(self, collection: PropertiesCollection, close=False):
+    def plot_collection(self, collection: PropertiesCollection, close: bool = False):
         """Plots the properties dataset"""
         get_logger().info("Plotting...")
 

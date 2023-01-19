@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Tuple, Union
 
 import cellpose.models
 import numpy as np
@@ -20,28 +21,80 @@ class Segmenter:
         self.params = params
 
     @abstractmethod
-    def segment(self, img, path=None):
-        """Should perform segmentation and return a mask image. path can point to a model to load."""
+    def segment(self, img: np.ndarray, path: str=None) -> np.ndarray:
+        """Should perform segmentation and return a mask image. Path can point to a model to load/state index/parameter
+        file or something else needed to load a checkpoint needed for segmentation.
+
+        Args:
+            img:
+                The image prepared for segmentation.
+
+            path:
+                Path to a model to load/state index/parameter file or smth. else needed to load a checkpoint needed
+                to perform the segmentation.
+
+        Returns:
+            A mask as np.ndarray image.
+
+        """
         raise NotImplementedError
 
     @abstractmethod
-    def prepare(self, img, input_parameter: ImageParameter):
+    def prepare(self, img: np.ndarray, input_parameter: ImageParameter) -> Tuple[np.ndarray, ImageParameter]:
         """Should perform preparation for a given image to perform the segmentation. Should return prepared image
-        and its parameters.
+        and its parameters. This could be a resizing, cropping, selecting channels, etc. E.g. whatever is needed to
+        perform the segmentation.
+
+        Args:
+            img:
+                The input image to prepare for segmentation as a numpy array.
+            input_parameter:
+                The parameters of the input image
+
+        Returns:
+            A tuple of the prepared image and its parameters as ImageParameter object.
+
         """
         raise NotImplementedError
 
 
 class CellposeSegmenter(Segmenter):
+    """Cellpose segmentation class"""
 
     def __init__(self, params: SegmentationParameter):
         super().__init__(params)
         self.params = params
 
-    def segment(self, img, path=None):
+    def segment(self, img: np.ndarray, path: Union[Path, str]=None) -> np.ndarray:
+        """Performs the segmentation of the given image. If a path is given, the model is loaded from the given path.
+
+        Args:
+            img:
+                The image prepared for segmentation.
+            path:
+                Path to a model to load/state index/parameter file or smth. else needed to load a checkpoint needed
+
+        Returns:
+            A mask as np.ndarray image.
+
+        """
         return self._load_or_get_cellpose_segmentation(img, path)
 
-    def prepare(self, img, img_parameter: ImageParameter):
+    def prepare(self, img: np.ndarray, img_parameter: ImageParameter) -> Tuple[np.ndarray, ImageParameter]:
+        """Prepares the image for segmentation. Returns an image that has the junction channel first, then the nucleus
+        channel and the last channel is the cytoplasm channel.
+
+        Args:
+            img:
+                The input image to prepare for segmentation as a numpy array.
+            img_parameter:
+                The parameters of the input image
+
+        Returns:
+            A tuple of the prepared image and its parameters as ImageParameter object.
+
+        """
+
         get_logger().info("Image shape: %s" % str(img.shape))
 
         params_prep_img = ImageParameter()

@@ -1,15 +1,17 @@
 import os
 from hashlib import sha1
+from pathlib import Path
+from typing import Optional, Union
 
 import numpy as np
 
-from polarityjam.compute.moran import run_morans
+from polarityjam import PropertiesCollection
+from polarityjam.model.moran import run_morans
 from polarityjam.compute.neighborhood import k_neighbor_dif
 from polarityjam.controller.collector import PropertyCollector, SingleCellPropertyCollector, SingleCellMaskCollector
 from polarityjam.model.masks import MasksCollection
-from polarityjam.model.parameter import RuntimeParameter
+from polarityjam.model.parameter import RuntimeParameter, ImageParameter
 from polarityjam.polarityjam_logging import get_logger
-from polarityjam.utils.rag import orientation_graph_nf, remove_islands
 
 
 class Extractor:
@@ -17,8 +19,25 @@ class Extractor:
         self.params = params
         self.collector = PropertyCollector()
 
-    def threshold(self, single_cell_mask, single_nucleus_mask=None, single_organelle_mask=None):
-        """Thresholds given single_cell_mask. Returns True if falls under threshold."""
+    def threshold(
+            self, single_cell_mask: np.ndarray,
+            single_nucleus_mask: np.ndarray = None,
+            single_organelle_mask: np.ndarray = None
+    ) -> bool:
+        """Thresholds given single_cell_mask. Returns True if falls under threshold.
+
+        Args:
+            single_cell_mask:
+                The single cell mask to threshold.
+            single_nucleus_mask:
+                The single nucleus mask to threshold. If None, it will be ignored.
+            single_organelle_mask:
+                The single organelle mask to threshold. If None, it will be ignored.
+
+        Returns:
+            True if the single cell in the mask falls under the threshold.
+
+        """
 
         # remove small cells
         if len(single_cell_mask[single_cell_mask == 1]) < self.params.min_cell_size:
@@ -35,68 +54,143 @@ class Extractor:
         return False
 
     @staticmethod
-    def get_image_marker(img, img_params):
-        """Gets the image of the marker channel specified in the img_params."""
+    def get_image_marker(img: np.ndarray, img_params: ImageParameter) -> Optional[np.ndarray]:
+        """Gets the image of the marker channel specified in the img_params.
+
+        Args:
+            img:
+                The image to get the marker channel from.
+            img_params:
+                The image parameters specifying the channel position.
+
+        Returns:
+            The np.ndarray of the marker channel.
+
+        """
         if img_params.channel_expression_marker >= 0:
             get_logger().info("Marker channel at position: %s" % str(img_params.channel_expression_marker))
             return img[:, :, img_params.channel_expression_marker]
         return None
 
     @staticmethod
-    def get_image_junction(img, img_params):
-        """Gets the image of the junction channel specified in the img_params."""
+    def get_image_junction(img: np.ndarray, img_params: ImageParameter) -> Optional[np.ndarray]:
+        """Gets the image of the junction channel specified in the img_params.
+
+        Args:
+            img:
+                The image to get the junction channel from.
+            img_params:
+                The image parameters specifying the channel position.
+
+        Returns:
+            The np.ndarray of the junction channel.
+
+        """
         if img_params.channel_junction >= 0:
             get_logger().info("Junction channel at position: %s" % str(img_params.channel_junction))
             return img[:, :, img_params.channel_junction]
         return None
 
     @staticmethod
-    def get_image_nucleus(img, img_params):
-        """Gets the image of the nucleus channel specified in the img_params."""
+    def get_image_nucleus(img: np.ndarray, img_params: ImageParameter) -> Optional[np.ndarray]:
+        """Gets the image of the nucleus channel specified in the img_params.
+
+        Args:
+            img:
+                The image to get the nucleus channel from.
+            img_params:
+                The image parameters specifying the channel position.
+
+        Returns:
+            The np.ndarray of the nucleus channel.
+
+        """
         if img_params.channel_nucleus >= 0:
             get_logger().info("Nucleus channel at position: %s" % str(img_params.channel_nucleus))
             return img[:, :, img_params.channel_nucleus]
         return None
 
     @staticmethod
-    def get_image_organelle(img, img_params):
-        """Gets the image of the organelle channel specified in the img_params."""
+    def get_image_organelle(img: np.ndarray, img_params: ImageParameter) -> Optional[np.ndarray]:
+        """Gets the image of the organelle channel specified in the img_params.
+
+        Args:
+            img:
+                The image to get the organelle channel from.
+            img_params:
+                The image parameters specifying the channel position.
+
+        Returns:
+            The np.ndarray of the organelle channel.
+        """
         if img_params.channel_organelle >= 0:
             get_logger().info("Organelle channel at position: %s" % str(img_params.channel_organelle))
             return img[:, :, img_params.channel_organelle]
         return None
 
     @staticmethod
-    def get_image_hash(img):
+    def get_image_hash(img: np.ndarray) -> str:
+        """Returns the hash of the given image.
+
+        Args:
+            img:
+                The image to get the hash from.
+
+        Returns:
+            The hash of the image.
+
+        """
         return sha1(img.copy(order='C')).hexdigest()
 
-    def extract(self, img, img_params, cells_mask, filename, output_path, collection):
-        """ Extracts the features from an input image."""
-        filename, _ = os.path.splitext(os.path.basename(filename))
+    def extract(
+            self,
+            img: np.ndarray,
+            img_params: ImageParameter,
+            cells_mask: np.ndarray,
+            filename_prefix: str,
+            output_path: Union[Path, str],
+            collection: PropertiesCollection
+    ) -> PropertiesCollection:
+        """Extracts features from an input image into a given collection.
+
+        Args:
+            img:
+                np.ndarray of the image to be processed.
+            img_params:
+                ImageParameter object containing the image parameters.
+            cells_mask:
+                np.ndarray of the cells mask.
+            filename_prefix:
+                Name prefix for the image used for all produced output.
+            output_path:
+                Path to the output directory.
+            collection:
+                PropertiesCollection object to which the extracted features will be added.
+
+        Returns:
+            PropertiesCollection object containing the extracted features.
+
+        """
+        filename_prefix, _ = os.path.splitext(os.path.basename(filename_prefix))
         img_marker = self.get_image_marker(img, img_params)
         img_junction = self.get_image_junction(img, img_params)
         img_nucleus = self.get_image_nucleus(img, img_params)
         img_organelle = self.get_image_organelle(img, img_params)
         img_hash = self.get_image_hash(img)
 
-        masks = MasksCollection(cells_mask)
+        mask_collection = MasksCollection(cells_mask)
 
-        # initialize graph - no features associated with nodes
-        rag = orientation_graph_nf(masks.cell_mask)
-        list_of_islands = masks.set_cell_mask_rem_island(rag)
-        rag = remove_islands(rag, list_of_islands)
-
-        get_logger().info("Number of RAG nodes: %s " % len(list(rag.nodes)))
+        rag, list_of_islands = mask_collection.set_cell_mask_connected()
 
         if img_params.channel_nucleus >= 0:
-            masks.set_nuclei_mask(img_nucleus)
+            mask_collection.set_nuclei_mask(img_nucleus)
 
         if img_params.channel_organelle >= 0:
-            masks.set_organelle_mask(img_organelle)
+            mask_collection.set_organelle_mask(img_organelle)
 
         excluded = 0
         # iterate through each unique segmented cell
-        for connected_component_label in np.unique(masks.cell_mask_rem_island):
+        for connected_component_label in np.unique(mask_collection.cell_mask_connected):
 
             # ignore background
             if connected_component_label == 0:
@@ -104,7 +198,7 @@ class Extractor:
 
             # get single cell masks
             sc_masks = SingleCellMaskCollector().calc_sc_masks(
-                masks, connected_component_label, img_junction, self.params.membrane_thickness
+                mask_collection, connected_component_label, img_junction, self.params.membrane_thickness
             )
 
             # threshold
@@ -123,7 +217,7 @@ class Extractor:
                 sc_masks, img_marker, img_junction
             )
 
-            self.collector.collect_sc_props(sc_props_collection, collection, filename, img_hash,
+            self.collector.collect_sc_props(sc_props_collection, collection, filename_prefix, img_hash,
                                             connected_component_label)
 
             # append feature of interest to the RAG node for being able to do further analysis
@@ -139,11 +233,11 @@ class Extractor:
             )
 
         get_logger().info("Excluded cells: %s" % str(excluded))
-        get_logger().info("Leftover cells: %s" % str(len(np.unique(masks.cell_mask)) - excluded))
+        get_logger().info("Leftover cells: %s" % str(len(np.unique(mask_collection.cell_mask)) - excluded))
 
         # morans I analysis based on FOI
         morans_i = run_morans(rag, self.params.feature_of_interest)
-        num_cells = len(np.unique(masks.cell_mask_rem_island))
+        num_cells = len(np.unique(mask_collection.cell_mask_connected))
         self.collector.collect_group_statistic(collection, morans_i, num_cells)
 
         # neighborhood feature analysis based on FOI
@@ -152,10 +246,10 @@ class Extractor:
 
         # mark the beginning of a new image that is potentially extracted
         self.collector.set_reset_index(collection)
-        self.collector.add_out_path(collection, filename, output_path)
-        self.collector.add_foi(collection, filename, self.params.feature_of_interest)
-        self.collector.add_image_params(collection, filename, img_params)
-        self.collector.add_img(collection, filename, img_nucleus, img_junction, img_marker)
-        self.collector.add_masks(collection, filename, masks)
+        self.collector.add_out_path(collection, filename_prefix, output_path)
+        self.collector.add_foi(collection, filename_prefix, self.params.feature_of_interest)
+        self.collector.add_image_params(collection, filename_prefix, img_params)
+        self.collector.add_img(collection, filename_prefix, img_nucleus, img_junction, img_marker)
+        self.collector.add_masks(collection, filename_prefix, mask_collection)
 
         return collection

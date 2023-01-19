@@ -1,10 +1,24 @@
 import math
+from typing import Tuple, List
 
 import cv2
 import numpy as np
 
 
-def get_corner(sc_img, epsilon=5):
+def get_corner(sc_img: np.ndarray, epsilon: int = 5) -> List[Tuple[int, int]]:
+    """Get the corner of a single cell image.
+
+    Args:
+        sc_img:
+            The single cell image
+        epsilon:
+            Epsilon value for the Douglas-Peucker algorithm. Determines the maximal perpendicular distance between two
+            points to be considered a corner.
+
+    Returns:
+        The corner coordinates of the single cell in the image
+
+    """
     contours, _ = cv2.findContours(sc_img.astype(bool).astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
     idx_l = 0
@@ -26,7 +40,19 @@ def get_corner(sc_img, epsilon=5):
     return corners[:-1][:]  # last corner point forms circle
 
 
-def douglas_peucker(points, epsilon):
+def douglas_peucker(points: np.ndarray, epsilon: int) -> np.ndarray:
+    """Douglas-Peucker algorithm for determining the contour points of a shape.
+
+    Args:
+        points:
+            The contour points of the shape
+        epsilon:
+            Epsilon value for the Douglas-Peucker algorithm. Determines the maximal perpendicular distance between two
+            points to be considered a corner.
+
+    Returns:
+
+    """
     if len(points) < 3:
         return points
 
@@ -54,6 +80,20 @@ def douglas_peucker(points, epsilon):
 
 
 def perpendicular_distance(p, p1, p2):
+    """Calculates the perpendicular distance between a point and a line.
+
+    Args:
+        p:
+            The point to calculate the distance for
+        p1:
+            The first point of the line
+        p2:
+            The second point of the line
+
+    Returns:
+        The perpendicular distance between the point and the line
+
+    """
     if p1[0] == p2[0]:
         result = abs(p[0] - p1[0])
     else:

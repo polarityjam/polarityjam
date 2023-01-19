@@ -1,13 +1,29 @@
-import collections
 import math
+from typing import List, Tuple
 
 import numpy as np
 import skimage.filters
 import skimage.measure
+from skimage.measure._regionprops import RegionProperties
 
 
-def compute_reference_target_orientation_rad(ref_x, ref_y, target_x, target_y):
-    """Computes the marker polarity radius"""
+def compute_reference_target_orientation_rad(ref_x: float, ref_y: float, target_x: float, target_y: float) -> float:
+    """Computes the 2D orientation in rad between reference and target.
+
+    Args:
+        ref_x:
+            The x coordinate of the reference point
+        ref_y:
+            The y coordinate of the reference point
+        target_x:
+            The x coordinate of the target point
+        target_y:
+            The y coordinate of the target point
+
+    Returns:
+        The orientation in rad between reference and target
+
+    """
     vec_x = ref_x - target_x
     vec_y = ref_y - target_y
     organelle_orientation_rad = np.pi - np.arctan2(vec_x, vec_y)
@@ -15,26 +31,60 @@ def compute_reference_target_orientation_rad(ref_x, ref_y, target_x, target_y):
     return organelle_orientation_rad
 
 
-def compute_angle_deg(angle_rad):
-    """Returns degree"""
+def compute_angle_deg(angle_rad: float) -> float:
+    """Computes the angle given in rad in degrees.
+
+    Args:
+        angle_rad:
+            The angle in rad
+
+    Returns:
+        The angle in degrees
+
+    """
     return 180.0 * angle_rad / np.pi
 
 
-def compute_shape_orientation_rad(orientation):
-    """Computes the shape orientation with zero based on x-axis"""
+def compute_shape_orientation_rad(orientation: float) -> float:
+    """Computes the shape orientation (zero based) on x-axis.
+
+    Args:
+        orientation:
+            The orientation
+
+    Returns:
+        The shape orientation in rad
+
+    """
     # note, the values of orientation from props are in [-pi/2,pi/2] with zero along the y-axis
     return np.pi / 2.0 + orientation
 
 
-def compute_marker_vector_norm(cell_x, cell_y, marker_centroid_x, marker_centroid_y):
-    """Computes the marker vector norm"""
+def compute_marker_vector_norm(cell_x: float, cell_y: float, marker_centroid_x: float,
+                               marker_centroid_y: float) -> float:
+    """Computes the marker vector norm.
+
+    Args:
+        cell_x:
+            The x coordinate of the cell
+        cell_y:
+            The y coordinate of the cell
+        marker_centroid_x:
+            The x coordinate of the marker centroid
+        marker_centroid_y:
+            The y coordinate of the marker centroid
+
+    Returns:
+        The marker vector norm
+
+    """
     distance2 = (cell_x - marker_centroid_x) ** 2
     distance2 += (cell_y - marker_centroid_y) ** 2
 
     return np.sqrt(distance2)
 
 
-def map_single_cell_to_circle(sc_protein_area, x_centroid, y_centroid, r):
+def map_single_cell_to_circle(sc_protein_area, x_centroid, y_centroid, r):  # todo: check if necessary
     circular_img = np.zeros([sc_protein_area.shape[0], sc_protein_area.shape[1]])
     circular_img_count = {}
 
@@ -53,23 +103,23 @@ def map_single_cell_to_circle(sc_protein_area, x_centroid, y_centroid, r):
         new_x = x_centroid - (new_x - x_centroid)
         new_x = int(new_x)
         new_y = int(new_y)
-    
+
         # count, TODO: check why new_x and new_y are sometimes out of the image boundaries
-        if (new_x in range(0,circular_img.shape[0]))  and (new_y in range(0,circular_img.shape[1])):
+        if (new_x in range(0, circular_img.shape[0])) and (new_y in range(0, circular_img.shape[1])):
             circular_img[int(new_x), int(new_y)] += sc_protein_area[x, y]
             if (int(new_x), int(new_y)) not in circular_img_count.keys():
                 circular_img_count[int(new_x), int(new_y)] = 1
             else:
                 circular_img_count[int(new_x), int(new_y)] += 1
-        #else:
+        # else:
         #    print("Circular image coords out of bounds")
         #    print("x: ", int(new_x), ", y:", int(new_y))
-#        if (int(new_x), int(new_y)) not in circular_img_count.keys():
-#            circular_img_count[int(new_x), int(new_y)] = 1
-#        else:
-#            circular_img_count[int(new_x), int(new_y)] += 1
-#
-#        circular_img[int(new_x), int(new_y)] += sc_protein_area[x, y]
+    #        if (int(new_x), int(new_y)) not in circular_img_count.keys():
+    #            circular_img_count[int(new_x), int(new_y)] = 1
+    #        else:
+    #            circular_img_count[int(new_x), int(new_y)] += 1
+    #
+    #        circular_img[int(new_x), int(new_y)] += sc_protein_area[x, y]
 
     # calculate mean
     for k in circular_img_count.keys():
@@ -78,7 +128,19 @@ def map_single_cell_to_circle(sc_protein_area, x_centroid, y_centroid, r):
     return circular_img
 
 
-def otsu_thresh_mask(mask, channel):
+def channel_threshold_otsu(channel: np.ndarray, mask: np.ndarray) -> np.ndarray:
+    """Otsu thresholding of a channel. Applying a mask first
+
+    Args:
+        mask:
+           Boolean (or int) mask to apply before thresholding
+        channel:
+            The channel to threshold
+
+    Returns:
+        The otsu thresholded channel after masking
+
+    """
     # otsu threshold a mask given a channel from the input image
     masked_channel = mask * channel
     otsu_val = skimage.filters.threshold_otsu(masked_channel)
@@ -87,7 +149,7 @@ def otsu_thresh_mask(mask, channel):
     return masked_channel
 
 
-def compute_single_cell_prop(single_cell_mask, intensity=None):
+def compute_single_cell_prop(single_cell_mask: np.ndarray, intensity: int = None) -> RegionProperties:
     """Gets the single cell properties."""
     # we are looking at a single cell. There is only one region!
     regions = skimage.measure.regionprops(single_cell_mask, intensity_image=intensity)
@@ -98,8 +160,16 @@ def compute_single_cell_prop(single_cell_mask, intensity=None):
     return props
 
 
-def straight_line_length(corners):
-    """Computes length between corners. Corner point assumed to be in the correct order."""
+def straight_line_length(corners: List[Tuple[int, int]]) -> float:
+    """Computes length between corners. Corner point assumed to be in the correct order.
+
+    Args:
+        corners:
+            The corners of the cell in the correct order
+
+    Returns:
+        The straight line length between the consecutive corner points
+    """
     dist = []
     for idx, c in enumerate(corners):
         x = c

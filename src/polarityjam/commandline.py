@@ -16,6 +16,13 @@ from polarityjam.utils.io import read_parameters, read_image, get_tif_list, read
 
 
 def run(args):
+    """Run the polarityjam pipeline.
+
+    Args:
+        args:
+            The arguments provided by the user.
+
+    """
     # read args
     param_file = args.param
     filepath = args.in_file
@@ -97,6 +104,13 @@ def _run(infile, param, output_path, fileout_name):
 
 
 def run_stack(args):
+    """Run the polarityjam pipeline on a stack of images.
+
+    Args:
+        args:
+            The arguments provided by the user.
+
+    """
     # read args
     param_file = args.param
     inpath = args.in_path
@@ -134,6 +148,13 @@ def run_stack(args):
 
 
 def run_key(args):
+    """Run the polarityjam pipeline on a stack of images given an additional csv describing the folder structure.
+
+    Args:
+        args:
+            The arguments provided by the user.
+
+    """
     # read args
     param_file = args.param
     in_path = args.in_path

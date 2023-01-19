@@ -33,7 +33,7 @@ class Parameter:
             self._setattr(key, None)
 
     @classmethod
-    def from_yml(cls, path):
+    def from_yml(cls, path: str):
         params = read_parameters(path)
 
         cls(**params)

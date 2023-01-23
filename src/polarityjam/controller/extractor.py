@@ -6,10 +6,13 @@ from typing import Optional, Union
 import numpy as np
 
 from polarityjam import PropertiesCollection
-from polarityjam.model.moran import run_morans
 from polarityjam.compute.neighborhood import k_neighbor_dif
-from polarityjam.controller.collector import PropertyCollector, SingleCellPropertyCollector, SingleCellMaskCollector
-from polarityjam.model.masks import MasksCollection
+from polarityjam.controller.collector import PropertyCollector, SingleCellPropertyCollector, SingleCellMaskCollector, \
+    GroupPropertyCollector
+from polarityjam.model.image import BioMedicalImage
+from polarityjam.model.masks import MasksCollection, BioMedicalInstanceSegmentationMask, BioMedicalInstanceSegmentation, \
+    MasksCollection_, BioMedicalInteriorMask
+from polarityjam.model.moran import run_morans
 from polarityjam.model.parameter import RuntimeParameter, ImageParameter
 from polarityjam.polarityjam_logging import get_logger
 
@@ -18,6 +21,17 @@ class Extractor:
     def __init__(self, params: RuntimeParameter):
         self.params = params
         self.collector = PropertyCollector()
+
+    def threshold_(self, sc_masks):
+        if sc_masks.sc_mask.is_count_below_threshold(self.params.min_cell_size):
+            return True
+        if sc_masks.sc_nucleus_mask is not None:
+            if sc_masks.sc_nucleus_mask.is_count_below_threshold(self.params.min_nucleus_size):
+                return True
+        if sc_masks.sc_organelle_mask is not None:
+            if sc_masks.sc_organelle_mask.is_count_below_threshold(self.params.min_organelle_size):
+                return True
+        return False
 
     def threshold(
             self, single_cell_mask: np.ndarray,
@@ -172,6 +186,86 @@ class Extractor:
 
         """
         filename_prefix, _ = os.path.splitext(os.path.basename(filename_prefix))
+        ################################### new code ###################################
+        bio_med_segmentation_mask = BioMedicalInstanceSegmentationMask(cells_mask)  # todo: rename to segmentation_mask
+        bio_med_segmentation = BioMedicalInstanceSegmentation(bio_med_segmentation_mask)
+
+        bio_med_image = BioMedicalImage(img, img_params, segmentation=bio_med_segmentation)
+
+        nuclei_mask_seg = None
+        if img_params.channel_nucleus >= 0:
+            nuclei_mask_seg = BioMedicalInteriorMask(bio_med_image.nucleus.channel).to_instance_segmentation(
+                bio_med_segmentation.segmentation_mask_connected)
+
+        organelle_mask_seg = None
+        if img_params.channel_organelle >= 0:
+            organelle_mask_seg = BioMedicalInteriorMask(bio_med_image.organelle.channel).to_instance_segmentation(
+                bio_med_segmentation.segmentation_mask_connected)
+
+        mask_collection = MasksCollection_(
+            bio_med_segmentation_mask, bio_med_segmentation.segmentation_mask_connected, nuclei_mask_seg,
+            organelle_mask_seg
+        )
+
+        excluded = 0
+        # iterate through each unique segmented cell
+        for connected_component_label in np.unique(bio_med_segmentation.segmentation_mask_connected.mask):
+
+            # ignore background
+            if connected_component_label == 0:
+                continue
+
+            sc_masks = SingleCellMaskCollector.calc_sc_masks_(
+                bio_med_image, connected_component_label, self.params.membrane_thickness, nuclei_mask_seg,
+                organelle_mask_seg
+            )
+
+            # threshold
+            if self.threshold_(sc_masks):
+                get_logger().info(
+                    "Cell \"%s\" falls under threshold! Removed from RAG..." % connected_component_label)
+                excluded += 1
+                # remove a cell from the RAG
+                bio_med_segmentation.remove_component_label(connected_component_label)
+                continue
+
+            sc_props_collection = SingleCellPropertyCollector(self.params).calc_sc_props_(
+                sc_masks, bio_med_image
+            )
+
+            PropertyCollector.collect_sc_props(sc_props_collection, collection, filename_prefix, bio_med_image.img_hash,
+                                               connected_component_label)
+
+            # append feature of interest to the RAG node for being able to do further analysis
+            foi_val = PropertyCollector.get_foi(collection, self.params.feature_of_interest)
+
+            bio_med_segmentation.set_feature_of_interest(connected_component_label, self.params.feature_of_interest,
+                                                         foi_val)
+
+        num_cells = len(np.unique(bio_med_segmentation.segmentation_mask_connected.mask)) - excluded
+        get_logger().info("Excluded cells: %s" % str(excluded))
+        get_logger().info("Leftover cells: %s" % str(num_cells))
+
+        # morans I analysis based on FOI
+        morans_i = GroupPropertyCollector.calc_moran(bio_med_segmentation, self.params.feature_of_interest)
+        PropertyCollector.collect_group_statistic(collection, morans_i, num_cells)
+
+        # neighborhood feature analysis based on FOI
+        neighborhood_props_list = GroupPropertyCollector.calc_neighborhood(bio_med_segmentation,
+                                                                           self.params.feature_of_interest)
+        PropertyCollector.collect_neighborhood_props(collection, neighborhood_props_list)
+
+        # mark the beginning of a new image that is potentially extracted
+        PropertyCollector.set_reset_index(collection)
+        PropertyCollector.add_out_path(collection, filename_prefix, output_path)
+        PropertyCollector.add_foi(collection, filename_prefix, self.params.feature_of_interest)
+        PropertyCollector.add_image_params(collection, filename_prefix, img_params)
+        PropertyCollector.add_img_(collection, filename_prefix, bio_med_image)
+        PropertyCollector.add_masks(collection, filename_prefix, mask_collection)
+
+        return collection
+
+        ################################### old code ###################################
         img_marker = self.get_image_marker(img, img_params)
         img_junction = self.get_image_junction(img, img_params)
         img_nucleus = self.get_image_nucleus(img, img_params)

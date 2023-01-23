@@ -1,11 +1,16 @@
+from typing import List
+
 import numpy as np
 from scipy import ndimage as ndi
-from typing import List
+
 from polarityjam import RuntimeParameter, ImageParameter
 from polarityjam.compute.compute import channel_threshold_otsu
+from polarityjam.compute.neighborhood import k_neighbor_dif
 from polarityjam.model.collection import PropertiesCollection
-from polarityjam.model.masks import SingleCellMasksCollection, MasksCollection
-from polarityjam.model.moran import Moran
+from polarityjam.model.image import BioMedicalImage
+from polarityjam.model.masks import SingleCellMasksCollection, MasksCollection, BioMedicalInstanceSegmentation, \
+    SingleCellMasksCollection_
+from polarityjam.model.moran import Moran, run_morans
 from polarityjam.model.properties import SingleCellCellProps, SingleCellNucleusProps, SingleCellOrganelleProps, \
     SingleCellMarkerProps, SingleCellMarkerMembraneProps, SingleCellMarkerNucleiProps, SingleCellMarkerCytosolProps, \
     SingleCellJunctionInterfaceProps, SingleCellJunctionProteinProps, SingleCellJunctionProteinCircularProps, \
@@ -92,6 +97,10 @@ class PropertyCollector:
         props_collection.image_parameter_dict[filename] = image_params
 
     @staticmethod
+    def add_img_(props_collection: PropertiesCollection, filename: str, img: BioMedicalImage):
+        PropertyCollector.add_img(props_collection, filename, img.nucleus, img.junction, img.marker)
+
+    @staticmethod
     def add_img(props_collection: PropertiesCollection, filename: str, img_nucleus: np.ndarray,
                 img_junction: np.ndarray, img_marker: np.ndarray):
         # todo: check for duplication
@@ -107,10 +116,37 @@ class PropertyCollector:
         props_collection.masks_dict[filename] = masks
 
 
+class GroupPropertyCollector:
+
+    @staticmethod
+    def calc_moran(bio_med_seg: BioMedicalInstanceSegmentation, feature_of_interest_name: str):
+        # morans I analysis based on FOI
+        morans_i = run_morans(bio_med_seg.neighborhood_graph, feature_of_interest_name)
+
+        return morans_i
+
+    @staticmethod
+    def calc_neighborhood(bio_med_seg: BioMedicalInstanceSegmentation, feature_of_interest_name: str):
+        return k_neighbor_dif(bio_med_seg.neighborhood_graph, feature_of_interest_name)
+
+
 class SingleCellPropertyCollector:
 
     def __init__(self, param: RuntimeParameter):
         self.param = param
+
+    def calc_sc_props_(self, sc_masks: SingleCellMasksCollection, img: BioMedicalImage):
+        sc_m = SingleCellMasksCollection(
+            sc_masks.connected_component_label,
+            sc_masks.sc_mask.mask,
+            sc_masks.sc_nucleus_mask.mask,
+            sc_masks.sc_organelle_mask.mask,
+            sc_masks.sc_membrane_mask.mask,
+            sc_masks.sc_cytosol_mask.mask,
+            sc_masks.sc_junction_protein_area_mask.mask,
+        )
+
+        return self.calc_sc_props(sc_m, img.marker.channel, img.junction.channel)
 
     def calc_sc_props(self, sc_masks: SingleCellMasksCollection, im_marker: np.ndarray,
                       im_junction: np.ndarray) -> SingleCellPropertiesCollection:
@@ -228,6 +264,38 @@ class SingleCellPropertyCollector:
 
 
 class SingleCellMaskCollector:
+
+    @staticmethod
+    def calc_sc_masks_(bio_med_img: BioMedicalImage, connected_component_label, membrane_thickness, nuclei_mask_seg,
+                       organelle_mask_seg):
+        sc_mask = bio_med_img.segmentation.segmentation_mask_connected.get_single_cell_maks(connected_component_label)
+        sc_membrane_mask = sc_mask.get_outline_from_mask(membrane_thickness)
+
+        # init optional sc masks
+        sc_nucleus_mask = None
+        sc_organelle_mask = None
+        sc_cytosol_mask = None
+        sc_junction_protein_mask = None
+
+        if nuclei_mask_seg is not None:
+            sc_nucleus_mask = nuclei_mask_seg.get_single_cell_maks(connected_component_label)
+            sc_cytosol_mask = sc_nucleus_mask.filter(sc_mask, np.logical_xor)
+
+        if organelle_mask_seg is not None:
+            sc_organelle_mask = organelle_mask_seg.get_single_cell_maks(connected_component_label)
+
+        if bio_med_img.junction is not None:
+            sc_junction_protein_mask = bio_med_img.junction.mask(sc_membrane_mask).threshold_otsu()
+
+        return SingleCellMasksCollection_(
+            connected_component_label,
+            sc_mask,
+            sc_nucleus_mask,
+            sc_organelle_mask,
+            sc_membrane_mask,
+            sc_cytosol_mask,
+            sc_junction_protein_mask,
+        )
 
     @staticmethod
     def calc_sc_masks(masks: MasksCollection, connected_component_label: int, im_junction: np.ndarray,

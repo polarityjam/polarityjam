@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from polarityjam import ImageParameter
-from polarityjam.model.masks import MasksCollection
+from polarityjam.model.masks import InstanceMasksCollection
 from polarityjam.model.moran import Moran
 from polarityjam.model.properties import SingleCellMarkerProps, SingleCellNucleusProps, SingleCellCellProps, \
     SingleCellOrganelleProps, SingleCellMarkerNucleiProps, SingleCellMarkerCytosolProps, SingleCellMarkerMembraneProps, \
@@ -81,7 +81,7 @@ class PropertiesCollection:
         """
         return self.image_parameter_dict[img_name]
 
-    def get_mask_by_img_name(self, img_name: str) -> MasksCollection:
+    def get_mask_by_img_name(self, img_name: str) -> InstanceMasksCollection:
         """Get the mask by image name.
 
         Args:

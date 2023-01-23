@@ -199,9 +199,9 @@ class Plotter:
 
     def plot_organelle_polarity(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_junction = collection.get_image_channel_by_img_name(img_name, "junction")
-        cell_mask = collection.get_mask_by_img_name(img_name).cell_mask_connected
-        nuclei_mask = collection.get_mask_by_img_name(img_name).nuclei_mask
-        organelle_mask = collection.get_mask_by_img_name(img_name).organelle_mask
+        cell_mask = collection.get_mask_by_img_name(img_name).instance_segmentation_connected
+        nuclei_mask = collection.get_mask_by_img_name(img_name).nuclei_segmentation_mask
+        organelle_mask = collection.get_mask_by_img_name(img_name).organelle_segmentation_mask
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
@@ -255,8 +255,8 @@ class Plotter:
 
     def plot_nuc_displacement_orientation(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_connected
-        nuclei_mask = collection.masks_dict[img_name].nuclei_mask
+        cell_mask = collection.masks_dict[img_name].instance_segmentation_connected
+        nuclei_mask = collection.masks_dict[img_name].nuclei_segmentation_mask
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
@@ -311,9 +311,9 @@ class Plotter:
 
     def plot_marker_expression(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_marker = collection.img_channel_dict[img_name]["marker"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_connected
+        cell_mask = collection.masks_dict[img_name].instance_segmentation_connected
         single_cell_dataset = collection.dataset.loc[collection.dataset["filename"] == img_name]
-        nuclei_mask = collection.masks_dict[img_name].nuclei_mask
+        nuclei_mask = collection.masks_dict[img_name].nuclei_segmentation_mask
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
@@ -395,7 +395,7 @@ class Plotter:
 
     def plot_marker_polarity(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_marker = collection.img_channel_dict[img_name]["marker"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_connected
+        cell_mask = collection.masks_dict[img_name].instance_segmentation_connected
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
@@ -426,8 +426,8 @@ class Plotter:
 
     def plot_marker_nucleus_orientation(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_connected
-        nuclei_mask = collection.masks_dict[img_name].nuclei_mask
+        cell_mask = collection.masks_dict[img_name].instance_segmentation_connected
+        nuclei_mask = collection.masks_dict[img_name].nuclei_segmentation_mask
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
@@ -481,7 +481,7 @@ class Plotter:
 
     def plot_junction_polarity(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_connected
+        cell_mask = collection.masks_dict[img_name].instance_segmentation_connected
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
@@ -527,7 +527,7 @@ class Plotter:
 
         # plot marker intensity
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_connected
+        cell_mask = collection.masks_dict[img_name].instance_segmentation_connected
 
         ax.imshow(im_junction, cmap=plt.cm.gray, alpha=1.0)
 
@@ -552,8 +552,8 @@ class Plotter:
 
     def plot_eccentricity(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_connected
-        nuclei_mask = collection.masks_dict[img_name].nuclei_mask
+        cell_mask = collection.masks_dict[img_name].instance_segmentation_connected
+        nuclei_mask = collection.masks_dict[img_name].nuclei_segmentation_mask
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
@@ -645,7 +645,7 @@ class Plotter:
 
     def plot_ratio_method(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_connected
+        cell_mask = collection.masks_dict[img_name].instance_segmentation_connected
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
@@ -705,7 +705,7 @@ class Plotter:
         get_logger().info("Plotting: figure of interest")
 
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        mask = collection.masks_dict[img_name].cell_mask_connected
+        mask = collection.masks_dict[img_name].instance_segmentation_connected
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
@@ -754,8 +754,8 @@ class Plotter:
 
     def plot_orientation(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         im_junction = collection.img_channel_dict[img_name]["junction"]
-        cell_mask = collection.masks_dict[img_name].cell_mask_connected
-        nuclei_mask = collection.masks_dict[img_name].nuclei_mask
+        cell_mask = collection.masks_dict[img_name].instance_segmentation_connected
+        nuclei_mask = collection.masks_dict[img_name].nuclei_segmentation_mask
 
         pixel_to_micron_ratio = collection.get_image_parameter_by_img_name(img_name).pixel_to_micron_ratio
 
@@ -876,8 +876,8 @@ class Plotter:
 
         for key in collection.img_channel_dict.keys():
 
-            nuclei_mask = collection.masks_dict[key].nuclei_mask
-            organelle_mask = collection.masks_dict[key].organelle_mask
+            nuclei_mask = collection.masks_dict[key].nuclei_segmentation_mask
+            organelle_mask = collection.masks_dict[key].organelle_segmentation_mask
             img_marker = collection.img_channel_dict[key]["marker"]
             img_junction = collection.img_channel_dict[key]["junction"]
 

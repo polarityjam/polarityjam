@@ -10,17 +10,17 @@ from polarityjam.model.masks import BioMedicalInstanceSegmentation, BioMedicalMa
 
 class BioMedicalChannel:  # todo: make it a PIL image for enhanced compatability?
     def __init__(self, channel: np.ndarray):
-        self.channel = channel
+        self.data = channel
 
     def threshold_otsu(self):
-        otsu_val = skimage.filters.threshold_otsu(self.channel)
-        channel = np.copy(self.channel)
-        channel[self.channel <= otsu_val] = 0
-        channel[self.channel > otsu_val] = 1
+        otsu_val = skimage.filters.threshold_otsu(self.data)
+        channel = np.copy(self.data)
+        channel[self.data <= otsu_val] = 0
+        channel[self.data > otsu_val] = 1
         return BioMedicalMask(channel)
 
     def mask(self, mask: BioMedicalMask):
-        return BioMedicalChannel(self.channel * mask.mask)
+        return BioMedicalChannel(self.data * mask.data)
 
 
 class BioMedicalImage:

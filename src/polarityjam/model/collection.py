@@ -1,10 +1,8 @@
 import json
 
-import numpy as np
 import pandas as pd
 
-from polarityjam import ImageParameter
-from polarityjam.model.masks import InstanceMasksCollection
+from polarityjam.model.image import BioMedicalImage
 from polarityjam.model.moran import Moran
 from polarityjam.model.properties import SingleCellMarkerProps, SingleCellNucleusProps, SingleCellCellProps, \
     SingleCellOrganelleProps, SingleCellMarkerNucleiProps, SingleCellMarkerCytosolProps, SingleCellMarkerMembraneProps, \
@@ -16,11 +14,9 @@ class PropertiesCollection:
 
     def __init__(self):
         self.dataset = pd.DataFrame()
-        self.masks_dict = {}
         self.out_path_dict = {}
-        self.img_channel_dict = {}
+        self.img_dict = {}
         self.feature_of_interest_dict = {}
-        self.image_parameter_dict = {}
         self._index = 1
         self._reset_index = 1
 
@@ -40,7 +36,7 @@ class PropertiesCollection:
         """Resets the index of the dataset."""
         self._index = self._reset_index
 
-    def get_image_channel_by_img_name(self, img_name: str, channel_name: str) -> np.ndarray:
+    def get_image_by_img_name(self, img_name: str) -> BioMedicalImage:
         """Get the image channel by image name.
 
         Args:
@@ -53,7 +49,7 @@ class PropertiesCollection:
             The image channel as numpy array
 
         """
-        return self.img_channel_dict[img_name][channel_name]
+        return self.img_dict[img_name]
 
     def get_foi_by_img_name(self, img_name: str) -> str:
         """Get the feature of interest given the image name.
@@ -68,31 +64,6 @@ class PropertiesCollection:
         """
         return self.feature_of_interest_dict[img_name]
 
-    def get_image_parameter_by_img_name(self, img_name: str) -> ImageParameter:
-        """Get the image parameter given the image name.
-
-        Args:
-            img_name:
-                The image name of which the image parameter should be returned
-
-        Returns:
-            The image parameter as dictionary
-
-        """
-        return self.image_parameter_dict[img_name]
-
-    def get_mask_by_img_name(self, img_name: str) -> InstanceMasksCollection:
-        """Get the mask by image name.
-
-        Args:
-            img_name:
-                The image name of which the mask should be returned
-
-        Returns:
-            The mask as numpy array
-
-        """
-        return self.masks_dict[img_name]
 
     def get_properties_by_img_name(self, img_name: str) -> pd.DataFrame:
         """Get the properties of the image given its image name.

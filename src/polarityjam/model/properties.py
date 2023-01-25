@@ -32,6 +32,7 @@ class SingleCellProps(RegionProperties):
 
 
 class SingleCellCellProps(SingleCellProps):
+    """Class representing the properties of a single cell."""
 
     def __init__(self, single_cell_mask: np.ndarray, param: RuntimeParameter):
         self.param = param
@@ -57,6 +58,7 @@ class SingleCellCellProps(SingleCellProps):
 
 
 class SingleCellNucleusProps(SingleCellProps):
+    """Class representing the properties of a single nucleus."""
     def __init__(self, single_nucleus_mask: np.ndarray, sc_props: SingleCellCellProps):
         super().__init__(single_nucleus_mask)
 
@@ -87,6 +89,7 @@ class SingleCellNucleusProps(SingleCellProps):
 
 
 class SingleCellOrganelleProps(SingleCellProps):
+    """Class representing the properties of a single organelle."""
     def __init__(self, single_organelle_mask: np.ndarray, nucleus_props: SingleCellNucleusProps):
         super().__init__(single_organelle_mask)
 
@@ -110,6 +113,7 @@ class SingleCellOrganelleProps(SingleCellProps):
 
 
 class SingleCellMarkerProps(SingleCellProps):
+    """Class representing the properties of a single cell marker signal."""
     def __init__(self, single_cell_mask: np.ndarray, im_marker: np.ndarray):
         super().__init__(single_cell_mask, im_marker)
 
@@ -129,6 +133,7 @@ class SingleCellMarkerProps(SingleCellProps):
 
 
 class SingleCellMarkerMembraneProps(SingleCellProps):
+    """Class representing the properties of a single cell membrane signal."""
     def __init__(self, single_membrane_mask: np.ndarray, im_marker: np.ndarray):
         super().__init__(single_membrane_mask, im_marker)
 
@@ -138,6 +143,7 @@ class SingleCellMarkerMembraneProps(SingleCellProps):
 
 
 class SingleCellMarkerNucleiProps(SingleCellProps):
+    """Class representing the properties of a single cell marker nucleus signal."""
     def __init__(self, single_nucleus_mask: np.ndarray, im_marker: np.ndarray, sc_nucleus_props: SingleCellNucleusProps,
                  sc_marker_props: SingleCellMarkerProps):
         super().__init__(single_nucleus_mask, im_marker)
@@ -163,6 +169,7 @@ class SingleCellMarkerNucleiProps(SingleCellProps):
 
 
 class SingleCellMarkerCytosolProps(SingleCellProps):
+    """Class representing the properties of a single cell marker cytosol signal."""
     def __init__(self, single_cytosol_mask: np.ndarray, im_marker: np.ndarray,
                  sc_marker_nuclei_props: SingleCellMarkerNucleiProps):
         super().__init__(single_cytosol_mask, im_marker)
@@ -192,6 +199,7 @@ class SingleCellJunctionProteinProps(SingleCellProps):
 class SingleCellJunctionProteinCircularProps(SingleCellProps):
     def __init__(self, im_junction_protein_single_cell: np.ndarray, cell_minor_axis_length: float,
                  interface_centroid: Tuple[float, float]):
+        # todo: check
         r = cell_minor_axis_length / 2
         circular_img = map_single_cell_to_circle(im_junction_protein_single_cell, interface_centroid[0],
                                                  interface_centroid[1], r)
@@ -201,6 +209,7 @@ class SingleCellJunctionProteinCircularProps(SingleCellProps):
 
 
 class SingleCellJunctionProps:
+    """Class representing the properties of a single cell junction."""
     def __init__(self, sc_junction_interface_props: SingleCellJunctionInterfaceProps,
                  sc_junction_protein_props: SingleCellJunctionProteinProps,
                  sc_junction_protein_circular_props: SingleCellJunctionProteinCircularProps,
@@ -241,6 +250,7 @@ class SingleCellJunctionProps:
 
 
 class NeighborhoodProps:
+    """Class representing the properties of cell neighborhood."""
     def __init__(self):
         self.num_neighbours = None
         self.mean_dif_first_neighbors = 0
@@ -254,7 +264,7 @@ class NeighborhoodProps:
 
 
 class SingleCellPropertiesCollection:
-
+    """Collection of properties of a single cell."""
     def __init__(self, single_cell_props: SingleCellCellProps,
                  nucleus_props: SingleCellNucleusProps,
                  organelle_props: SingleCellOrganelleProps,

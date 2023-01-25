@@ -1,4 +1,6 @@
-from typing import List, Tuple, Callable
+from __future__ import annotations
+
+from typing import List, Tuple, Callable, Union, Any
 
 import numpy as np
 import skimage.filters
@@ -9,8 +11,23 @@ from polarityjam.utils.rag import orientation_graph_nf, remove_islands
 
 
 class BioMedicalMask:
-    def __init__(self, mask: np.ndarray, dtype: object = bool):
-        self.data = mask.astype(dtype)
+    """Class representing a single boolean mask."""
+
+    def __init__(self, mask: np.ndarray):
+        self.data = mask.astype(bool)
+
+    @classmethod
+    def from_threshold_otsu(cls, channel: np.ndarray) -> BioMedicalMask:
+        """Initializes a mask from a channel using Otsu's method."""
+        img_channel_blur = ndi.gaussian_filter(channel, sigma=3)
+        interior_mask = np.where(img_channel_blur > skimage.filters.threshold_otsu(img_channel_blur), True, False)
+
+        return cls(interior_mask)
+
+    @classmethod
+    def empty(cls, shape: Tuple[int, int]) -> BioMedicalMask:
+        """Creates an empty mask of a given shape."""
+        return cls(np.zeros(shape))
 
     def get_outline_from_mask(self, width: int = 1):
         """Computes outline for a single cell mask.
@@ -31,67 +48,241 @@ class BioMedicalMask:
 
         return BioMedicalMask(outline_mask)
 
-    def filter(self, overlay: object, operator: Callable):
-        if not isinstance(overlay, BioMedicalMask):
-            return NotImplemented
-
+    def operation(self, overlay: BioMedicalMask, operator: Callable):
+        """Performs an operation on the mask with another mask."""
         return BioMedicalMask(operator(overlay.data.astype(bool), self.data.astype(bool)))
 
     def is_count_below_threshold(self, pixel_value: int) -> bool:
+        """Checks if the number of pixels in the mask is below a given threshold.
+
+        Args:
+            pixel_value:
+                The threshold value.
+
+        Returns:
+            True if the number of pixels is below the threshold, False otherwise.
+        """
         if len(self.data[self.data == 1]) < pixel_value:
             return True
+        return False
+
+    def overlay_instance_segmentation(
+            self,
+            connected_component_mask: BioMedicalInstanceSegmentationMask
+    ) -> BioMedicalInstanceSegmentationMask:
+        """Overlays an instance segmentation mask on the mask."""
+        return BioMedicalInstanceSegmentationMask(self.data * connected_component_mask.data)
+
+    def to_instance_mask(self) -> BioMedicalInstanceSegmentationMask:
+        """Converts the mask to an instance segmentation mask."""
+        return BioMedicalInstanceSegmentationMask(self.data)
 
 
 class BioMedicalInstanceSegmentationMask(BioMedicalMask):
-    def __init__(self, mask: np.ndarray):
-        super().__init__(mask, dtype=int)
+    """Class representing an instance segmentation mask."""
 
-    def get_single_cell_maks(self, connected_component_label: int) -> BioMedicalMask:
+    def __init__(self, mask: np.ndarray, dtype: Union[str, Any] = int, background_label: Union[int, float] = 0):
+        super().__init__(mask)
+        self.background_label = background_label
+        self.data = mask.astype(dtype)
+
+    def remove_instance(self, instance_label: int) -> BioMedicalInstanceSegmentationMask:
+        """Removes a single instance from the mask."""
+        return BioMedicalInstanceSegmentationMask(
+            np.where(self.data == instance_label, self.background_label, self.data),
+            background_label=self.background_label
+        )
+
+    def mask_background(
+            self, background_label: Union[int, float] = 0, mask_with: Union[
+                np.ndarray, BioMedicalInstanceSegmentationMask] = None
+    ) -> BioMedicalInstanceSegmentationMask:
+        """Masks the background of the mask."""
+        if mask_with is None:
+            mask_with = self.data
+        elif isinstance(mask_with, BioMedicalInstanceSegmentationMask):
+            mask_with = mask_with.data
+
+        return BioMedicalInstanceSegmentationMask(
+            np.ma.masked_where(self.data == background_label, mask_with), dtype=float,
+            background_label=self.background_label
+        )
+
+    def get_single_instance_maks(self, instance_label: int) -> BioMedicalMask:
         """Gets the single cell mask given its label.
 
         Args:
-            connected_component_label:
+            instance_label:
                 The connected component label.
 
         Returns:
             The single cell mask.
         """
         return BioMedicalMask(
-            np.where(self.data == connected_component_label, True, False)
+            np.where(self.data == instance_label, True, False)
         )  # convert connected_component_label to True/False mask
 
+    def __len__(self):
+        return len(np.unique(self.data))
 
-class BioMedicalInteriorMask(BioMedicalMask):
-    def __init__(self, img_channel: np.ndarray):
-        mask = self.get_interior_mask(img_channel)
+    def get_labels(self, exclude_background: bool = True) -> np.ndarray:
+        """Gets the labels of the mask.
 
-        super().__init__(mask)
+        Args:
+            exclude_background:
+                Whether to exclude the background label.
 
-    def get_interior_mask(self, img_channel: np.ndarray) -> np.ndarray:
-        img_channel_blur = ndi.gaussian_filter(img_channel, sigma=3)
-        interior_mask = np.where(img_channel_blur > skimage.filters.threshold_otsu(img_channel_blur), True, False)
+        Returns:
+            The labels of the mask.
 
-        return interior_mask
+        """
+        labels = np.unique(self.data)
 
-    def overlay_instance_segmentation(
-            self,
-            connected_component_mask: BioMedicalInstanceSegmentationMask
+        if exclude_background:
+            labels = labels[labels != self.background_label]
+
+        return labels
+
+    def to_semantic_mask(self) -> BioMedicalMask:
+        """Converts the mask to a semantic (boolean) mask."""
+        return BioMedicalMask(self.data.astype(bool))
+
+    def element_mult(
+            self, mask: Union[BioMedicalInstanceSegmentationMask, np.ndarray]
     ) -> BioMedicalInstanceSegmentationMask:
-        return BioMedicalInstanceSegmentationMask(self.data * connected_component_mask.data)
+        """Performs an element-wise multiplication of the mask with another mask.
+
+        Args:
+            mask:
+                The mask to multiply with.
+
+        Returns:
+            The resulting mask.
+
+        """
+        if isinstance(mask, BioMedicalInstanceSegmentationMask):
+            mask = mask.data
+        return BioMedicalInstanceSegmentationMask(self.data * mask, dtype=float, background_label=self.background_label)
+
+    def element_add(
+            self, mask: Union[BioMedicalInstanceSegmentationMask, np.ndarray]
+    ) -> BioMedicalInstanceSegmentationMask:
+        """Performs an element-wise addition of the mask with another mask.
+
+        Args:
+            mask:
+                The mask to add with.
+
+        Returns:
+            The resulting mask.
+
+        """
+        if isinstance(mask, BioMedicalInstanceSegmentationMask):
+            mask = mask.data
+        return BioMedicalInstanceSegmentationMask(self.data + mask, dtype=float, background_label=self.background_label)
+
+    def scalar_mult(self, scalar: int) -> BioMedicalInstanceSegmentationMask:
+        """Performs a scalar multiplication of the mask.
+
+        Args:
+            scalar:
+                The scalar to multiply with.
+
+        Returns:
+            The resulting mask.
+
+        """
+        return BioMedicalInstanceSegmentationMask(self.data * scalar, dtype=float,
+                                                  background_label=self.background_label)
+
+    def scalar_add(self, scalar: int) -> BioMedicalInstanceSegmentationMask:
+        """Performs a scalar addition of the mask.
+
+        Args:
+            scalar:
+                The scalar to add with.
+
+        Returns:
+            The resulting mask.
+
+        """
+        return BioMedicalInstanceSegmentationMask(self.data + scalar, dtype=float,
+                                                  background_label=self.background_label)
+
+    def relabel(self, new_labels: Union[dict, np.ndarray],
+                exclude_background: bool = True) -> BioMedicalInstanceSegmentationMask:
+        """Reallocates the labels of the mask.
+
+        Args:
+            new_labels:
+                A dictionary mapping old labels to new labels.
+                Alternatively, a numpy array that assumes consecutive ordered labels.
+            exclude_background:
+                Whether to exclude the background label from the reallocation.
+
+        Returns:
+            New mask object with a reallocated mask.
+
+        """
+        l = len(self) - 1 if exclude_background else len(self)
+
+        old_labels = np.unique(self.data)
+
+        if exclude_background:
+            old_labels = old_labels[old_labels != self.background_label]
+
+        if isinstance(new_labels, dict):
+            new_labels = np.array([new_labels[label] for label in old_labels])
+
+        err_str = f"The number of new labels must match the number of old labels. Got length %s and length %s." % (
+            len(new_labels), l
+        )
+        assert len(new_labels) == l, err_str
+
+        new_mask = np.zeros_like(self.data).astype(new_labels.dtype)
+        for old_label, new_label in zip(old_labels, new_labels):
+            new_mask[self.data == old_label] = new_label
+
+        return BioMedicalInstanceSegmentationMask(new_mask, dtype=new_mask.dtype,
+                                                  background_label=self.background_label)
 
 
 class BioMedicalInstanceSegmentation:
+    """Class representing an entire instance segmentation."""
     def __init__(self, segmentation_mask: BioMedicalInstanceSegmentationMask):
         self.segmentation_mask = segmentation_mask
         self.neighborhood_graph = orientation_graph_nf(self.segmentation_mask.data)
-        self.segmentation_mask_connected, self.list_of_islands = self.get_cell_mask_connected()
+        self.segmentation_mask_connected, self.list_of_islands = self.get_connected_instance_mask()
 
     def remove_instance_label(self, instance_label):
-        self.neighborhood_graph.remove_node(instance_label)
-        # todo: should we remove the connected component from the segmentation mask?
+        """Removes an instance label from the segmentation
 
-    # todo: set for the whole image and not for each cell instance?
+        Args:
+            instance_label:
+                The instance label to remove.
+
+        Returns:
+            Inplace removal of the instance label.
+
+        """
+        self.neighborhood_graph.remove_node(instance_label)
+        self.segmentation_mask = self.segmentation_mask.remove_instance(instance_label)
+        self.segmentation_mask_connected = self.segmentation_mask_connected.remove_instance(instance_label)
+
     def set_feature_of_interest(self, connected_component_label, feature_of_interest_name, feature_of_interest_val):
+        """Sets the feature of interest for a given connected component label.
+
+        Args:
+            connected_component_label:
+                The connected component label of the cell.
+            feature_of_interest_name:
+                The name of the feature of interest.
+            feature_of_interest_val:
+                The value of the feature of interest.
+
+        Returns:
+            Inplace setting of the feature of interest.
+        """
         self.neighborhood_graph.nodes[connected_component_label.astype('int')][
             feature_of_interest_name] = feature_of_interest_val
 
@@ -103,11 +294,11 @@ class BioMedicalInstanceSegmentation:
             )
         )
 
-    def get_cell_mask_connected(self) -> Tuple[BioMedicalInstanceSegmentationMask, List[int]]:
+    def get_connected_instance_mask(self) -> Tuple[BioMedicalInstanceSegmentationMask, List[int]]:
         """Remove unconnected cells from the mask (Cells without neighbours).
 
         Returns:
-            List of all unconnected component labels. (Islands)
+            A tuple containing the connected mask and a list of unconnected cells (Islands).
 
         """
 
@@ -119,11 +310,11 @@ class BioMedicalInstanceSegmentation:
 
         list_of_islands = np.unique(list_of_islands)
 
-        connected_component_mask_np = np.copy(self.segmentation_mask.data)
+        connected_component_mask = BioMedicalInstanceSegmentationMask(np.copy(self.segmentation_mask.data))
 
         # remove islands from mask
         for elemet in list_of_islands:
-            connected_component_mask_np[:, :][connected_component_mask_np[:, :] == elemet] = 0
+            connected_component_mask = connected_component_mask.remove_instance(elemet)
 
         # remove islands from graph
         self.neighborhood_graph = remove_islands(self.neighborhood_graph, list_of_islands)
@@ -131,69 +322,11 @@ class BioMedicalInstanceSegmentation:
         get_logger().info("Removed number of islands: %s" % len(list_of_islands))
         get_logger().info("Number of RAG nodes: %s " % len(list(self.neighborhood_graph.nodes)))
 
-        connected_component_mask = BioMedicalInstanceSegmentationMask(connected_component_mask_np)
-
         return connected_component_mask, list_of_islands
 
 
-def get_single_cell_mask(cells_mask: np.ndarray, connected_component_label: int) -> np.ndarray:
-    """Gets the single cell mask from a cells mask given its label.
-
-    Args:
-        cells_mask:
-            The cells mask.
-        connected_component_label:
-            The connected component label.
-
-    Returns:
-        The single cell mask.
-    """
-    return np.where(cells_mask == connected_component_label, 1, 0)  # convert connected_component_label to 1
-
-
-def get_single_cell_nuc_mask(nuclei_mask: np.ndarray, cell_mask: np.ndarray,
-                             connected_component_label: int) -> np.ndarray:
-    """Gets the single nuclei mask from a cells mask given its label.
-
-    Args:
-        nuclei_mask:
-            The nuclei mask.
-        cell_mask:
-            The cells mask.
-        connected_component_label:
-            The connected component label.
-
-    Returns:
-        The single nuclei mask.
-
-    """
-    single_cell_mask = get_single_cell_mask(cell_mask, connected_component_label)
-    return single_cell_mask * nuclei_mask
-
-
-def get_outline_from_mask(sc_mask: np.ndarray, width: int = 1) -> np.ndarray:
-    """Computes outline for a single cell mask.
-
-    Args:
-        sc_mask:
-            The single cell mask.
-        width:
-            The width of the outline.
-
-    Returns:
-        The outline mask.
-
-    """
-
-    sc_mask = sc_mask.astype(bool)
-    dilated_mask = ndi.binary_dilation(sc_mask, iterations=width)
-    eroded_mask = ndi.binary_erosion(sc_mask, iterations=width)
-    outline_mask = np.logical_xor(dilated_mask, eroded_mask)
-
-    return outline_mask
-
-
 class SingleCellMasksCollection:
+    """Collection of single cell masks and the corresponding label."""
     def __init__(
             self,
             connected_component_label: int,
@@ -211,13 +344,3 @@ class SingleCellMasksCollection:
         self.sc_membrane_mask = sc_membrane_mask
         self.sc_cytosol_mask = sc_cytosol_mask
         self.sc_junction_protein_area_mask = sc_junction_protein_mask
-
-
-class InstanceMasksCollection:
-    def __init__(self, instance_segmentation: BioMedicalInstanceSegmentationMask,
-                 instance_segmentation_connected: BioMedicalInstanceSegmentationMask,
-                 nuclei_segmentation_mask: BioMedicalInstanceSegmentationMask, organelle_segmentation_mask: BioMedicalInstanceSegmentationMask):
-        self.instance_segmentation = instance_segmentation
-        self.instance_segmentation_connected = instance_segmentation_connected
-        self.nuclei_segmentation_mask = nuclei_segmentation_mask
-        self.organelle_segmentation_mask = organelle_segmentation_mask

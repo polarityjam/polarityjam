@@ -100,6 +100,8 @@ def _run(infile, param, output_path, fileout_name):
     get_logger().info("Writing features to disk: %s" % fileout_path)
     c.dataset.to_csv(str(fileout_path), index=False)
 
+    get_logger().info("File %s done!" % infile)
+
     return c.dataset, mask
 
 
@@ -138,7 +140,7 @@ def run_stack(args):
             continue
 
         get_logger().info(
-            "Processing file with: file stem  \"%s\" and file extension: \"%s\"" % (filepath.stem, filepath.suffix)
+            "Processing file with file stem  \"%s\" and file extension: \"%s\"" % (filepath.stem, filepath.suffix)
         )
 
         # start routine

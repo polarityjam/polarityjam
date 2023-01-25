@@ -1,30 +1,51 @@
+from __future__ import annotations
+
 from hashlib import sha1
+from typing import Dict, Union
 
 import numpy as np
 import skimage
 
 from polarityjam import ImageParameter
-from polarityjam.polarityjam_logging import get_logger
 from polarityjam.model.masks import BioMedicalInstanceSegmentation, BioMedicalMask
+from polarityjam.polarityjam_logging import get_logger
 
 
 class BioMedicalChannel:  # todo: make it a PIL image for enhanced compatability?
+    """Class representing a single channel of a biomedical image. It can contain multiple masks."""
     def __init__(self, channel: np.ndarray):
         self.data = channel
+        self.masks: Dict[str, BioMedicalMask] = {}
 
     def threshold_otsu(self):
+        """Thresholds the channel using Otsu's method."""
         otsu_val = skimage.filters.threshold_otsu(self.data)
         channel = np.copy(self.data)
         channel[self.data <= otsu_val] = 0
         channel[self.data > otsu_val] = 1
         return BioMedicalMask(channel)
 
-    def mask(self, mask: BioMedicalMask):
+    def mask(self, mask: BioMedicalMask) -> BioMedicalChannel:
+        """Masks the channel with a given mask."""
         return BioMedicalChannel(self.data * mask.data)
+
+    def add_mask(self, key: str, val: BioMedicalMask):
+        """Adds a mask given a name to the channel."""
+        self.masks[key] = val
+
+    def remove_mask(self, key: str):
+        """Removes a mask from the channel."""
+        del self.masks[key]
+
+    def get_mask_by_name(self, name: str) -> Union[BioMedicalMask, BioMedicalInstanceSegmentation]:
+        """Returns a mask by its name."""
+        return self.masks[name]
 
 
 class BioMedicalImage:
-    def __init__(self, img: np.ndarray, img_params: ImageParameter, segmentation: BioMedicalInstanceSegmentation = None):
+    """Class representing a biomedical image. It can contain multiple channels and a segmentation."""
+    def __init__(self, img: np.ndarray, img_params: ImageParameter,
+                 segmentation: BioMedicalInstanceSegmentation = None):
         self.img = img
         self.segmentation = segmentation
         self.img_params = img_params

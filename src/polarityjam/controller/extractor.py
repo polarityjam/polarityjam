@@ -9,7 +9,7 @@ from polarityjam.controller.collector import PropertyCollector, SingleCellProper
     GroupPropertyCollector
 from polarityjam.model.image import BioMedicalImage
 from polarityjam.model.masks import BioMedicalInstanceSegmentationMask, BioMedicalInstanceSegmentation, \
-    InstanceMasksCollection, BioMedicalInteriorMask
+    BioMedicalMask
 from polarityjam.model.parameter import RuntimeParameter, ImageParameter
 from polarityjam.polarityjam_logging import get_logger
 
@@ -78,20 +78,17 @@ class Extractor:
 
         nuclei_mask_seg = None
         if img_params.channel_nucleus >= 0:
-            nuclei_mask_seg = BioMedicalInteriorMask(bio_med_image.nucleus.data).overlay_instance_segmentation(
+            nuclei_mask_seg = BioMedicalMask.from_threshold_otsu(
+                bio_med_image.nucleus.data).overlay_instance_segmentation(
                 bio_med_segmentation.segmentation_mask_connected)
+            bio_med_image.nucleus.add_mask("nuclei_mask_seg", nuclei_mask_seg)
 
         organelle_mask_seg = None
         if img_params.channel_organelle >= 0:
-            organelle_mask_seg = BioMedicalInteriorMask(bio_med_image.organelle.data).overlay_instance_segmentation(
+            organelle_mask_seg = BioMedicalMask.from_threshold_otsu(
+                bio_med_image.organelle.data).overlay_instance_segmentation(
                 bio_med_segmentation.segmentation_mask_connected)
-
-        mask_collection = InstanceMasksCollection(
-            bio_med_segmentation_mask,
-            bio_med_segmentation.segmentation_mask_connected,
-            nuclei_mask_seg,
-            organelle_mask_seg
-        )
+            bio_med_image.organelle.add_mask("organelle_mask_seg", organelle_mask_seg)
 
         excluded = 0
         # iterate through each unique segmented cell
@@ -118,8 +115,8 @@ class Extractor:
                 bio_med_segmentation.remove_instance_label(connected_component_label)
                 continue
 
-            sc_props_collection = SingleCellPropertyCollector(self.params).calc_sc_props(
-                sc_masks, bio_med_image
+            sc_props_collection = SingleCellPropertyCollector.calc_sc_props(
+                sc_masks, bio_med_image, self.params
             )
 
             PropertyCollector.collect_sc_props(
@@ -156,8 +153,8 @@ class Extractor:
         PropertyCollector.set_reset_index(collection)
         PropertyCollector.add_out_path(collection, filename_prefix, output_path)
         PropertyCollector.add_foi(collection, filename_prefix, self.params.feature_of_interest)
-        PropertyCollector.add_image_params(collection, filename_prefix, img_params)
-        PropertyCollector.add_img_(collection, filename_prefix, bio_med_image)
-        PropertyCollector.add_masks(collection, filename_prefix, mask_collection)
+        PropertyCollector.add_img(collection, filename_prefix, bio_med_image)
+
+        get_logger().info("Done feature extraction for file: %s" % str(filename_prefix))
 
         return collection

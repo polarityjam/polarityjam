@@ -482,7 +482,7 @@ def run_morans(rag, foi):
     Morans I class object.
 
     """
-    get_logger().info("Calculating morans I group statistic...")
+    get_logger().info("Calculating morans I group statistic for FOI \"%s\"..." % foi)
 
     # extract weights
     weights = W.from_networkx(rag)

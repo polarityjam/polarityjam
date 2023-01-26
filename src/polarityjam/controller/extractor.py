@@ -9,7 +9,7 @@ from polarityjam.controller.collector import PropertyCollector, SingleCellProper
     GroupPropertyCollector
 from polarityjam.model.image import BioMedicalImage
 from polarityjam.model.masks import BioMedicalInstanceSegmentationMask, BioMedicalInstanceSegmentation, \
-    BioMedicalMask
+    BioMedicalMask, SingleCellMasksCollection
 from polarityjam.model.parameter import RuntimeParameter, ImageParameter
 from polarityjam.polarityjam_logging import get_logger
 
@@ -19,7 +19,7 @@ class Extractor:
         self.params = params
         self.collector = PropertyCollector()
 
-    def threshold_size(self, sc_masks):
+    def threshold_size(self, sc_masks: SingleCellMasksCollection) -> bool:
         """Thresholds a collection of single cell mask based on cell size, nucleus size and organelle size.
 
         Args:
@@ -77,7 +77,7 @@ class Extractor:
         bio_med_image = BioMedicalImage(img, img_params, segmentation=bio_med_segmentation)
 
         nuclei_mask_seg = None
-        if img_params.channel_nucleus >= 0:
+        if img_params.channel_nucleus >= 0:  # todo: improve this
             nuclei_mask_seg = BioMedicalMask.from_threshold_otsu(
                 bio_med_image.nucleus.data).overlay_instance_segmentation(
                 bio_med_segmentation.segmentation_mask_connected)
@@ -92,11 +92,7 @@ class Extractor:
 
         excluded = 0
         # iterate through each unique segmented cell
-        for connected_component_label in np.unique(bio_med_segmentation.segmentation_mask_connected.data):
-
-            # ignore background
-            if connected_component_label == 0:
-                continue
+        for connected_component_label in bio_med_segmentation.segmentation_mask_connected.get_labels():
 
             sc_masks = SingleCellMaskCollector.calc_sc_masks(
                 bio_med_image,
@@ -107,11 +103,11 @@ class Extractor:
             )
 
             # threshold
-            if self.threshold_size(sc_masks):
+            if self.threshold_size(sc_masks):  # todo: move out of loop
                 get_logger().info(
                     "Cell \"%s\" falls under threshold! Removed from analysis!" % connected_component_label)
                 excluded += 1
-                # remove a cell from the RAG
+                # remove a cell from the segmentation
                 bio_med_segmentation.remove_instance_label(connected_component_label)
                 continue
 
@@ -136,13 +132,13 @@ class Extractor:
                 foi_val
             )
 
-        num_cells = len(np.unique(bio_med_segmentation.segmentation_mask_connected.data)) - excluded
+        num_cells = len(np.unique(bio_med_segmentation.segmentation_mask_connected.data)) - excluded  # todo refactor
         get_logger().info("Excluded cells: %s" % str(excluded))
         get_logger().info("Leftover cells: %s" % str(num_cells))
 
         # morans I analysis based on FOI
         morans_i = GroupPropertyCollector.calc_moran(bio_med_segmentation, self.params.feature_of_interest)
-        PropertyCollector.collect_group_statistic(collection, morans_i, num_cells)
+        PropertyCollector.collect_group_statistic(collection, morans_i, num_cells)  # todo: refactor
 
         # neighborhood feature analysis based on FOI
         neighborhood_props_list = GroupPropertyCollector.calc_neighborhood(bio_med_segmentation,

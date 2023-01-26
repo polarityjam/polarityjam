@@ -39,12 +39,12 @@ class Plotter:
 
         return fig, ax
 
-    def _get_outlines(self, im_marker: BioMedicalChannel, cell_mask: BioMedicalInstanceSegmentationMask,
-                      nuclei_mask: BioMedicalInstanceSegmentationMask,
-                      single_cell_dataset: pandas.DataFrame) -> List[np.ndarray]:
-        outlines_cell = np.zeros((im_marker.data.shape[0], im_marker.data.shape[1]))
-        outlines_mem = np.copy(outlines_cell)
-        outlines_nuc = np.copy(outlines_cell)
+    def _get_inlines(self, im_marker: BioMedicalChannel, cell_mask: BioMedicalInstanceSegmentationMask,
+                     nuclei_mask: BioMedicalInstanceSegmentationMask,
+                     single_cell_dataset: pandas.DataFrame) -> List[np.ndarray]:
+        inlines_cell = BioMedicalInstanceSegmentationMask.empty(im_marker.data.shape)
+        inlines_mem = np.zeros((im_marker.data.shape[0], im_marker.data.shape[1]))
+        inlines_nuc = BioMedicalInstanceSegmentationMask.empty(im_marker.data.shape)
 
         for cell_label in single_cell_dataset["label"]:
             feature_row = single_cell_dataset.loc[single_cell_dataset["label"] == cell_label]
@@ -56,22 +56,27 @@ class Plotter:
                 intensity_nuc = feature_row["marker_mean_expression_nuc"].values[0]
 
             single_cell_mask = cell_mask.get_single_instance_maks(cell_label)
-            outline_cell = single_cell_mask.get_outline_from_mask(self.params.outline_width)
-            single_cell_mask_ = np.where(outline_cell.data == True, 0, single_cell_mask.data)
-            outlines_cell = np.where(single_cell_mask_ == True, intensity_cell, outlines_cell)
+            invert_outline_cell = single_cell_mask.get_outline_from_mask(
+                self.params.outline_width).invert().to_instance_mask()
+            single_cell_inlay_mask = single_cell_mask.overlay_instance_segmentation(invert_outline_cell)
+            single_cell_inlay_intensity_mask = single_cell_inlay_mask.scalar_mult(intensity_cell)
+            inlines_cell = inlines_cell.element_add(single_cell_inlay_intensity_mask)
 
+            # membrane outline cannot be summed up on an empty mask, because outlines overlap.
             outline_mem = single_cell_mask.get_outline_from_mask(self.params.membrane_thickness)
-            outlines_mem = np.where(np.logical_and(outline_mem.data, outlines_mem.data < intensity_mem), intensity_mem,
-                                    outlines_mem.data)
+            inlines_mem = np.where(np.logical_and(outline_mem.data, inlines_mem.data < intensity_mem), intensity_mem,
+                                    inlines_mem.data)
 
             # nuclei marker intensity
             if nuclei_mask is not None:
                 single_nucleus_mask = nuclei_mask.get_single_instance_maks(cell_label)
-                outline_nuc = single_nucleus_mask.get_outline_from_mask(self.params.outline_width)
-                single_nuc_mask_ = np.where(outline_nuc.data == True, 0, single_nucleus_mask.data)  # todo refactor
-                outlines_nuc = np.where(single_nuc_mask_ == True, intensity_nuc, outlines_nuc)
+                invert_outline_nuc = single_nucleus_mask.get_outline_from_mask(
+                    self.params.outline_width).invert().to_instance_mask()
+                single_nuc_inlay_mask = single_nucleus_mask.overlay_instance_segmentation(invert_outline_nuc)
+                single_nuc_inlay_intensity_mask = single_nuc_inlay_mask.scalar_mult(intensity_nuc)
+                inlines_nuc = inlines_nuc.element_add(single_nuc_inlay_intensity_mask)
 
-        return [outlines_cell, outlines_mem, outlines_nuc]
+        return [inlines_cell.data, inlines_mem, inlines_nuc.data]
 
     def _masked_cell_outlines(self, channel: BioMedicalChannel,
                               instance_seg_mask: BioMedicalInstanceSegmentationMask) -> np.ndarray:
@@ -83,7 +88,7 @@ class Plotter:
             outlines_cells = outlines_cells.operation(outline_cell, np.logical_or)
 
         # convert cell outlines to image
-        outlines_cells_rgba = outlines_cells.to_instance_mask().scalar_mult(255).mask_background()
+        outlines_cells_rgba = outlines_cells.to_instance_mask().mask_background()
         outlines_cells_rgba = np.dstack([outlines_cells_rgba.data] * 3)
 
         return outlines_cells_rgba
@@ -135,9 +140,11 @@ class Plotter:
             add_title(ax, "first channel", seg_img[:, :], self.params.show_graphics_axis)
             axes = [ax]
 
-        return self._finish_plot(
+        self._finish_plot(
             fig, output_path, filename, "_channels", axes, seg_img_params.pixel_to_micron_ratio, close
         )
+
+        return fig, axes
 
     def plot_mask(self, mask: np.ndarray, seg_img: np.ndarray, seg_img_params: ImageParameter,
                   output_path: Union[str, Path], filename: Union[str, Path], close: bool = False):
@@ -207,9 +214,11 @@ class Plotter:
 
             axes = [ax[0], ax[1]]
 
-        return self._finish_plot(
+        self._finish_plot(
             fig, output_path, filename, "_segmentation", axes, seg_img_params.pixel_to_micron_ratio, close
         )
+
+        return fig, axes
 
     def plot_organelle_polarity(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         """Plots the organelle polarity of a specific image in the collection
@@ -272,7 +281,7 @@ class Plotter:
         # set title and ax limits
         add_title(ax, "organelle orientation", im_junction.data, self.params.show_graphics_axis)
 
-        return self._finish_plot(
+        self._finish_plot(
             fig, collection.get_out_path_by_name(img_name),
             img_name,
             "_nuclei_organelle_vector",
@@ -281,6 +290,8 @@ class Plotter:
             close,
             polarity_angle
         )
+
+        return fig, [ax]
 
     def plot_nuc_displacement_orientation(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         """Plots the nucleus displacement orientation of a specific image in the collection
@@ -339,7 +350,7 @@ class Plotter:
         # set title and ax limits
         add_title(ax, "nucleus displacement orientation", img.junction.data, self.params.show_graphics_axis)
 
-        return self._finish_plot(
+        self._finish_plot(
             fig,
             collection.get_out_path_by_name(img_name),
             img_name,
@@ -349,6 +360,8 @@ class Plotter:
             close,
             nuc_polarity_angle
         )
+
+        return fig, [ax]
 
     def plot_marker_expression(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         """Plots the marker expression of a specific image in the collection
@@ -386,7 +399,7 @@ class Plotter:
         for i in range(number_sub_figs):
             ax[i].imshow(im_marker, cmap=plt.cm.gray, alpha=1.0)
 
-        outlines_cell, outlines_mem, outlines_nuc = self._get_outlines(
+        outlines_cell, outlines_mem, outlines_nuc = self._get_inlines(
             im_marker, cell_mask, nuclei_mask, single_cell_dataset
         )
 
@@ -440,7 +453,7 @@ class Plotter:
             add_title(ax[2], "mean intensity nucleus", im_marker.data, self.params.show_graphics_axis)
             axes = [ax[0], ax[1], ax[2]]
 
-        return self._finish_plot(
+        self._finish_plot(
             fig, collection.get_out_path_by_name(img_name),
             img_name,
             "_marker_expression",
@@ -448,6 +461,8 @@ class Plotter:
             pixel_to_micron_ratio,
             close
         )
+
+        return fig, axes
 
     def plot_marker_polarity(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         """Plots the marker polarity of a specific image in the collection
@@ -488,10 +503,12 @@ class Plotter:
 
         add_title(ax, "marker polarity", im_marker.data, self.params.show_graphics_axis)
 
-        return self._finish_plot(
+        self._finish_plot(
             fig, collection.get_out_path_by_name(img_name), img_name, "_marker_polarity", [ax], pixel_to_micron_ratio,
             close
         )
+
+        return fig, [ax]
 
     def plot_marker_nucleus_orientation(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         """Plots the marker polarity of a specific image in the collection
@@ -553,7 +570,7 @@ class Plotter:
         # set title and ax limits
         add_title(ax, "marker nucleus orientation", im_junction.data, self.params.show_graphics_axis)
 
-        return self._finish_plot(
+        self._finish_plot(
             fig,
             collection.get_out_path_by_name(img_name),
             img_name,
@@ -562,6 +579,8 @@ class Plotter:
             pixel_to_micron_ratio,
             close, nuc_polarity_angle
         )
+
+        return fig, [ax]
 
     def plot_junction_polarity(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         """Plots the junction polarity of a specific image in the collection
@@ -607,7 +626,7 @@ class Plotter:
 
         add_title(ax, "junction polarity", im_junction.data, self.params.show_graphics_axis)
 
-        return self._finish_plot(
+        self._finish_plot(
             fig,
             collection.get_out_path_by_name(img_name),
             img_name,
@@ -616,6 +635,8 @@ class Plotter:
             pixel_to_micron_ratio,
             close
         )
+
+        return fig, [ax]
 
     def plot_corners(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         """Plots the corners of a specific image in the collection
@@ -649,7 +670,7 @@ class Plotter:
 
         add_title(ax, "cell corners", im_junction.data, self.params.show_graphics_axis)
 
-        return self._finish_plot(
+        self._finish_plot(
             fig,
             collection.get_out_path_by_name(img_name),
             img_name,
@@ -658,6 +679,8 @@ class Plotter:
             pixel_to_micron_ratio,
             close
         )
+
+        return fig, [ax]
 
     def plot_eccentricity(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         """Plots the eccentricity of a specific image in the collection
@@ -762,7 +785,7 @@ class Plotter:
             add_title(ax, "cell elongation", im_junction.data, self.params.show_graphics_axis)
             axes = [ax]
 
-        return self._finish_plot(
+        self._finish_plot(
             fig,
             collection.get_out_path_by_name(img_name),
             img_name,
@@ -771,6 +794,8 @@ class Plotter:
             pixel_to_micron_ratio,
             close
         )
+
+        return fig, axes
 
     def plot_ratio_method(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         """Plots the ratio method of a specific image in the collection
@@ -830,7 +855,7 @@ class Plotter:
 
         add_title(ax, "ratio method", im_junction.data, self.params.show_graphics_axis)
 
-        return self._finish_plot(
+        self._finish_plot(
             fig,
             collection.get_out_path_by_name(img_name),
             img_name,
@@ -839,6 +864,8 @@ class Plotter:
             pixel_to_micron_ratio,
             close
         )
+
+        return fig, ax
 
     def plot_foi(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         """Plots the field of interest of a specific image in the collection
@@ -894,7 +921,7 @@ class Plotter:
         # set title and ax limits
         add_title(ax, "feature of interest", im_junction.data, self.params.show_graphics_axis)
 
-        return self._finish_plot(
+        self._finish_plot(
             fig,
             collection.get_out_path_by_name(img_name),
             img_name,
@@ -903,6 +930,8 @@ class Plotter:
             pixel_to_micron_ratio,
             close
         )
+
+        return fig, ax
 
     def plot_orientation(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         """Plots the orientation of a specific image in the collection
@@ -1008,7 +1037,7 @@ class Plotter:
             add_title(ax, "cell shape orientation", im_junction.data, self.params.show_graphics_axis)
             axes = [ax]
 
-        return self._finish_plot(
+        self._finish_plot(
             fig,
             collection.get_out_path_by_name(img_name),
             img_name,
@@ -1017,6 +1046,8 @@ class Plotter:
             pixel_to_micron_ratio,
             close
         )
+
+        return fig, ax
 
     def _finish_plot(self, fig, output_path, img_name, output_suffix, axes, pixel_to_micron_ratio, close=False,
                      image=None):

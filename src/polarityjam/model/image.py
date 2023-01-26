@@ -15,7 +15,7 @@ class BioMedicalChannel:  # todo: make it a PIL image for enhanced compatability
     """Class representing a single channel of a biomedical image. It can contain multiple masks."""
     def __init__(self, channel: np.ndarray):
         self.data = channel
-        self.masks: Dict[str, BioMedicalMask] = {}
+        self.masks: Dict[str, Union[BioMedicalMask, BioMedicalInstanceSegmentation]] = {}
 
     def threshold_otsu(self):
         """Thresholds the channel using Otsu's method."""

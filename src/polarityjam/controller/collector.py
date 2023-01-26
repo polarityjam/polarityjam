@@ -1,4 +1,5 @@
-from typing import List
+from pathlib import Path
+from typing import List, Union
 
 import numpy as np
 
@@ -82,7 +83,7 @@ class PropertyCollector:
         props_collection.set_reset_index()
 
     @staticmethod
-    def add_out_path(props_collection: PropertiesCollection, filename: str, path: str):
+    def add_out_path(props_collection: PropertiesCollection, filename: str, path: Union[Path, str]):
         props_collection.out_path_dict[filename] = path
 
     @staticmethod

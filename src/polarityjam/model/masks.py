@@ -10,14 +10,14 @@ from polarityjam.polarityjam_logging import get_logger
 from polarityjam.utils.rag import orientation_graph_nf, remove_islands
 
 
-class BioMedicalMask:
-    """Class representing a single boolean mask."""
+class Mask:
+    """Class representing a base mask."""
 
     def __init__(self, mask: np.ndarray):
         self.data = mask.astype(bool)
 
     @classmethod
-    def from_threshold_otsu(cls, channel: np.ndarray) -> BioMedicalMask:
+    def from_threshold_otsu(cls, channel: np.ndarray) -> Mask:
         """Initializes a mask from a channel using Otsu's method."""
         img_channel_blur = ndi.gaussian_filter(channel, sigma=3)
         interior_mask = np.where(img_channel_blur > skimage.filters.threshold_otsu(img_channel_blur), True, False)
@@ -25,11 +25,40 @@ class BioMedicalMask:
         return cls(interior_mask)
 
     @classmethod
-    def empty(cls, shape: Tuple[int, int]) -> BioMedicalMask:
+    def empty(cls, shape: Tuple[int, int]) -> Mask:
         """Creates an empty mask of a given shape."""
         return cls(np.zeros(shape))
 
-    def get_outline_from_mask(self, width: int = 1):
+    def is_count_below_threshold(self, pixel_value: int) -> bool:
+        """Checks if the number of pixels in the mask is below a given threshold.
+
+        Args:
+            pixel_value:
+                The threshold value.
+
+        Returns:
+            True if the number of pixels is below the threshold, False otherwise.
+        """
+        if len(self.data[self.data == 1]) < pixel_value:
+            return True
+        return False
+
+
+class BioMedicalMask(Mask):
+    """Class representing a single boolean mask."""
+
+    def __init__(self, mask: np.ndarray):
+        super().__init__(mask)
+
+    def invert(self) -> BioMedicalMask:
+        """Inverts the mask."""
+        return BioMedicalMask(np.invert(self.data))
+
+    def operation(self, overlay: BioMedicalMask, operator: Callable) -> BioMedicalMask:
+        """Performs an operation on the mask with another mask."""
+        return BioMedicalMask(operator(overlay.data.astype(bool), self.data.astype(bool)))
+
+    def get_outline_from_mask(self, width: int = 1) -> BioMedicalMask:
         """Computes outline for a single cell mask.
 
         Args:
@@ -48,24 +77,6 @@ class BioMedicalMask:
 
         return BioMedicalMask(outline_mask)
 
-    def operation(self, overlay: BioMedicalMask, operator: Callable):
-        """Performs an operation on the mask with another mask."""
-        return BioMedicalMask(operator(overlay.data.astype(bool), self.data.astype(bool)))
-
-    def is_count_below_threshold(self, pixel_value: int) -> bool:
-        """Checks if the number of pixels in the mask is below a given threshold.
-
-        Args:
-            pixel_value:
-                The threshold value.
-
-        Returns:
-            True if the number of pixels is below the threshold, False otherwise.
-        """
-        if len(self.data[self.data == 1]) < pixel_value:
-            return True
-        return False
-
     def overlay_instance_segmentation(
             self,
             connected_component_mask: BioMedicalInstanceSegmentationMask
@@ -78,7 +89,7 @@ class BioMedicalMask:
         return BioMedicalInstanceSegmentationMask(self.data)
 
 
-class BioMedicalInstanceSegmentationMask(BioMedicalMask):
+class BioMedicalInstanceSegmentationMask(Mask):
     """Class representing an instance segmentation mask."""
 
     def __init__(self, mask: np.ndarray, dtype: Union[str, Any] = int, background_label: Union[int, float] = 0):
@@ -96,7 +107,7 @@ class BioMedicalInstanceSegmentationMask(BioMedicalMask):
     def mask_background(
             self, background_label: Union[int, float] = 0, mask_with: Union[
                 np.ndarray, BioMedicalInstanceSegmentationMask] = None
-    ) -> BioMedicalInstanceSegmentationMask:
+    ) -> Self:
         """Masks the background of the mask."""
         if mask_with is None:
             mask_with = self.data
@@ -249,6 +260,7 @@ class BioMedicalInstanceSegmentationMask(BioMedicalMask):
 
 class BioMedicalInstanceSegmentation:
     """Class representing an entire instance segmentation."""
+
     def __init__(self, segmentation_mask: BioMedicalInstanceSegmentationMask):
         self.segmentation_mask = segmentation_mask
         self.neighborhood_graph = orientation_graph_nf(self.segmentation_mask.data)
@@ -267,7 +279,8 @@ class BioMedicalInstanceSegmentation:
         """
         self.neighborhood_graph.remove_node(instance_label)
         self.segmentation_mask = self.segmentation_mask.remove_instance(instance_label)
-        self.segmentation_mask_connected = self.segmentation_mask_connected.remove_instance(instance_label)
+        self.segmentation_mask_connected = self.segmentation_mask_connected.remove_instance(
+            instance_label)  # todo: check if this causes islands and or disconnected components
 
     def set_feature_of_interest(self, connected_component_label, feature_of_interest_name, feature_of_interest_val):
         """Sets the feature of interest for a given connected component label.
@@ -327,6 +340,7 @@ class BioMedicalInstanceSegmentation:
 
 class SingleCellMasksCollection:
     """Collection of single cell masks and the corresponding label."""
+
     def __init__(
             self,
             connected_component_label: int,

@@ -5,9 +5,9 @@ from typing import List, Tuple, Callable, Union, Any
 import numpy as np
 import skimage.filters
 from scipy import ndimage as ndi
+from skimage.future.graph import RAG
 
 from polarityjam.polarityjam_logging import get_logger
-from polarityjam.utils.rag import orientation_graph_nf, remove_islands
 
 
 class Mask:
@@ -107,7 +107,7 @@ class BioMedicalInstanceSegmentationMask(Mask):
     def mask_background(
             self, background_label: Union[int, float] = 0, mask_with: Union[
                 np.ndarray, BioMedicalInstanceSegmentationMask] = None
-    ) -> Self:
+    ) -> BioMedicalInstanceSegmentationMask:
         """Masks the background of the mask."""
         if mask_with is None:
             mask_with = self.data
@@ -263,8 +263,25 @@ class BioMedicalInstanceSegmentation:
 
     def __init__(self, segmentation_mask: BioMedicalInstanceSegmentationMask):
         self.segmentation_mask = segmentation_mask
-        self.neighborhood_graph = orientation_graph_nf(self.segmentation_mask.data)
-        self.segmentation_mask_connected, self.list_of_islands = self.get_connected_instance_mask()
+        self.neighborhood_graph = BioMedicalInstanceSegmentation.get_rag(self.segmentation_mask)
+        self.segmentation_mask_connected = self.init_segmentation_mask(
+            BioMedicalInstanceSegmentation.get_islands(self.neighborhood_graph))
+        self.neighborhood_graph_connected = BioMedicalInstanceSegmentation.get_rag(self.segmentation_mask_connected)
+
+    def update_graphs(self):
+        self.neighborhood_graph = BioMedicalInstanceSegmentation.get_rag(self.segmentation_mask)
+        self.neighborhood_graph_connected = BioMedicalInstanceSegmentation.get_rag(
+            self.segmentation_mask_connected)  # could create potential islands
+        self.segmentation_mask_connected, _ = self.remove_islands()
+
+    def init_segmentation_mask(self, islands: np.ndarray):
+        connected_component_mask = BioMedicalInstanceSegmentationMask(np.copy(self.segmentation_mask.data))
+
+        # remove islands from mask
+        for elemet in islands:
+            connected_component_mask = connected_component_mask.remove_instance(elemet)
+
+        return connected_component_mask
 
     def remove_instance_label(self, instance_label):
         """Removes an instance label from the segmentation
@@ -280,34 +297,20 @@ class BioMedicalInstanceSegmentation:
         self.neighborhood_graph.remove_node(instance_label)
         self.segmentation_mask = self.segmentation_mask.remove_instance(instance_label)
         self.segmentation_mask_connected = self.segmentation_mask_connected.remove_instance(
-            instance_label)  # todo: check if this causes islands and or disconnected components
+            instance_label)
 
-    def set_feature_of_interest(self, connected_component_label, feature_of_interest_name, feature_of_interest_val):
-        """Sets the feature of interest for a given connected component label.
+        self.update_graphs()
 
-        Args:
-            connected_component_label:
-                The connected component label of the cell.
-            feature_of_interest_name:
-                The name of the feature of interest.
-            feature_of_interest_val:
-                The value of the feature of interest.
+    def set_feature_of_interest(self, feature_of_interest_name: str, feature_of_interest_vec: np.ndarray):
+        nodes = sorted(self.neighborhood_graph_connected.nodes)
 
-        Returns:
-            Inplace setting of the feature of interest.
-        """
-        self.neighborhood_graph.nodes[connected_component_label.astype('int')][
-            feature_of_interest_name] = feature_of_interest_val
+        assert len(feature_of_interest_vec) == len(
+            nodes), "The length of the feature of interest vector must match the number of nodes in the graph."
 
-        get_logger().info(
-            " ".join(
-                str(x) for x in ["Cell %s - feature \"%s\": %s" % (
-                    connected_component_label, feature_of_interest_name, feature_of_interest_val
-                )]
-            )
-        )
+        for idx, node in enumerate(nodes):
+            self.neighborhood_graph_connected.nodes[node][feature_of_interest_name] = feature_of_interest_vec[idx]
 
-    def get_connected_instance_mask(self) -> Tuple[BioMedicalInstanceSegmentationMask, List[int]]:
+    def remove_islands(self) -> Tuple[BioMedicalInstanceSegmentationMask, List[int]]:
         """Remove unconnected cells from the mask (Cells without neighbours).
 
         Returns:
@@ -316,26 +319,49 @@ class BioMedicalInstanceSegmentation:
         """
 
         # Get list of islands - nodes with no neighbours and remove them
-        list_of_islands = []
-        for nodes in self.neighborhood_graph.nodes:
-            if len(list(self.neighborhood_graph.neighbors(nodes))) == 0:
-                list_of_islands.append(nodes)
+        list_of_islands = BioMedicalInstanceSegmentation.get_islands(self.neighborhood_graph_connected)
 
-        list_of_islands = np.unique(list_of_islands)
-
-        connected_component_mask = BioMedicalInstanceSegmentationMask(np.copy(self.segmentation_mask.data))
+        connected_component_mask = BioMedicalInstanceSegmentationMask(np.copy(self.segmentation_mask_connected.data))
 
         # remove islands from mask
         for elemet in list_of_islands:
             connected_component_mask = connected_component_mask.remove_instance(elemet)
 
         # remove islands from graph
-        self.neighborhood_graph = remove_islands(self.neighborhood_graph, list_of_islands)
+        for elem in np.unique(list_of_islands):
+            self.neighborhood_graph_connected.remove_node(elem)
 
         get_logger().info("Removed number of islands: %s" % len(list_of_islands))
-        get_logger().info("Number of RAG nodes: %s " % len(list(self.neighborhood_graph.nodes)))
+        get_logger().info("Number of RAG nodes: %s " % len(list(self.neighborhood_graph_connected.nodes)))
 
         return connected_component_mask, list_of_islands
+
+    @staticmethod
+    def get_rag(instance_segmentation: BioMedicalInstanceSegmentationMask, background: int = 0) -> RAG:
+        """Gets the RegionAdjacencyGraph for an instance segmentation image.
+
+        Args:
+            instance_segmentation:
+                The instance segmentation image.
+            background:
+                The background value.
+
+        Returns:
+            The RegionAdjacencyGraph.
+
+        """
+        rag = RAG(instance_segmentation.data)
+        rag.remove_node(background)
+        return rag
+
+    @staticmethod
+    def get_islands(neighborhood_graph: RAG) -> np.ndarray:
+        list_of_islands = []
+        for nodes in neighborhood_graph.nodes:
+            if len(list(neighborhood_graph.neighbors(nodes))) == 0:
+                list_of_islands.append(nodes)
+
+        return np.unique(list_of_islands)
 
 
 class SingleCellMasksCollection:

@@ -77,14 +77,14 @@ class Extractor:
         bio_med_image = BioMedicalImage(img, img_params, segmentation=bio_med_segmentation)
 
         nuclei_mask_seg = None
-        if img_params.channel_nucleus >= 0:  # todo: improve this
+        if bio_med_image.has_nuclei():
             nuclei_mask_seg = BioMedicalMask.from_threshold_otsu(
                 bio_med_image.nucleus.data).overlay_instance_segmentation(
                 bio_med_segmentation.segmentation_mask_connected)
             bio_med_image.nucleus.add_mask("nuclei_mask_seg", nuclei_mask_seg)
 
         organelle_mask_seg = None
-        if img_params.channel_organelle >= 0:
+        if bio_med_image.has_organelle():
             organelle_mask_seg = BioMedicalMask.from_threshold_otsu(
                 bio_med_image.organelle.data).overlay_instance_segmentation(
                 bio_med_segmentation.segmentation_mask_connected)
@@ -103,7 +103,7 @@ class Extractor:
             )
 
             # threshold
-            if self.threshold_size(sc_masks):  # todo: move out of loop
+            if self.threshold_size(sc_masks):
                 get_logger().info(
                     "Cell \"%s\" falls under threshold! Removed from analysis!" % connected_component_label)
                 excluded += 1
@@ -124,21 +124,23 @@ class Extractor:
             )
 
             # append feature of interest to the RAG node for being able to do further analysis
-            foi_val = PropertyCollector.get_foi(collection, self.params.feature_of_interest)
-
-            bio_med_segmentation.set_feature_of_interest(
-                connected_component_label,
-                self.params.feature_of_interest,
-                foi_val
-            )
-
-        num_cells = len(np.unique(bio_med_segmentation.segmentation_mask_connected.data)) - excluded  # todo refactor
+            # foi_val = PropertyCollector.get_foi(collection, self.params.feature_of_interest)
+            #
+            # bio_med_segmentation.set_feature_of_interest(
+            #     connected_component_label,
+            #     self.params.feature_of_interest,
+            #     foi_val
+            # )
+        num_cells = len(bio_med_segmentation.segmentation_mask_connected) - excluded
         get_logger().info("Excluded cells: %s" % str(excluded))
         get_logger().info("Leftover cells: %s" % str(num_cells))
 
+        foi_vec = collection.get_properties_by_img_name(filename_prefix)[self.params.feature_of_interest].values
+        bio_med_segmentation.set_feature_of_interest(self.params.feature_of_interest, foi_vec)
+
         # morans I analysis based on FOI
         morans_i = GroupPropertyCollector.calc_moran(bio_med_segmentation, self.params.feature_of_interest)
-        PropertyCollector.collect_group_statistic(collection, morans_i, num_cells)  # todo: refactor
+        PropertyCollector.collect_group_statistic(collection, morans_i, num_cells)
 
         # neighborhood feature analysis based on FOI
         neighborhood_props_list = GroupPropertyCollector.calc_neighborhood(bio_med_segmentation,

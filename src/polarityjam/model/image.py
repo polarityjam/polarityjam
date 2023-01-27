@@ -131,3 +131,19 @@ class BioMedicalImage:
 
         """
         return sha1(img.copy(order='C')).hexdigest()
+
+    def has_nuclei(self) -> bool:
+        """Returns whether the image has a nucleus channel."""
+        return self.nucleus is not None
+
+    def has_organelle(self) -> bool:
+        """Returns whether the image has an organelle channel."""
+        return self.organelle is not None
+
+    def has_junction(self) -> bool:
+        """Returns whether the image has a junction channel."""
+        return self.junction is not None
+
+    def has_marker(self) -> bool:
+        """Returns whether the image has a marker channel."""
+        return self.marker is not None

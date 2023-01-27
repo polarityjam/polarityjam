@@ -721,7 +721,7 @@ class Plotter:
         if inst_nuclei_mask is not None:
             Plotter._add_cell_eccentricity(fig, ax[0], im_junction, cell_eccentricity)
             # get nuclei eccentricity
-            nuclei_eccentricity_vec = collection.get_properties_by_img_name(img_name).sort_values(by="label")[
+            nuclei_eccentricity_vec = collection.get_properties_by_img_name(img_name)[
                 "nuc_eccentricity"].values
             nuclei_eccentricity = inst_nuclei_mask.relabel(nuclei_eccentricity_vec)
 
@@ -889,7 +889,7 @@ class Plotter:
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
         single_cell_dataset = collection.dataset.loc[collection.dataset["filename"] == img_name]
-        foi_name = collection.get_foi_by_img_name(img_name)
+        foi_name = collection.get_foi_name_by_img_name(img_name)
         foi = single_cell_dataset[foi_name]
         # figure and axes
         fig, ax = self._get_figure(1)
@@ -965,7 +965,7 @@ class Plotter:
         fig, ax = self._get_figure(number_sub_figs)
 
         # get cell_orientation
-        cell_orientation_vec = collection.get_properties_by_img_name(img_name).sort_values(by="label")[
+        cell_orientation_vec = collection.get_properties_by_img_name(img_name)[
             "cell_shape_orientation_deg"].values
         cell_orientation = instance_segmentation_con.relabel(cell_orientation_vec)
 
@@ -974,7 +974,7 @@ class Plotter:
             Plotter._add_cell_orientation(fig, ax[0], im_junction, cell_orientation)
 
             # get nuclei orientation
-            nuc_shape_orientation_rad_vector = collection.get_properties_by_img_name(img_name).sort_values(by="label")[
+            nuc_shape_orientation_rad_vector = collection.get_properties_by_img_name(img_name)[
                 "nuc_shape_orientation_rad"].values
             nuc_shape_orientation_deg_vector = nuc_shape_orientation_rad_vector * 180.0 / np.pi
             nuclei_orientation = inst_nuclei_mask.relabel(nuc_shape_orientation_deg_vector)
@@ -1087,23 +1087,19 @@ class Plotter:
         """
         for key in collection.img_dict.keys():
             img = collection.get_image_by_img_name(key)
-            nuclei_set = img.img_params.channel_nucleus >= 0
-            organelle_set = img.img_params.channel_organelle >= 0
-            junction_set = img.img_params.channel_junction >= 0
-            marker_set = img.img_params.channel_expression_marker >= 0
 
-            if self.params.plot_polarity and nuclei_set and organelle_set:
+            if self.params.plot_polarity and img.has_nuclei() and img.has_organelle():
                 self.plot_organelle_polarity(collection, key, close)
-                if nuclei_set:
+                if img.has_nuclei():
                     self.plot_nuc_displacement_orientation(collection, key, close)
 
-            if self.params.plot_marker and marker_set:
+            if self.params.plot_marker and img.has_marker():
                 self.plot_marker_expression(collection, key, close)
                 self.plot_marker_polarity(collection, key, close)
-                if nuclei_set:
+                if img.has_nuclei():
                     self.plot_marker_nucleus_orientation(collection, key, close)
 
-            if self.params.plot_junctions and junction_set:
+            if self.params.plot_junctions and img.has_junction():
                 self.plot_junction_polarity(collection, key, close)
                 self.plot_corners(collection, key, close)
 

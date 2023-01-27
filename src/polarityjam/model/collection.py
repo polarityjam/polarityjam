@@ -51,7 +51,7 @@ class PropertiesCollection:
         """
         return self.img_dict[img_name]
 
-    def get_foi_by_img_name(self, img_name: str) -> str:
+    def get_foi_name_by_img_name(self, img_name: str) -> str:
         """Get the feature of interest given the image name.
 
         Args:
@@ -64,8 +64,7 @@ class PropertiesCollection:
         """
         return self.feature_of_interest_dict[img_name]
 
-
-    def get_properties_by_img_name(self, img_name: str) -> pd.DataFrame:
+    def get_properties_by_img_name(self, img_name: str, sorted: bool = True) -> pd.DataFrame:
         """Get the properties of the image given its image name.
 
         Args:
@@ -76,7 +75,10 @@ class PropertiesCollection:
             The properties as a pandas dataset
 
         """
-        return self.dataset.loc[self.dataset["filename"] == img_name]
+        features = self.dataset.loc[self.dataset["filename"] == img_name]
+        if sorted:
+            features = features.sort_values(by=["label"], ascending=True)
+        return features
 
     def get_out_path_by_name(self, img_name: str) -> str:
         """Get the output path of the image given its image name.

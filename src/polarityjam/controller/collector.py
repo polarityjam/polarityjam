@@ -101,13 +101,13 @@ class GroupPropertyCollector:
     @staticmethod
     def calc_moran(bio_med_seg: BioMedicalInstanceSegmentation, feature_of_interest_name: str):
         # morans I analysis based on FOI
-        morans_i = run_morans(bio_med_seg.neighborhood_graph, feature_of_interest_name)
+        morans_i = run_morans(bio_med_seg.neighborhood_graph_connected, feature_of_interest_name)
 
         return morans_i
 
     @staticmethod
     def calc_neighborhood(bio_med_seg: BioMedicalInstanceSegmentation, feature_of_interest_name: str):
-        return k_neighbor_dif(bio_med_seg.neighborhood_graph, feature_of_interest_name)
+        return k_neighbor_dif(bio_med_seg.neighborhood_graph_connected, feature_of_interest_name)
 
 
 class SingleCellPropertyCollector:

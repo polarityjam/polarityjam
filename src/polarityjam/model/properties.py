@@ -21,8 +21,7 @@ class SingleCellProps(RegionProperties):
 
         objects = ndi.find_objects(single_cell_mask)
 
-        if len(objects) > 1:
-            raise RuntimeError("Several objects detected in single cell mask! Aborting...")
+        assert len(objects) == 1, "Only one object allowed!"
 
         sl = objects[0]
 

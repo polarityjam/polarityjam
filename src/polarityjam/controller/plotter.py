@@ -65,7 +65,7 @@ class Plotter:
             # membrane outline cannot be summed up on an empty mask, because outlines overlap.
             outline_mem = single_cell_mask.get_outline_from_mask(self.params.membrane_thickness)
             inlines_mem = np.where(np.logical_and(outline_mem.data, inlines_mem.data < intensity_mem), intensity_mem,
-                                    inlines_mem.data)
+                                   inlines_mem.data)
 
             # nuclei marker intensity
             if nuclei_mask is not None:
@@ -950,7 +950,7 @@ class Plotter:
         instance_segmentation_con = img.segmentation.segmentation_mask_connected
 
         inst_nuclei_mask = None
-        if img.img_params.channel_nucleus >= 0:
+        if img.has_nuclei():
             inst_nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg")
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio

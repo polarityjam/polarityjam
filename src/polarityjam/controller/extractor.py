@@ -123,14 +123,6 @@ class Extractor:
                 connected_component_label
             )
 
-            # append feature of interest to the RAG node for being able to do further analysis
-            # foi_val = PropertyCollector.get_foi(collection, self.params.feature_of_interest)
-            #
-            # bio_med_segmentation.set_feature_of_interest(
-            #     connected_component_label,
-            #     self.params.feature_of_interest,
-            #     foi_val
-            # )
         num_cells = len(bio_med_segmentation.segmentation_mask_connected) - excluded
         get_logger().info("Excluded cells: %s" % str(excluded))
         get_logger().info("Leftover cells: %s" % str(num_cells))

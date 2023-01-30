@@ -73,10 +73,9 @@ class TestIntegration(TestCommon):
 
         root = Path(p).parent
         sys.path.insert(0, str(root))
-        os.chdir(root)
-        spec = importlib.util.spec_from_file_location("nb_test", p)
-        nb_test = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(nb_test)
+        spec = importlib.util.spec_from_file_location("nb_test2", p)
+        nb_test2 = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(nb_test2)
 
     @unittest.skipIf(platform.system().lower() == 'windows', "Plotting too memory extensive. Skipping test!")
     def test_nb(self):
@@ -101,8 +100,8 @@ class TestIntegration(TestCommon):
                     if line.startswith(replace_cell_pattern):
                         print("output_path = Path(\"%s\")" % self.data_path.parent)
                         print("input_file = Path(\"%s\")" % self.data_path.parent.joinpath(
-                            "data", "golgi_nuclei", "set_1", "060721_EGM2_18dyn_01.tif"))
-                        print("output_file_prefix = \"060721_EGM2_18dyn_01\"")
+                            "data", "golgi_nuclei", "set_2", "060721_EGM2_18dyn_02.tif"))
+                        print("output_file_prefix = \"060721_EGM2_18dyn_02\"")
                         while not next(myiter, "None").startswith(replace_cell_pattern):
                             print("")
                     else:
@@ -112,7 +111,6 @@ class TestIntegration(TestCommon):
 
         root = Path(p).parent
         sys.path.insert(0, str(root))
-        os.chdir(root)
         spec = importlib.util.spec_from_file_location("nb_test", p)
         nb_test = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(nb_test)

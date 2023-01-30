@@ -37,7 +37,7 @@ class TestIntegration(TestCommon):
     def test_nb_2(self):
         # copy to notebook tmp dir
         path_nb = Path(os.path.dirname(os.path.realpath(__file__))).parent.parent.parent.joinpath(
-            "notebooks", "polarityjam-notebook_api.ipynb"
+            "docs", "notebooks", "polarityjam-notebook_api.ipynb"
         )
         p = self.nb_to_py(path_nb, path_nb.stem, self.tmp_dir)
 
@@ -82,7 +82,7 @@ class TestIntegration(TestCommon):
     def test_nb(self):
         # copy to notebook tmp dir
         path_nb = Path(os.path.dirname(os.path.realpath(__file__))).parent.parent.parent.joinpath(
-            "notebooks", "polarityjam-notebook.ipynb"
+            "docs", "notebooks", "polarityjam-notebook.ipynb"
         )
         p = self.nb_to_py(path_nb, path_nb.stem, self.tmp_dir)
 

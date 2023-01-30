@@ -9,7 +9,7 @@ from polarityjam.compute.neighborhood import k_neighbor_dif
 from polarityjam.model.collection import PropertiesCollection
 from polarityjam.model.image import BioMedicalImage
 from polarityjam.model.masks import BioMedicalInstanceSegmentation, \
-    SingleCellMasksCollection, BioMedicalInstanceSegmentationMask
+    SingleCellMasksCollection, BioMedicalInstanceSegmentationMask, BioMedicalMask
 from polarityjam.model.moran import Moran, run_morans
 from polarityjam.model.properties import SingleCellCellProps, SingleCellNucleusProps, SingleCellOrganelleProps, \
     SingleCellMarkerProps, SingleCellMarkerMembraneProps, SingleCellMarkerNucleiProps, SingleCellMarkerCytosolProps, \
@@ -266,7 +266,8 @@ class SingleCellMaskCollector:
             sc_organelle_mask = organelle_mask_seg.get_single_instance_maks(connected_component_label)
 
         if bio_med_img.junction is not None:
-            sc_junction_protein_mask = bio_med_img.junction.mask(sc_membrane_mask).threshold_otsu()
+            junction_channel_sc_mask = bio_med_img.junction.mask(sc_membrane_mask)
+            sc_junction_protein_mask = BioMedicalMask.from_threshold_otsu(junction_channel_sc_mask.data)
 
         return SingleCellMasksCollection(
             connected_component_label,

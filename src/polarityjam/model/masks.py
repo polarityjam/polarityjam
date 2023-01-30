@@ -88,6 +88,14 @@ class BioMedicalMask(Mask):
         """Converts the mask to an instance segmentation mask."""
         return BioMedicalInstanceSegmentationMask(self.data)
 
+    def mask_background(
+            self,
+    ) -> BioMedicalMask:
+        """Masks the background of the mask."""
+        return BioMedicalMask(
+            np.ma.masked_where(self.data == False, self.data)
+        )
+
 
 class BioMedicalInstanceSegmentationMask(Mask):
     """Class representing an instance segmentation mask."""

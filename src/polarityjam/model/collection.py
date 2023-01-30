@@ -42,8 +42,6 @@ class PropertiesCollection:
         Args:
             img_name:
                 image name of which the channel should be returned
-            channel_name:
-                The channel given its name
 
         Returns:
             The image channel as numpy array

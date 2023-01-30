@@ -4,7 +4,6 @@ from hashlib import sha1
 from typing import Dict, Union
 
 import numpy as np
-import skimage
 
 from polarityjam import ImageParameter
 from polarityjam.model.masks import BioMedicalInstanceSegmentation, BioMedicalMask
@@ -16,14 +15,6 @@ class BioMedicalChannel:  # todo: make it a PIL image for enhanced compatability
     def __init__(self, channel: np.ndarray):
         self.data = channel
         self.masks: Dict[str, Union[BioMedicalMask, BioMedicalInstanceSegmentation]] = {}
-
-    def threshold_otsu(self):
-        """Thresholds the channel using Otsu's method."""
-        otsu_val = skimage.filters.threshold_otsu(self.data)
-        channel = np.copy(self.data)
-        channel[self.data <= otsu_val] = 0
-        channel[self.data > otsu_val] = 1
-        return BioMedicalMask(channel)
 
     def mask(self, mask: BioMedicalMask) -> BioMedicalChannel:
         """Masks the channel with a given mask."""

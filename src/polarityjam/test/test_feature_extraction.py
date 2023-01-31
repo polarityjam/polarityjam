@@ -4,7 +4,7 @@ import networkx as nx
 import numpy as np
 import yaml
 
-from polarityjam.compute.moran import run_morans
+from polarityjam.model.moran import run_morans
 from polarityjam.test.test_common import TestCommon
 from polarityjam.utils.io import read_parameters, read_image
 

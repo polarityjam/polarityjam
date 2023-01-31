@@ -1,17 +1,41 @@
+from typing import List, Set, Tuple
+
 import numpy as np
+from skimage.future.graph import RAG
 
-from polarityjam.polarityjam_logging import get_logger
 from polarityjam.model.properties import NeighborhoodProps
+from polarityjam.polarityjam_logging import get_logger
 
 
-def shared_edges(rag, node):
-    """Return all first nearest neighbor nodes of a given node in a rag"""
+def shared_edges(rag: RAG, node: int) -> List[Set[int]]:
+    """Return all first nearest neighbor nodes of a given node in a rag
+
+    Args:
+        rag:
+            The RegionAdjacencyGraph.
+        node:
+            The node of interest.
+
+    Returns:
+
+    """
     first_nearest = list(set(rag.neighbors(node)))
     return first_nearest
 
 
-def n_neighbors(rag, node):
-    """Return all second and first nearest neighbor nodes of a given node in a rag"""
+def n_neighbors(rag: RAG, node: int) -> Tuple[List[Set[int]], List[int]]:
+    """Get first and second nearest neighbors of a node in a rag
+
+    Args:
+        rag:
+            The RegionAdjacencyGraph.
+        node:
+            The node of interest.
+
+    Returns:
+        Tuple of the first and second nearest neighbors of a node in a rag.
+
+    """
     first_nearest_list = shared_edges(rag, node)
 
     # get list of second nearest neighbors
@@ -30,8 +54,19 @@ def n_neighbors(rag, node):
     return first_nearest_list, second_nearest_list
 
 
-def k_neighbor_dif(graph, foi):
-    """Extracts neighborhood statics from graph."""
+def k_neighbor_dif(graph: RAG, foi: str) -> List[NeighborhoodProps]:
+    """Extracts neighborhood statics from graph."
+
+    Args:
+        graph:
+            The RegionAdjacencyGraph.
+        foi:
+            The feature of interest.
+
+    Returns:
+        List of NeighborhoodProps objects.
+
+    """
     get_logger().info("Calculating first and second nearest neighbor statistic...")
     neighborhood_props_list = []
     for node in graph.nodes():

@@ -49,7 +49,8 @@ Welcome to polarityjam's documentation!
    Usage
    Features
    Visualizations
-   API
+   notebooks/polarityjam-notebook.ipynb
+   notebooks/polarityjam-notebook_api.ipynb
    Methods
    Contribute
 

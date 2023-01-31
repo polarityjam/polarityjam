@@ -5,6 +5,7 @@ from polarityjam.utils.io import read_parameters
 
 
 class Parameter:
+    """Base class for all parameters."""
 
     def __init__(self, *args, **kwargs):
         # init with default values from resources
@@ -33,7 +34,7 @@ class Parameter:
             self._setattr(key, None)
 
     @classmethod
-    def from_yml(cls, path):
+    def from_yml(cls, path: str):
         params = read_parameters(path)
 
         cls(**params)
@@ -46,6 +47,7 @@ class Parameter:
 
 
 class SegmentationParameter(Parameter):
+    """Parameter class for the parameters necessary for the segmentation of images."""
 
     def __init__(self, attrs=None):
         if attrs is None:
@@ -66,7 +68,7 @@ class SegmentationParameter(Parameter):
 
 
 class ImageParameter(Parameter):
-
+    """Parameter class for the parameters necessary for the image processing."""
     def __init__(self, attrs=None):
         if attrs is None:
             attrs = {}
@@ -88,7 +90,7 @@ class ImageParameter(Parameter):
 
 
 class RuntimeParameter(Parameter):
-
+    """Parameter class for the parameters necessary for the calculation of the features."""
     def __init__(self, attrs=None):
         if attrs is None:
             attrs = {}
@@ -103,7 +105,7 @@ class RuntimeParameter(Parameter):
 
 
 class PlotParameter(Parameter):
-
+    """Parameter class for the parameters necessary for the plotting of the results."""
     def __init__(self, attrs=None):
         if attrs is None:
             attrs = {}

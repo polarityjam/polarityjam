@@ -2,9 +2,8 @@ import math
 from typing import List, Tuple
 
 import numpy as np
-import skimage.filters
-import skimage.measure
-from skimage.measure._regionprops import RegionProperties
+
+from polarityjam.utils.decorators import experimental
 
 
 def compute_reference_target_orientation_rad(ref_x: float, ref_y: float, target_x: float, target_y: float) -> float:
@@ -84,7 +83,10 @@ def compute_marker_vector_norm(cell_x: float, cell_y: float, marker_centroid_x: 
     return np.sqrt(distance2)
 
 
-def map_single_cell_to_circle(sc_protein_area, x_centroid, y_centroid, r):  # todo: check if necessary
+@experimental
+def map_single_cell_to_circle(sc_protein_area, x_centroid, y_centroid, r):
+    """Maps a single cell to a circle. NOTE: EXPERIMENTAL"""
+
     circular_img = np.zeros([sc_protein_area.shape[0], sc_protein_area.shape[1]])
     circular_img_count = {}
 
@@ -126,38 +128,6 @@ def map_single_cell_to_circle(sc_protein_area, x_centroid, y_centroid, r):  # to
         circular_img[k[0], k[1]] = circular_img[k[0], k[1]] / circular_img_count[k]
 
     return circular_img
-
-
-def channel_threshold_otsu(channel: np.ndarray, mask: np.ndarray) -> np.ndarray:
-    """Otsu thresholding of a channel. Applying a mask first
-
-    Args:
-        mask:
-           Boolean (or int) mask to apply before thresholding
-        channel:
-            The channel to threshold
-
-    Returns:
-        The otsu thresholded channel after masking
-
-    """
-    # otsu threshold a mask given a channel from the input image
-    masked_channel = mask * channel
-    otsu_val = skimage.filters.threshold_otsu(masked_channel)
-    masked_channel[masked_channel <= otsu_val] = 0
-
-    return masked_channel
-
-
-def compute_single_cell_prop(single_cell_mask: np.ndarray, intensity: int = None) -> RegionProperties:
-    """Gets the single cell properties."""
-    # we are looking at a single cell. There is only one region!
-    regions = skimage.measure.regionprops(single_cell_mask, intensity_image=intensity)
-    if len(regions) > 1:
-        raise ValueError("Too many regions for a single cell!")
-    props = regions[-1]
-
-    return props
 
 
 def straight_line_length(corners: List[Tuple[int, int]]) -> float:

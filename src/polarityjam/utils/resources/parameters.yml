@@ -27,6 +27,7 @@ feature_of_interest : "cell_area"
 min_nucleus_size : 10
 min_organelle_size : 10
 dp_epsilon : 5
+cue_direction : 0
 
 # PlotParameter
 plot_junctions : True

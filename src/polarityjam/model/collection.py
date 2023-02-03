@@ -4,7 +4,7 @@ import pandas as pd
 
 from polarityjam.model.image import BioMedicalImage
 from polarityjam.model.moran import Moran
-from polarityjam.model.properties import SingleCellMarkerProps, SingleCellNucleusProps, SingleCellCellProps, \
+from polarityjam.model.properties import SingleCellMarkerProps, SingleCellNucleusProps, SingleCellProps, \
     SingleCellOrganelleProps, SingleCellMarkerNucleiProps, SingleCellMarkerCytosolProps, SingleCellMarkerMembraneProps, \
     SingleCellJunctionProps, NeighborhoodProps
 
@@ -132,7 +132,7 @@ class PropertiesCollection:
         self.dataset.at[self._index, "nuc_major_to_minor_ratio"] = nucleus_props.nuc_major_to_minor_ratio
 
     def add_sc_general_props(
-            self, filename: str, img_hash: str, connected_component_label: int, sc_props: SingleCellCellProps):
+            self, filename: str, img_hash: str, connected_component_label: int, sc_props: SingleCellProps):
         """Adds general single cell properties to the dataset, including filename, image hash,
         connected component label and general properties.
 

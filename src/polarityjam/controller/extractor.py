@@ -41,6 +41,19 @@ class Extractor:
         return False
 
     def extract_cell_features(self, collection, bio_med_image, bio_med_segmentation, filename_prefix):
+        """Extracts features from cells
+
+        Args:
+            collection:
+                PropertiesCollection object to which the extracted features will be added.
+            bio_med_image:
+                BioMedicalImage object containing the image information.
+            bio_med_segmentation:
+                BioMedicalInstanceSegmentation object containing the segmentation of the cells.
+            filename_prefix:
+                Name prefix for the image used for all produced output.
+
+        """
         nuclei_mask_seg = None
         if bio_med_image.has_nuclei():
             nuclei_mask_seg = BioMedicalMask.from_threshold_otsu(

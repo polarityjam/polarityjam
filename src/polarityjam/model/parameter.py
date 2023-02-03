@@ -100,6 +100,7 @@ class RuntimeParameter(Parameter):
         self.min_nucleus_size = None
         self.min_organelle_size = None
         self.dp_epsilon = None
+        self.cue_direction = None
 
         super().__init__(**attrs)
 

@@ -10,7 +10,7 @@ from polarityjam.model.image import BioMedicalImage
 from polarityjam.model.masks import BioMedicalInstanceSegmentation, \
     SingleCellMasksCollection, BioMedicalInstanceSegmentationMask, BioMedicalMask
 from polarityjam.model.moran import Moran, run_morans
-from polarityjam.model.properties import SingleCellCellProps, SingleCellNucleusProps, SingleCellOrganelleProps, \
+from polarityjam.model.properties import SingleCellProps, SingleCellNucleusProps, SingleCellOrganelleProps, \
     SingleCellMarkerProps, SingleCellMarkerMembraneProps, SingleCellMarkerNucleiProps, SingleCellMarkerCytosolProps, \
     SingleCellJunctionInterfaceProps, SingleCellJunctionIntensityProps, \
     SingleCellJunctionProps, SingleCellPropertiesCollection, NeighborhoodProps
@@ -180,11 +180,11 @@ class SingleCellPropertyCollector:
         )
 
     @staticmethod
-    def calc_sc_cell_props(sc_mask: np.ndarray, param: RuntimeParameter) -> SingleCellCellProps:
-        return SingleCellCellProps(sc_mask, param)
+    def calc_sc_cell_props(sc_mask: np.ndarray, param: RuntimeParameter) -> SingleCellProps:
+        return SingleCellProps(sc_mask, param)
 
     @staticmethod
-    def calc_sc_nucleus_props(sc_nucleus_maks: np.ndarray, sc_props: SingleCellCellProps) -> SingleCellNucleusProps:
+    def calc_sc_nucleus_props(sc_nucleus_maks: np.ndarray, sc_props: SingleCellProps) -> SingleCellNucleusProps:
         return SingleCellNucleusProps(sc_nucleus_maks, sc_props)
 
     @staticmethod
@@ -230,7 +230,7 @@ class SingleCellPropertyCollector:
     ) -> SingleCellJunctionProps:
 
         sc_junction_interface_props = SingleCellJunctionInterfaceProps(single_membrane_mask, im_junction)
-        sc_junction_protein_props = SingleCellJunctionIntensityProps(single_junction_intensity_mask, im_junction)
+        sc_junction_protein_props = SingleCellJunctionIntensityProps(single_junction_intensity_mask, im_junction, param)
 
         return SingleCellJunctionProps(sc_junction_interface_props, sc_junction_protein_props, sc_mask, param)
 

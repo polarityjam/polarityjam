@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 import skimage.measure
 from scipy import ndimage as ndi
@@ -7,10 +9,11 @@ from polarityjam import RuntimeParameter
 from polarityjam.compute.compute import compute_reference_target_orientation_rad, \
     compute_angle_deg, compute_marker_vector_norm, compute_shape_orientation_rad, \
     straight_line_length
-from polarityjam.compute.corner import get_corner
+from polarityjam.compute.corner import get_corner, get_contour
+from polarityjam.compute.shape import partition_single_cell_mask
 
 
-class SingleCellProps(RegionProperties):
+class SingleInstanceProps(RegionProperties):
     """Base class for all single cell properties."""
 
     def __init__(self, single_cell_mask: np.ndarray, intensity: np.ndarray = None):
@@ -24,11 +27,12 @@ class SingleCellProps(RegionProperties):
         sl = objects[0]
 
         self._mask = single_cell_mask
+        self._intensity = intensity
 
         super().__init__(sl, 1, single_cell_mask, intensity, True)
 
 
-class SingleCellCellProps(SingleCellProps):
+class SingleCellProps(SingleInstanceProps):
     """Class representing the properties of a single cell."""
 
     def __init__(self, single_cell_mask: np.ndarray, param: RuntimeParameter):
@@ -54,10 +58,10 @@ class SingleCellCellProps(SingleCellProps):
         return get_corner(self._mask, self.param.dp_epsilon)
 
 
-class SingleCellNucleusProps(SingleCellProps):
+class SingleCellNucleusProps(SingleInstanceProps):
     """Class representing the properties of a single nucleus."""
 
-    def __init__(self, single_nucleus_mask: np.ndarray, sc_props: SingleCellCellProps):
+    def __init__(self, single_nucleus_mask: np.ndarray, sc_props: SingleCellProps):
         super().__init__(single_nucleus_mask)
 
         self._sc_props = sc_props
@@ -85,8 +89,12 @@ class SingleCellNucleusProps(SingleCellProps):
     def nuc_major_to_minor_ratio(self):
         return self.major_axis_length / self.minor_axis_length
 
+    @property
+    def contour_points(self):
+        return get_contour(self._mask)
 
-class SingleCellOrganelleProps(SingleCellProps):
+
+class SingleCellOrganelleProps(SingleInstanceProps):
     """Class representing the properties of a single organelle."""
 
     def __init__(self, single_organelle_mask: np.ndarray, nucleus_props: SingleCellNucleusProps):
@@ -110,8 +118,12 @@ class SingleCellOrganelleProps(SingleCellProps):
     def organelle_orientation_deg(self):
         return compute_angle_deg(self.organelle_orientation_rad)
 
+    @property
+    def contour_points(self):
+        return get_contour(self._mask)
 
-class SingleCellMarkerProps(SingleCellProps):
+
+class SingleCellMarkerProps(SingleInstanceProps):
     """Class representing the properties of a single cell marker signal."""
 
     def __init__(self, single_cell_mask: np.ndarray, im_marker: np.ndarray):
@@ -132,7 +144,7 @@ class SingleCellMarkerProps(SingleCellProps):
         return self.mean_intensity * self.area
 
 
-class SingleCellMarkerMembraneProps(SingleCellProps):
+class SingleCellMarkerMembraneProps(SingleInstanceProps):
     """Class representing the properties of a single cell membrane signal."""
 
     def __init__(self, single_membrane_mask: np.ndarray, im_marker: np.ndarray):
@@ -143,7 +155,7 @@ class SingleCellMarkerMembraneProps(SingleCellProps):
         return self.mean_intensity * self.area
 
 
-class SingleCellMarkerNucleiProps(SingleCellProps):
+class SingleCellMarkerNucleiProps(SingleInstanceProps):
     """Class representing the properties of a single cell marker nucleus signal."""
 
     def __init__(
@@ -175,7 +187,7 @@ class SingleCellMarkerNucleiProps(SingleCellProps):
         return self.mean_intensity * self.area
 
 
-class SingleCellMarkerCytosolProps(SingleCellProps):
+class SingleCellMarkerCytosolProps(SingleInstanceProps):
     """Class representing the properties of a single cell marker cytosol signal."""
 
     def __init__(
@@ -196,15 +208,37 @@ class SingleCellMarkerCytosolProps(SingleCellProps):
         return self.sc_marker_nuclei_props.mean_intensity / self.mean_intensity
 
 
-class SingleCellJunctionInterfaceProps(SingleCellProps):
+class SingleCellJunctionInterfaceProps(SingleInstanceProps):
     # Based on junction mapper: https://doi.org/10.7554/eLife.45413
     def __init__(self, single_membrane_mask: np.ndarray, im_junction: np.ndarray):
         super().__init__(single_membrane_mask, im_junction)
 
 
-class SingleCellJunctionIntensityProps(SingleCellProps):
-    def __init__(self, single_junction_intensity_mask: np.ndarray, im_junction: np.ndarray):
+class SingleCellJunctionIntensityProps(SingleInstanceProps):
+    def __init__(self, single_junction_intensity_mask: np.ndarray, im_junction: np.ndarray, param: RuntimeParameter):
         super().__init__(single_junction_intensity_mask, im_junction)
+        self._param = param
+        self._partition_masks = partition_single_cell_mask(
+            self._mask,
+            self._param.cue_direction,
+            self.axis_major_length,
+            4
+        )
+
+    @property
+    def lft_right_ratio(self):
+        left = self._intensity * self._partition_masks[1].data * self._mask
+        right = self._intensity * self._partition_masks[3].data * self._mask
+        return np.mean(left) / np.mean(right)
+
+    @property
+    def top_bottom_vs_left_right(self):
+        left = self._intensity * self._partition_masks[1].data * self._mask
+        right = self._intensity * self._partition_masks[3].data * self._mask
+        top = self._intensity * self._partition_masks[0].data * self._mask
+        bottom = self._intensity * self._partition_masks[2].data * self._mask
+
+        return (np.mean(top) + np.mean(bottom)) / (np.mean(left) + np.mean(right))
 
 
 class SingleCellJunctionProps:
@@ -250,6 +284,14 @@ class SingleCellJunctionProps:
     def junction_cluster_density(self):
         return self.junction_protein_intensity / self.sc_junction_intensity_props.area
 
+    @property
+    def junction_lft_right_ratio(self):
+        return self.sc_junction_intensity_props.lft_right_ratio
+
+    @property
+    def junction_top_bottom_vs_left_right(self):
+        return self.sc_junction_intensity_props.top_bottom_vs_left_right
+
 
 class NeighborhoodProps:
     """Class representing the properties of cell neighborhood."""
@@ -270,7 +312,7 @@ class SingleCellPropertiesCollection:
     """Collection of properties of a single cell."""
 
     def __init__(
-            self, single_cell_props: SingleCellCellProps,
+            self, single_cell_props: SingleCellProps,
             nucleus_props: SingleCellNucleusProps,
             organelle_props: SingleCellOrganelleProps,
             marker_props: SingleCellMarkerProps,

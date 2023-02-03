@@ -5,6 +5,34 @@ import cv2
 import numpy as np
 
 
+def get_contour(sc_img: np.ndarray) -> np.ndarray:
+    """Get the contour of a single cell image.
+
+    Args:
+        sc_img:
+            The single cell image
+
+    Returns:
+        The contour coordinates of the single cell
+
+    """
+    contours, _ = cv2.findContours(sc_img.astype(bool).astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    idx_l = 0
+    len_l = 0
+    if len(contours) > 1:
+        # only take the longest contour
+        for idx, c in enumerate(contours):
+            if len(c) > len_l:
+                idx_l = idx
+                len_l = len(c)
+
+    contours = contours[idx_l].squeeze(1)
+
+    contours = np.concatenate((contours, [contours[0]]))
+
+    return contours
+
+
 def get_corner(sc_img: np.ndarray, epsilon: int = 5) -> List[Tuple[int, int]]:
     """Get the corner of a single cell image.
 
@@ -19,21 +47,7 @@ def get_corner(sc_img: np.ndarray, epsilon: int = 5) -> List[Tuple[int, int]]:
         The corner coordinates of the single cell in the image
 
     """
-    contours, _ = cv2.findContours(sc_img.astype(bool).astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-
-    idx_l = 0
-    len_l = 0
-    if len(contours) > 1:
-        # only take the longest contour
-        for idx, c in enumerate(contours):
-            if len(c) > len_l:
-                idx_l = idx
-                len_l = len(c)
-
-    contours = contours[idx_l].squeeze(1)
-
-    # append first point to build a circular structure
-    contours = np.concatenate((contours, [contours[0]]))
+    contours = get_contour(sc_img)
 
     corners = douglas_peucker(contours, epsilon)
 

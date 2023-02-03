@@ -4,7 +4,6 @@ from typing import List, Union
 import numpy as np
 
 from polarityjam import RuntimeParameter
-from polarityjam.compute.compute import channel_threshold_otsu
 from polarityjam.compute.neighborhood import k_neighbor_dif
 from polarityjam.model.collection import PropertiesCollection
 from polarityjam.model.image import BioMedicalImage
@@ -13,7 +12,7 @@ from polarityjam.model.masks import BioMedicalInstanceSegmentation, \
 from polarityjam.model.moran import Moran, run_morans
 from polarityjam.model.properties import SingleCellCellProps, SingleCellNucleusProps, SingleCellOrganelleProps, \
     SingleCellMarkerProps, SingleCellMarkerMembraneProps, SingleCellMarkerNucleiProps, SingleCellMarkerCytosolProps, \
-    SingleCellJunctionInterfaceProps, SingleCellJunctionProteinProps, SingleCellJunctionProteinCircularProps, \
+    SingleCellJunctionInterfaceProps, SingleCellJunctionIntensityProps, \
     SingleCellJunctionProps, SingleCellPropertiesCollection, NeighborhoodProps
 
 
@@ -160,14 +159,12 @@ class SingleCellPropertyCollector:
                     sc_masks.sc_cytosol_mask.data.astype(int), img.marker.data, sc_marker_nuclei_props
                 )
 
-        # properties for junctions
         if img.junction.data is not None:
             sc_junction_props = SingleCellPropertyCollector.calc_sc_junction_props(
                 sc_masks.sc_mask.data.astype(int),
                 sc_masks.sc_membrane_mask.data.astype(int),
                 sc_masks.sc_junction_protein_area_mask.data.astype(int),
                 img.junction.data,
-                sc_cell_props.minor_axis_length,
                 param
             )
 
@@ -191,8 +188,10 @@ class SingleCellPropertyCollector:
         return SingleCellNucleusProps(sc_nucleus_maks, sc_props)
 
     @staticmethod
-    def calc_sc_organelle_props(sc_organelle_mask: np.ndarray,
-                                sc_nucleus_props: SingleCellNucleusProps) -> SingleCellOrganelleProps:
+    def calc_sc_organelle_props(
+            sc_organelle_mask: np.ndarray,
+            sc_nucleus_props: SingleCellNucleusProps
+    ) -> SingleCellOrganelleProps:
         return SingleCellOrganelleProps(sc_organelle_mask, sc_nucleus_props)
 
     @staticmethod
@@ -200,42 +199,40 @@ class SingleCellPropertyCollector:
         return SingleCellMarkerProps(sc_mask, im_marker)
 
     @staticmethod
-    def calc_sc_marker_membrane_props(sc_membrane_mask: np.ndarray,
-                                      im_marker: np.ndarray) -> SingleCellMarkerMembraneProps:
+    def calc_sc_marker_membrane_props(
+            sc_membrane_mask: np.ndarray,
+            im_marker: np.ndarray
+    ) -> SingleCellMarkerMembraneProps:
         return SingleCellMarkerMembraneProps(sc_membrane_mask, im_marker)
 
     @staticmethod
-    def calc_sc_marker_nuclei_props(sc_nucleus_mask: np.ndarray, im_marker: np.ndarray,
-                                    sc_nucleus_props: SingleCellNucleusProps,
-                                    sc_marker_props: SingleCellMarkerProps) -> SingleCellMarkerNucleiProps:
+    def calc_sc_marker_nuclei_props(
+            sc_nucleus_mask: np.ndarray, im_marker: np.ndarray,
+            sc_nucleus_props: SingleCellNucleusProps,
+            sc_marker_props: SingleCellMarkerProps
+    ) -> SingleCellMarkerNucleiProps:
         return SingleCellMarkerNucleiProps(sc_nucleus_mask, im_marker, sc_nucleus_props, sc_marker_props)
 
     @staticmethod
-    def calc_sc_marker_cytosol_props(sc_cytosol_mask: np.ndarray, im_marker: np.ndarray,
-                                     sc_marker_nuclei_props: SingleCellMarkerNucleiProps) -> SingleCellMarkerCytosolProps:
+    def calc_sc_marker_cytosol_props(
+            sc_cytosol_mask: np.ndarray, im_marker: np.ndarray,
+            sc_marker_nuclei_props: SingleCellMarkerNucleiProps
+    ) -> SingleCellMarkerCytosolProps:
         return SingleCellMarkerCytosolProps(sc_cytosol_mask, im_marker, sc_marker_nuclei_props)
 
     @staticmethod
-    def calc_sc_junction_props(sc_mask: np.ndarray, single_membrane_mask: np.ndarray,
-                               single_junction_protein_area_mask: np.ndarray,
-                               im_junction: np.ndarray, cell_minor_axis_length: float,
-                               param: RuntimeParameter) -> SingleCellJunctionProps:
-
-        im_junction_protein_single_cell = channel_threshold_otsu(im_junction, single_membrane_mask)
+    def calc_sc_junction_props(
+            sc_mask: np.ndarray,
+            single_membrane_mask: np.ndarray,
+            single_junction_intensity_mask: np.ndarray,
+            im_junction: np.ndarray,
+            param: RuntimeParameter
+    ) -> SingleCellJunctionProps:
 
         sc_junction_interface_props = SingleCellJunctionInterfaceProps(single_membrane_mask, im_junction)
+        sc_junction_protein_props = SingleCellJunctionIntensityProps(single_junction_intensity_mask, im_junction)
 
-        sc_junction_protein_props = SingleCellJunctionProteinProps(single_junction_protein_area_mask,
-                                                                   im_junction_protein_single_cell)
-
-        sc_junction_protein_circular_props = SingleCellJunctionProteinCircularProps(
-            im_junction_protein_single_cell,
-            cell_minor_axis_length,
-            sc_junction_interface_props.centroid
-        )
-
-        return SingleCellJunctionProps(sc_junction_interface_props, sc_junction_protein_props,
-                                       sc_junction_protein_circular_props, sc_mask, param)
+        return SingleCellJunctionProps(sc_junction_interface_props, sc_junction_protein_props, sc_mask, param)
 
 
 class SingleCellMaskCollector:
@@ -266,8 +263,11 @@ class SingleCellMaskCollector:
             sc_organelle_mask = organelle_mask_seg.get_single_instance_maks(connected_component_label)
 
         if bio_med_img.junction is not None:
-            junction_channel_sc_mask = bio_med_img.junction.mask(sc_membrane_mask)
-            sc_junction_protein_mask = BioMedicalMask.from_threshold_otsu(junction_channel_sc_mask.data)
+            masked_sc_junction_channel = bio_med_img.junction.mask(sc_membrane_mask)
+            sc_junction_protein_mask = BioMedicalMask.from_threshold_otsu(
+                masked_sc_junction_channel.data,
+                gaussian_filter=None
+            )
 
         return SingleCellMasksCollection(
             connected_component_label,

@@ -17,9 +17,12 @@ class Mask:
         self.data = mask.astype(bool)
 
     @classmethod
-    def from_threshold_otsu(cls, channel: np.ndarray) -> Mask:
+    def from_threshold_otsu(cls, channel: np.ndarray, gaussian_filter=3) -> Mask:
         """Initializes a mask from a channel using Otsu's method."""
-        img_channel_blur = ndi.gaussian_filter(channel, sigma=3)
+        if gaussian_filter is not None:
+            img_channel_blur = ndi.gaussian_filter(channel, sigma=3)
+        else:
+            img_channel_blur = channel
         interior_mask = np.where(img_channel_blur > skimage.filters.threshold_otsu(img_channel_blur), True, False)
 
         return cls(interior_mask)

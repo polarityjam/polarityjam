@@ -219,12 +219,12 @@ class PropertiesCollection:
                 The single cell junction properties
 
         """
-        junctions_centroid_x, junctions_centroid_y = sc_junction_props.sc_junction_protein_circular_props.weighted_centroid
+        junctions_centroid_x, junctions_centroid_y = sc_junction_props.sc_junction_intensity_props.weighted_centroid
 
         self.dataset.at[self._index, "junction_centroid_X"] = junctions_centroid_x
         self.dataset.at[self._index, "junction_centroid_Y"] = junctions_centroid_y
         self.dataset.at[self._index, "junction_perimeter"] = sc_junction_props.interface_perimeter
-        self.dataset.at[self._index, "junction_protein_area"] = sc_junction_props.sc_junction_protein_props.area
+        self.dataset.at[self._index, "junction_protein_area"] = sc_junction_props.sc_junction_intensity_props.area
         # dataset.at[index, "junction_fragmented_perimeter"] = sc_junction_props.junction_fragmented_perimeter
         self.dataset.at[
             self._index, "junction_mean_expression"] = sc_junction_props.sc_junction_interface_props.mean_intensity

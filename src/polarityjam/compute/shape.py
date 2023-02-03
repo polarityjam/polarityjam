@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union, List, Tuple
 
 import cv2
 import numpy as np
@@ -7,10 +7,25 @@ from shapely.geometry import LineString
 from shapely.geometry.polygon import Polygon
 from shapely.ops import split
 
+from polarityjam.compute.compute import compute_reference_target_orientation_rad, compute_angle_deg
 from polarityjam.compute.corner import get_contour
 
 
 def mask_from_contours(ref_img: np.ndarray, coord_list_x: np.ndarray, coord_list_y: np.ndarray) -> np.ndarray:
+    """Create a mask from a list of coordinates.
+
+    Args:
+        ref_img:
+            The reference image
+        coord_list_x:
+            The x coordinates
+        coord_list_y:
+            The y coordinates
+
+    Returns:
+        The mask
+
+    """
     mask = np.zeros(ref_img.shape, dtype=np.uint8)
 
     l = []
@@ -23,7 +38,8 @@ def mask_from_contours(ref_img: np.ndarray, coord_list_x: np.ndarray, coord_list
 
 
 def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
-                               major_axes_length: Union[int, float], num_partitions: int) -> List[np.ndarray]:
+                               major_axes_length: Union[int, float], num_partitions: int) -> Tuple[
+    List[np.ndarray], List[Polygon]]:
     """Partitions a single cell mask into multiple masks from its centroid.
 
     Args:
@@ -70,12 +86,23 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
     splits = LineString(div_coords)
     sectors = split(pg, splits)
 
+    polygons = list(sectors.geoms)
+
+    polygons.sort(
+        key=lambda x: compute_angle_deg(
+            compute_reference_target_orientation_rad(
+                pg_cent_a, pg_cent_b,
+                x.centroid.coords.xy[0][0], x.centroid.coords.xy[1][0]
+            )
+        ) - div_angle / 2
+    )
+
     masks = []
-    for i in range(0, num_partitions):
-        c = sectors[i].exterior.coords.xy
+    for s in polygons:
+        c = s.exterior.coords.xy
         x = np.asarray(c[0].tolist()).astype(np.uint)
         y = np.asarray(c[1].tolist()).astype(np.uint)
 
         masks.append(mask_from_contours(sc_mask, x, y))
 
-    return masks
+    return masks, polygons

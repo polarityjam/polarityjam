@@ -218,7 +218,7 @@ class SingleCellJunctionIntensityProps(SingleInstanceProps):
     def __init__(self, single_junction_intensity_mask: np.ndarray, im_junction: np.ndarray, param: RuntimeParameter):
         super().__init__(single_junction_intensity_mask, im_junction)
         self._param = param
-        self._partition_masks = partition_single_cell_mask(
+        self._partition_masks, self._partition_polygons = partition_single_cell_mask(
             self._mask,
             self._param.cue_direction,
             self.axis_major_length,
@@ -227,16 +227,16 @@ class SingleCellJunctionIntensityProps(SingleInstanceProps):
 
     @property
     def lft_right_ratio(self):
-        left = self._intensity * self._partition_masks[1].data * self._mask
-        right = self._intensity * self._partition_masks[3].data * self._mask
+        left = self._intensity * self._partition_masks[1] * self._mask
+        right = self._intensity * self._partition_masks[3] * self._mask
         return np.mean(left) / np.mean(right)
 
     @property
     def top_bottom_vs_left_right(self):
-        left = self._intensity * self._partition_masks[1].data * self._mask
-        right = self._intensity * self._partition_masks[3].data * self._mask
-        top = self._intensity * self._partition_masks[0].data * self._mask
-        bottom = self._intensity * self._partition_masks[2].data * self._mask
+        left = self._intensity * self._partition_masks[1] * self._mask
+        right = self._intensity * self._partition_masks[3] * self._mask
+        top = self._intensity * self._partition_masks[0] * self._mask
+        bottom = self._intensity * self._partition_masks[2] * self._mask
 
         return (np.mean(top) + np.mean(bottom)) / (np.mean(left) + np.mean(right))
 

@@ -162,10 +162,9 @@ class SingleCellPropertyCollector:
         if img.junction.data is not None:
             sc_junction_props = SingleCellPropertyCollector.calc_sc_junction_props(
                 sc_masks.sc_mask.data.astype(int),
-                sc_masks.sc_membrane_mask.data.astype(int),
-                sc_masks.sc_junction_protein_area_mask.data.astype(int),
                 img.junction.data,
-                param
+                sc_masks.sc_membrane_mask.data.astype(int),
+                sc_masks.sc_junction_protein_area_mask.data.astype(int), param
             )
 
         return SingleCellPropertiesCollection(
@@ -223,16 +222,15 @@ class SingleCellPropertyCollector:
     @staticmethod
     def calc_sc_junction_props(
             sc_mask: np.ndarray,
-            single_membrane_mask: np.ndarray,
-            single_junction_intensity_mask: np.ndarray,
             im_junction: np.ndarray,
-            param: RuntimeParameter
+            single_cell_membrane_mask: np.ndarray,
+            single_cell_junction_intensity_mask: np.ndarray,
+            runtime_parameter: RuntimeParameter
     ) -> SingleCellJunctionProps:
 
-        sc_junction_interface_props = SingleCellJunctionInterfaceProps(single_membrane_mask, im_junction)
-        sc_junction_protein_props = SingleCellJunctionIntensityProps(single_junction_intensity_mask, im_junction, param)
-
-        return SingleCellJunctionProps(sc_junction_interface_props, sc_junction_protein_props, sc_mask, param)
+        return SingleCellJunctionProps(
+            im_junction, single_cell_membrane_mask, single_cell_junction_intensity_mask, sc_mask, runtime_parameter
+        )
 
 
 class SingleCellMaskCollector:

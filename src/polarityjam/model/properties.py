@@ -208,34 +208,42 @@ class SingleCellMarkerCytosolProps(SingleInstanceProps):
         return self.sc_marker_nuclei_props.mean_intensity / self.mean_intensity
 
 
-class SingleCellJunctionInterfaceProps(SingleInstanceProps):
-    # Based on junction mapper: https://doi.org/10.7554/eLife.45413
-    def __init__(self, single_membrane_mask: np.ndarray, im_junction: np.ndarray):
-        super().__init__(single_membrane_mask, im_junction)
-
-
-class SingleCellJunctionIntensityProps(SingleInstanceProps):
-    def __init__(self, single_junction_intensity_mask: np.ndarray, im_junction: np.ndarray, param: RuntimeParameter):
-        super().__init__(single_junction_intensity_mask, im_junction)
-        self._param = param
-
-
 class SingleCellJunctionProps:
+    # Junction properties subclasses
+    class SingleCellJunctionInterfaceProps(SingleInstanceProps):
+        # Based on junction mapper: https://doi.org/10.7554/eLife.45413
+        def __init__(self, single_membrane_mask: np.ndarray, im_junction: np.ndarray):
+            super().__init__(single_membrane_mask, im_junction)
+
+    class SingleCellJunctionIntensityProps(SingleInstanceProps):
+        def __init__(self, single_junction_intensity_mask: np.ndarray, im_junction: np.ndarray,
+                     param: RuntimeParameter):
+            super().__init__(single_junction_intensity_mask, im_junction)
+            self._param = param
+
     """Class representing the properties of a single cell junction."""
 
     def __init__(
             self,
-            sc_junction_interface_props: SingleCellJunctionInterfaceProps,
-            sc_junction_intensity_props: SingleCellJunctionIntensityProps,
-            sc_mask: np.ndarray,
+            im_junction: np.ndarray,
+            single_cell_mask: np.ndarray,
+            single_cell_membrane_mask: np.ndarray,
+            single_cell_junction_intensity_mask: np.ndarray,
             params: RuntimeParameter
     ):
-        self.sc_mask = sc_mask
-        self.sc_junction_interface_props = sc_junction_interface_props
-        self.sc_junction_intensity_props = sc_junction_intensity_props
+        self.img_junction = im_junction
+        self.single_cell_mask = single_cell_mask
+        self.single_membrane_mask = single_cell_membrane_mask
+        self.single_cell_junction_intensity_mask = single_cell_junction_intensity_mask
         self.params = params
+
+        self.sc_junction_interface_props = self.SingleCellJunctionInterfaceProps(single_cell_membrane_mask, im_junction)
+        self.sc_junction_intensity_props = self.SingleCellJunctionIntensityProps(
+            single_cell_junction_intensity_mask, im_junction, params
+        )
+
         self.quadrant_masks, self._partition_polygons = partition_single_cell_mask(
-            self.sc_mask,
+            np.logical_or(self.single_cell_mask, self.sc_junction_interface_props.mask),
             self.params.cue_direction,
             self.sc_junction_interface_props.axis_major_length,
             4
@@ -243,11 +251,11 @@ class SingleCellJunctionProps:
 
     @property
     def straight_line_junction_length(self):
-        return straight_line_length(get_corner(self.sc_mask, self.params.dp_epsilon))
+        return straight_line_length(get_corner(self.single_cell_mask, self.params.dp_epsilon))
 
     @property
     def interface_perimeter(self):
-        return skimage.measure.perimeter(self.sc_mask)
+        return skimage.measure.perimeter(self.single_cell_mask)
 
     @property
     def junction_interface_linearity_index(self):

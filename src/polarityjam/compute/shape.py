@@ -43,7 +43,7 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
     """Partitions a single cell mask into multiple masks from its centroid.
 
     Args:
-        sc_mask:
+        sc_mask_f:
             The single cell mask
         cue_direction:
             The orientation of the cue (e.g. flow)
@@ -57,11 +57,12 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
 
     """
     # cv2 needs flipped y axis
-    sc_mask = np.flip(sc_mask, axis=0)
+    sc_mask_f = np.flip(sc_mask, axis=0)
 
     # get the contour of the single cell mask
-    contours = get_contour(sc_mask.astype(int))
+    contours = get_contour(sc_mask_f.astype(int))
     pg = Polygon(contours)
+    pg_convex = pg.convex_hull
 
     pg_cent_a = int(pg.centroid.coords.xy[0][0])
     pg_cent_b = int(pg.centroid.coords.xy[1][0])
@@ -85,7 +86,7 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
         div_coords += [(int(np.rint(x)), int(np.rint(y))) for x, y in [*div.coords]]
 
     splits = LineString(div_coords)
-    sectors = split(pg, splits)
+    sectors = split(pg_convex, splits)
 
     polygons = list(sectors.geoms)
 
@@ -105,8 +106,12 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
         y = np.asarray(c[1].tolist()).astype(np.uint)
 
         # flip back to original y axis
-        masks.append(np.flip(mask_from_contours(sc_mask, x, y), axis=0))
+        convex_mask = np.flip(mask_from_contours(sc_mask_f, x, y), axis=0)
 
-    assert len(masks) == num_partitions, "Number of partitions does not match the number of masks."
+        # keep only concave hull parts of the mask
+        masks.append((np.logical_and(convex_mask, sc_mask)).astype(np.uint8))
+
+    assert len(masks) == num_partitions, "Number of partitions(%s) does not match the number of masks (%s)." % (
+        num_partitions, len(masks))
 
     return masks, polygons

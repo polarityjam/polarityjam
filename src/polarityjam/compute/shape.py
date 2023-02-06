@@ -6,8 +6,8 @@ from shapely.affinity import rotate
 from shapely.geometry import LineString
 from shapely.geometry.polygon import Polygon
 from shapely.ops import split
-
-from polarityjam.compute.compute import compute_reference_target_orientation_rad, compute_angle_deg
+from collections import deque
+from polarityjam.compute.compute import compute_angle_deg, compute_ref_x_abs_angle_deg
 from polarityjam.compute.corner import get_contour
 
 
@@ -56,8 +56,9 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
         The list of partitioned masks counter clock wise from the cue direction
 
     """
+    # cv2 needs flipped y axis
+    sc_mask = np.flip(sc_mask, axis=0)
 
-    # todo figure out why order is sometimes different
     # get the contour of the single cell mask
     contours = get_contour(sc_mask.astype(int))
     pg = Polygon(contours)
@@ -89,12 +90,11 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
     polygons = list(sectors.geoms)
 
     polygons.sort(
-        key=lambda x: compute_angle_deg(
-            compute_reference_target_orientation_rad(
+        key=lambda x:
+            compute_ref_x_abs_angle_deg(
                 pg_cent_a, pg_cent_b,
                 x.centroid.coords.xy[0][0], x.centroid.coords.xy[1][0]
-            )
-        ) - div_angle / 2
+            ) - div_angle / 2
     )
 
     masks = []
@@ -103,6 +103,7 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
         x = np.asarray(c[0].tolist()).astype(np.uint)
         y = np.asarray(c[1].tolist()).astype(np.uint)
 
-        masks.append(mask_from_contours(sc_mask, x, y))
+        # flip back to original y axis
+        masks.append(np.flip(mask_from_contours(sc_mask, x, y), axis=0))
 
     return masks, polygons

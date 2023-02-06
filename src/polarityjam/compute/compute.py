@@ -30,6 +30,34 @@ def compute_reference_target_orientation_rad(ref_x: float, ref_y: float, target_
     return organelle_orientation_rad
 
 
+def compute_ref_x_abs_angle_deg(ref_x: float, ref_y: float, x: float, y: float) -> float:
+    """Computes the angle between the x-axis and the vector (x,y).
+
+    Args:
+        ref_y:
+            The y coordinate of the reference point
+        ref_x:
+            The x coordinate of the reference point
+        x:
+            The x coordinate
+        y:
+            The y coordinate
+
+    Returns:
+        The angle in rad
+
+    """
+    y_vec = y - ref_y
+    x_vec = x - ref_x
+
+    angle_deg = compute_angle_deg(np.arctan2(y_vec, x_vec))
+
+    if angle_deg < 0:
+        angle_deg = (180 - abs(angle_deg)) + 180
+
+    return angle_deg
+
+
 def compute_angle_deg(angle_rad: float) -> float:
     """Computes the angle given in rad in degrees.
 

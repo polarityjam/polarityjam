@@ -1,24 +1,38 @@
 from __future__ import annotations
 
+from typing import Union
+
 import numpy as np
 import skimage.measure
 from scipy import ndimage as ndi
 from skimage.measure._regionprops import RegionProperties
 
-from polarityjam import RuntimeParameter
+from polarityjam.model.parameter import RuntimeParameter
+from polarityjam.model.masks import BioMedicalMask
 from polarityjam.compute.compute import compute_reference_target_orientation_rad, \
     compute_angle_deg, compute_marker_vector_norm, compute_shape_orientation_rad, \
     straight_line_length
 from polarityjam.compute.corner import get_corner, get_contour
 from polarityjam.compute.shape import partition_single_cell_mask
+from polarityjam.model.image import BioMedicalChannel
 
 
 class SingleInstanceProps(RegionProperties):
     """Base class for all single cell properties."""
 
-    def __init__(self, single_cell_mask: np.ndarray, intensity: np.ndarray = None):
-        if not np.issubdtype(single_cell_mask.dtype, np.integer):
-            raise RuntimeError("Only integer images allowed!")
+    def __init__(
+            self, single_cell_mask: Union[np.ndarray, BioMedicalMask],
+            intensity: Union[np.ndarray, BioMedicalChannel] = None
+    ):
+
+        if isinstance(single_cell_mask, BioMedicalMask):
+            single_cell_mask = single_cell_mask.to_instance_mask(1).data
+        else:
+            if not np.issubdtype(single_cell_mask.dtype, np.integer):
+                raise RuntimeError("Only integer images allowed!")
+
+        if isinstance(intensity, BioMedicalChannel):
+            intensity = intensity.data
 
         objects = ndi.find_objects(single_cell_mask)
 
@@ -35,7 +49,7 @@ class SingleInstanceProps(RegionProperties):
 class SingleCellProps(SingleInstanceProps):
     """Class representing the properties of a single cell."""
 
-    def __init__(self, single_cell_mask: np.ndarray, param: RuntimeParameter):
+    def __init__(self, single_cell_mask: BioMedicalMask, param: RuntimeParameter):
         self.param = param
         super().__init__(single_cell_mask)
 
@@ -61,7 +75,7 @@ class SingleCellProps(SingleInstanceProps):
 class SingleCellNucleusProps(SingleInstanceProps):
     """Class representing the properties of a single nucleus."""
 
-    def __init__(self, single_nucleus_mask: np.ndarray, sc_props: SingleCellProps):
+    def __init__(self, single_nucleus_mask: BioMedicalMask, sc_props: SingleCellProps):
         super().__init__(single_nucleus_mask)
 
         self._sc_props = sc_props
@@ -97,7 +111,7 @@ class SingleCellNucleusProps(SingleInstanceProps):
 class SingleCellOrganelleProps(SingleInstanceProps):
     """Class representing the properties of a single organelle."""
 
-    def __init__(self, single_organelle_mask: np.ndarray, nucleus_props: SingleCellNucleusProps):
+    def __init__(self, single_organelle_mask: BioMedicalMask, nucleus_props: SingleCellNucleusProps):
         super().__init__(single_organelle_mask)
 
         self._nucleus_props = nucleus_props
@@ -126,7 +140,7 @@ class SingleCellOrganelleProps(SingleInstanceProps):
 class SingleCellMarkerProps(SingleInstanceProps):
     """Class representing the properties of a single cell marker signal."""
 
-    def __init__(self, single_cell_mask: np.ndarray, im_marker: np.ndarray):
+    def __init__(self, single_cell_mask: BioMedicalMask, im_marker: BioMedicalChannel):
         super().__init__(single_cell_mask, im_marker)
 
     @property
@@ -147,7 +161,7 @@ class SingleCellMarkerProps(SingleInstanceProps):
 class SingleCellMarkerMembraneProps(SingleInstanceProps):
     """Class representing the properties of a single cell membrane signal."""
 
-    def __init__(self, single_membrane_mask: np.ndarray, im_marker: np.ndarray):
+    def __init__(self, single_membrane_mask: BioMedicalMask, im_marker: BioMedicalChannel):
         super().__init__(single_membrane_mask, im_marker)
 
     @property
@@ -160,8 +174,8 @@ class SingleCellMarkerNucleiProps(SingleInstanceProps):
 
     def __init__(
             self,
-            single_nucleus_mask: np.ndarray,
-            im_marker: np.ndarray,
+            single_nucleus_mask: BioMedicalMask,
+            im_marker: BioMedicalChannel,
             sc_nucleus_props: SingleCellNucleusProps,
             sc_marker_props: SingleCellMarkerProps
     ):
@@ -192,8 +206,8 @@ class SingleCellMarkerCytosolProps(SingleInstanceProps):
 
     def __init__(
             self,
-            single_cytosol_mask: np.ndarray,
-            im_marker: np.ndarray,
+            single_cytosol_mask: BioMedicalMask,
+            im_marker: BioMedicalChannel,
             sc_marker_nuclei_props: SingleCellMarkerNucleiProps
     ):
         super().__init__(single_cytosol_mask, im_marker)
@@ -212,11 +226,11 @@ class SingleCellJunctionProps:
     # Junction properties subclasses
     class SingleCellJunctionInterfaceProps(SingleInstanceProps):
         # Based on junction mapper: https://doi.org/10.7554/eLife.45413
-        def __init__(self, single_membrane_mask: np.ndarray, im_junction: np.ndarray):
+        def __init__(self, single_membrane_mask: BioMedicalMask, im_junction: BioMedicalChannel):
             super().__init__(single_membrane_mask, im_junction)
 
     class SingleCellJunctionIntensityProps(SingleInstanceProps):
-        def __init__(self, single_junction_intensity_mask: np.ndarray, im_junction: np.ndarray,
+        def __init__(self, single_junction_intensity_mask: BioMedicalMask, im_junction: BioMedicalChannel,
                      param: RuntimeParameter):
             super().__init__(single_junction_intensity_mask, im_junction)
             self._param = param
@@ -225,13 +239,13 @@ class SingleCellJunctionProps:
 
     def __init__(
             self,
-            im_junction: np.ndarray,
-            single_cell_mask: np.ndarray,
-            single_cell_membrane_mask: np.ndarray,
-            single_cell_junction_intensity_mask: np.ndarray,
+            im_junction: BioMedicalChannel,
+            single_cell_mask: BioMedicalMask,
+            single_cell_membrane_mask: BioMedicalMask,
+            single_cell_junction_intensity_mask: BioMedicalMask,
             params: RuntimeParameter
     ):
-        self.img_junction = im_junction
+        self.im_junction = im_junction
         self.single_cell_mask = single_cell_mask
         self.single_membrane_mask = single_cell_membrane_mask
         self.single_cell_junction_intensity_mask = single_cell_junction_intensity_mask
@@ -243,7 +257,7 @@ class SingleCellJunctionProps:
         )
 
         self.quadrant_masks, self._partition_polygons = partition_single_cell_mask(
-            np.logical_or(self.single_cell_mask, self.sc_junction_interface_props.mask),
+            np.logical_or(self.single_cell_mask.data, self.sc_junction_interface_props.mask.data),
             self.params.cue_direction,
             self.sc_junction_interface_props.axis_major_length,
             4
@@ -251,11 +265,11 @@ class SingleCellJunctionProps:
 
     @property
     def straight_line_junction_length(self):
-        return straight_line_length(get_corner(self.single_cell_mask, self.params.dp_epsilon))
+        return straight_line_length(get_corner(self.single_cell_mask.data, self.params.dp_epsilon))
 
     @property
     def interface_perimeter(self):
-        return skimage.measure.perimeter(self.single_cell_mask)
+        return skimage.measure.perimeter(self.single_cell_mask.data)
 
     @property
     def junction_interface_linearity_index(self):

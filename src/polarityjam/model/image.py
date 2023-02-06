@@ -5,7 +5,7 @@ from typing import Dict, Union
 
 import numpy as np
 
-from polarityjam import ImageParameter
+from polarityjam.model.parameter import ImageParameter
 from polarityjam.model.masks import BioMedicalInstanceSegmentation, BioMedicalMask
 from polarityjam.polarityjam_logging import get_logger
 

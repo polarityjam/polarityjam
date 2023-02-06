@@ -32,7 +32,7 @@ def mask_from_contours(ref_img: np.ndarray, coord_list_x: np.ndarray, coord_list
     for a, b in zip(coord_list_x, coord_list_y):
         l.append([a, b])
 
-    mask = cv2.drawContours(mask, [np.array(l)], -1, (1), thickness=cv2.FILLED)
+    mask = cv2.drawContours(mask, [np.array(l).astype(np.int32)], -1, 1, thickness=cv2.FILLED)
 
     return mask
 

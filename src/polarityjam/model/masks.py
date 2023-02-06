@@ -87,9 +87,9 @@ class BioMedicalMask(Mask):
         """Overlays an instance segmentation mask on the mask."""
         return BioMedicalInstanceSegmentationMask(self.data * connected_component_mask.data)
 
-    def to_instance_mask(self) -> BioMedicalInstanceSegmentationMask:
+    def to_instance_mask(self, instance_label: int = 1) -> BioMedicalInstanceSegmentationMask:
         """Converts the mask to an instance segmentation mask."""
-        return BioMedicalInstanceSegmentationMask(self.data)
+        return BioMedicalInstanceSegmentationMask(self.data * instance_label)
 
     def mask_background(
             self,

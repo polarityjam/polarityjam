@@ -43,7 +43,7 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
     """Partitions a single cell mask into multiple masks from its centroid.
 
     Args:
-        sc_mask_f:
+        sc_mask:
             The single cell mask
         cue_direction:
             The orientation of the cue (e.g. flow)

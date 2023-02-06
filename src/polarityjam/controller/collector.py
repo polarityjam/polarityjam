@@ -12,7 +12,6 @@ from polarityjam.model.masks import BioMedicalInstanceSegmentation, \
 from polarityjam.model.moran import Moran, run_morans
 from polarityjam.model.properties import SingleCellProps, SingleCellNucleusProps, SingleCellOrganelleProps, \
     SingleCellMarkerProps, SingleCellMarkerMembraneProps, SingleCellMarkerNucleiProps, SingleCellMarkerCytosolProps, \
-    SingleCellJunctionInterfaceProps, SingleCellJunctionIntensityProps, \
     SingleCellJunctionProps, SingleCellPropertiesCollection, NeighborhoodProps
 
 

@@ -26,8 +26,8 @@ class SingleInstanceProps(RegionProperties):
 
         sl = objects[0]
 
-        self._mask = single_cell_mask
-        self._intensity = intensity
+        self.mask = single_cell_mask
+        self.intensity = intensity
 
         super().__init__(sl, 1, single_cell_mask, intensity, True)
 
@@ -55,7 +55,7 @@ class SingleCellProps(SingleInstanceProps):
 
     @property
     def cell_corner_points(self):
-        return get_corner(self._mask, self.param.dp_epsilon)
+        return get_corner(self.mask, self.param.dp_epsilon)
 
 
 class SingleCellNucleusProps(SingleInstanceProps):
@@ -91,7 +91,7 @@ class SingleCellNucleusProps(SingleInstanceProps):
 
     @property
     def contour_points(self):
-        return get_contour(self._mask)
+        return get_contour(self.mask)
 
 
 class SingleCellOrganelleProps(SingleInstanceProps):
@@ -120,7 +120,7 @@ class SingleCellOrganelleProps(SingleInstanceProps):
 
     @property
     def contour_points(self):
-        return get_contour(self._mask)
+        return get_contour(self.mask)
 
 
 class SingleCellMarkerProps(SingleInstanceProps):
@@ -218,27 +218,6 @@ class SingleCellJunctionIntensityProps(SingleInstanceProps):
     def __init__(self, single_junction_intensity_mask: np.ndarray, im_junction: np.ndarray, param: RuntimeParameter):
         super().__init__(single_junction_intensity_mask, im_junction)
         self._param = param
-        self._partition_masks, self._partition_polygons = partition_single_cell_mask(
-            self._mask,
-            self._param.cue_direction,
-            self.axis_major_length,
-            4
-        )
-
-    @property
-    def lft_right_ratio(self):
-        left = self._intensity * self._partition_masks[1] * self._mask
-        right = self._intensity * self._partition_masks[3] * self._mask
-        return np.mean(left) / np.mean(right)
-
-    @property
-    def top_bottom_vs_left_right(self):
-        left = self._intensity * self._partition_masks[1] * self._mask
-        right = self._intensity * self._partition_masks[3] * self._mask
-        top = self._intensity * self._partition_masks[0] * self._mask
-        bottom = self._intensity * self._partition_masks[2] * self._mask
-
-        return (np.mean(top) + np.mean(bottom)) / (np.mean(left) + np.mean(right))
 
 
 class SingleCellJunctionProps:
@@ -255,6 +234,12 @@ class SingleCellJunctionProps:
         self.sc_junction_interface_props = sc_junction_interface_props
         self.sc_junction_intensity_props = sc_junction_intensity_props
         self.params = params
+        self.quadrant_masks, self._partition_polygons = partition_single_cell_mask(
+            self.sc_mask,
+            self.params.cue_direction,
+            self.sc_junction_interface_props.axis_major_length,
+            4
+        )
 
     @property
     def straight_line_junction_length(self):
@@ -285,12 +270,26 @@ class SingleCellJunctionProps:
         return self.junction_protein_intensity / self.sc_junction_intensity_props.area
 
     @property
-    def junction_lft_right_ratio(self):
-        return self.sc_junction_intensity_props.lft_right_ratio
+    def junction_cue_intensity_ratio(self):
+        # todo: split cell in two parts and compute ratio?
+        left = self.sc_junction_intensity_props.intensity * self.quadrant_masks[1] * \
+               self.sc_junction_intensity_props.mask
+        right = self.sc_junction_intensity_props.intensity * self.quadrant_masks[3] * \
+                self.sc_junction_intensity_props.mask
+        return np.mean(left) / np.mean(right)
 
     @property
-    def junction_top_bottom_vs_left_right(self):
-        return self.sc_junction_intensity_props.top_bottom_vs_left_right
+    def junction_quadrant_cue_intensity_ratio(self):
+        left = self.sc_junction_intensity_props.intensity * \
+               self.quadrant_masks[1] * self.sc_junction_intensity_props.mask
+        right = self.sc_junction_intensity_props.intensity * \
+                self.quadrant_masks[3] * self.sc_junction_intensity_props.mask
+        top = self.sc_junction_intensity_props.intensity * \
+              self.quadrant_masks[0] * self.sc_junction_intensity_props.mask
+        bottom = self.sc_junction_intensity_props.intensity * \
+                 self.quadrant_masks[2] * self.sc_junction_intensity_props.mask
+
+        return (np.mean(top) + np.mean(bottom)) / (np.mean(left) + np.mean(right) + np.mean(top) + np.mean(bottom))
 
 
 class NeighborhoodProps:

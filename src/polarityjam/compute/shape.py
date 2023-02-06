@@ -6,8 +6,8 @@ from shapely.affinity import rotate
 from shapely.geometry import LineString
 from shapely.geometry.polygon import Polygon
 from shapely.ops import split
-from collections import deque
-from polarityjam.compute.compute import compute_angle_deg, compute_ref_x_abs_angle_deg
+
+from polarityjam.compute.compute import compute_ref_x_abs_angle_deg
 from polarityjam.compute.corner import get_contour
 
 
@@ -89,12 +89,13 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
 
     polygons = list(sectors.geoms)
 
+    # sort polygons counter clock wise
     polygons.sort(
         key=lambda x:
-            compute_ref_x_abs_angle_deg(
-                pg_cent_a, pg_cent_b,
-                x.centroid.coords.xy[0][0], x.centroid.coords.xy[1][0]
-            ) - div_angle / 2
+        compute_ref_x_abs_angle_deg(
+            pg_cent_a, pg_cent_b,
+            x.centroid.coords.xy[0][0], x.centroid.coords.xy[1][0]
+        ) - (div_angle / 2) + cue_direction
     )
 
     masks = []
@@ -105,5 +106,7 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
 
         # flip back to original y axis
         masks.append(np.flip(mask_from_contours(sc_mask, x, y), axis=0))
+
+    assert len(masks) == num_partitions, "Number of partitions does not match the number of masks."
 
     return masks, polygons

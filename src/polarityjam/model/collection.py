@@ -108,6 +108,9 @@ class PropertiesCollection:
         self.dataset.at[
             self._index, "marker_centroid_orientation_deg"] = sc_marker_props.marker_centroid_orientation_deg
 
+        self.dataset.at[self._index, "marker_cue_directional_intensity_ratio"] = sc_marker_props.marker_cue_directional_intensity_ratio
+        self.dataset.at[self._index, "marker_cue_undirectional_intensity_ratio"] = sc_marker_props.marker_cue_undirectional_intensity_ratio
+
     def add_sc_nucleus_props(self, nucleus_props: SingleCellNucleusProps):
         """Adds specific single cell nucleus properties to the dataset.
 

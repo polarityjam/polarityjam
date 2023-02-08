@@ -140,8 +140,14 @@ class SingleCellOrganelleProps(SingleInstanceProps):
 class SingleCellMarkerProps(SingleInstanceProps):
     """Class representing the properties of a single cell marker signal."""
 
-    def __init__(self, single_cell_mask: BioMedicalMask, im_marker: BioMedicalChannel):
+    def __init__(self, single_cell_mask: BioMedicalMask, im_marker: BioMedicalChannel, cue_direction: int):
         super().__init__(single_cell_mask, im_marker)
+        self.quadrant_masks, self._partition_polygons = partition_single_cell_mask(
+            single_cell_mask.data, cue_direction, self.axis_major_length, 4
+        )
+        self.half_masks, self._partition_polygons = partition_single_cell_mask(
+            single_cell_mask.data, cue_direction, self.axis_major_length, 2
+        )
 
     @property
     def marker_centroid_orientation_rad(self):
@@ -156,6 +162,21 @@ class SingleCellMarkerProps(SingleInstanceProps):
     @property
     def marker_sum_expression(self):
         return self.mean_intensity * self.area
+
+    @property
+    def marker_cue_directional_intensity_ratio(self):
+        left = self.intensity * self.half_masks[0] * self.mask
+        right = self.intensity * self.half_masks[1] * self.mask
+        return np.mean(left) / np.mean(right)
+
+    @property
+    def marker_cue_undirectional_intensity_ratio(self):
+        top = self.intensity * self.quadrant_masks[0] * self.mask
+        left = self.intensity * self.quadrant_masks[1] * self.mask
+        bottom = self.intensity * self.quadrant_masks[2] * self.mask
+        right = self.intensity * self.quadrant_masks[3] * self.mask
+
+        return (np.mean(top) + np.mean(bottom)) / (np.mean(left) + np.mean(right) + np.mean(top) + np.mean(bottom))
 
 
 class SingleCellMarkerMembraneProps(SingleInstanceProps):
@@ -241,14 +262,17 @@ class SingleCellJunctionProps:
             single_cell_mask: BioMedicalMask,
             single_cell_membrane_mask: BioMedicalMask,
             single_cell_junction_intensity_mask: BioMedicalMask,
-            params: RuntimeParameter
+            cue_direction: int,
+            dp_epsilon: int,
     ):
         self.im_junction = im_junction
         self.single_cell_mask = single_cell_mask
         self.single_membrane_mask = single_cell_membrane_mask
         self.single_cell_junction_intensity_mask = single_cell_junction_intensity_mask
-        self.params = params
+        self.cue_direction = cue_direction
+        self.dp_epsilon = dp_epsilon
 
+        # specific junction properties
         self.sc_junction_interface_props = self.SingleCellJunctionInterfaceProps(single_cell_membrane_mask, im_junction)
         self.sc_junction_intensity_props = self.SingleCellJunctionIntensityProps(
             single_cell_junction_intensity_mask, im_junction
@@ -256,21 +280,20 @@ class SingleCellJunctionProps:
 
         self.quadrant_masks, self._partition_polygons = partition_single_cell_mask(
             np.logical_or(self.single_cell_mask.data, self.sc_junction_interface_props.mask.data),
-            self.params.cue_direction,
+            cue_direction,
             self.sc_junction_interface_props.axis_major_length,
             4
         )
         self.half_masks, self._partition_polygons = partition_single_cell_mask(
             np.logical_or(self.single_cell_mask.data, self.sc_junction_interface_props.mask.data),
-            self.params.cue_direction,
+            cue_direction,
             self.sc_junction_interface_props.axis_major_length,
             2
         )
 
-
     @property
     def straight_line_junction_length(self):
-        return straight_line_length(get_corner(self.single_cell_mask.data, self.params.dp_epsilon))
+        return straight_line_length(get_corner(self.single_cell_mask.data, self.dp_epsilon))
 
     @property
     def interface_perimeter(self):

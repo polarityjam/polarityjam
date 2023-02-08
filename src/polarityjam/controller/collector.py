@@ -113,11 +113,11 @@ class SingleCellPropertyCollector:
 
     @staticmethod
     def calc_sc_props(sc_masks: SingleCellMasksCollection,
-                      img: BioMedicalImage, param: RuntimeParameter) -> SingleCellPropertiesCollection:
+                      img: BioMedicalImage, runtime_params: RuntimeParameter) -> SingleCellPropertiesCollection:
         """calculates all properties for the single cell"""
 
         # properties for single cell
-        sc_cell_props = SingleCellPropertyCollector.calc_sc_cell_props(sc_masks.sc_mask, param)
+        sc_cell_props = SingleCellPropertyCollector.calc_sc_cell_props(sc_masks.sc_mask, runtime_params)
 
         # init optional properties
         sc_nuc_props = None
@@ -143,7 +143,7 @@ class SingleCellPropertyCollector:
         # properties for marker
         if img.marker.data is not None:
             sc_marker_props = SingleCellPropertyCollector.calc_sc_marker_props(
-                sc_masks.sc_mask, img.marker.data
+                sc_masks.sc_mask, img.marker.data, runtime_params
             )
             sc_marker_membrane_props = SingleCellPropertyCollector.calc_sc_marker_membrane_props(
                 sc_masks.sc_membrane_mask, img.marker.data
@@ -164,7 +164,7 @@ class SingleCellPropertyCollector:
                 sc_masks.sc_mask,
                 sc_masks.sc_membrane_mask,
                 sc_masks.sc_junction_protein_area_mask,
-                param
+                runtime_params
             )
 
         return SingleCellPropertiesCollection(
@@ -194,8 +194,10 @@ class SingleCellPropertyCollector:
         return SingleCellOrganelleProps(sc_organelle_mask, sc_nucleus_props)
 
     @staticmethod
-    def calc_sc_marker_props(sc_mask: BioMedicalMask, im_marker: BioMedicalChannel) -> SingleCellMarkerProps:
-        return SingleCellMarkerProps(sc_mask, im_marker)
+    def calc_sc_marker_props(
+            sc_mask: BioMedicalMask, im_marker: BioMedicalChannel, runtime_parameter: RuntimeParameter
+    ) -> SingleCellMarkerProps:
+        return SingleCellMarkerProps(sc_mask, im_marker, runtime_parameter.cue_direction)
 
     @staticmethod
     def calc_sc_marker_membrane_props(
@@ -228,7 +230,12 @@ class SingleCellPropertyCollector:
     ) -> SingleCellJunctionProps:
 
         return SingleCellJunctionProps(
-            im_junction, single_cell_membrane_mask, single_cell_junction_intensity_mask, sc_mask, runtime_parameter
+            im_junction,
+            single_cell_membrane_mask,
+            single_cell_junction_intensity_mask,
+            sc_mask,
+            runtime_parameter.cue_direction,
+            runtime_parameter.dp_epsilon
         )
 
 

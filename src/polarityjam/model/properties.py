@@ -230,10 +230,8 @@ class SingleCellJunctionProps:
             super().__init__(single_membrane_mask, im_junction)
 
     class SingleCellJunctionIntensityProps(SingleInstanceProps):
-        def __init__(self, single_junction_intensity_mask: BioMedicalMask, im_junction: BioMedicalChannel,
-                     param: RuntimeParameter):
+        def __init__(self, single_junction_intensity_mask: BioMedicalMask, im_junction: BioMedicalChannel):
             super().__init__(single_junction_intensity_mask, im_junction)
-            self._param = param
 
     """Class representing the properties of a single cell junction."""
 
@@ -253,7 +251,7 @@ class SingleCellJunctionProps:
 
         self.sc_junction_interface_props = self.SingleCellJunctionInterfaceProps(single_cell_membrane_mask, im_junction)
         self.sc_junction_intensity_props = self.SingleCellJunctionIntensityProps(
-            single_cell_junction_intensity_mask, im_junction, params
+            single_cell_junction_intensity_mask, im_junction
         )
 
         self.quadrant_masks, self._partition_polygons = partition_single_cell_mask(
@@ -262,6 +260,13 @@ class SingleCellJunctionProps:
             self.sc_junction_interface_props.axis_major_length,
             4
         )
+        self.half_masks, self._partition_polygons = partition_single_cell_mask(
+            np.logical_or(self.single_cell_mask.data, self.sc_junction_interface_props.mask.data),
+            self.params.cue_direction,
+            self.sc_junction_interface_props.axis_major_length,
+            2
+        )
+
 
     @property
     def straight_line_junction_length(self):
@@ -292,16 +297,15 @@ class SingleCellJunctionProps:
         return self.junction_protein_intensity / self.sc_junction_intensity_props.area
 
     @property
-    def junction_cue_intensity_ratio(self):
-        # todo: split cell in two parts and compute ratio?
-        left = self.sc_junction_intensity_props.intensity * self.quadrant_masks[1] * \
+    def junction_cue_directional_intensity_ratio(self):
+        left = self.sc_junction_intensity_props.intensity * self.half_masks[0] * \
                self.sc_junction_intensity_props.mask
-        right = self.sc_junction_intensity_props.intensity * self.quadrant_masks[3] * \
+        right = self.sc_junction_intensity_props.intensity * self.half_masks[1] * \
                 self.sc_junction_intensity_props.mask
         return np.mean(left) / np.mean(right)
 
     @property
-    def junction_quadrant_cue_intensity_ratio(self):
+    def junction_cue_undirectional_intensity_ratio(self):
         left = self.sc_junction_intensity_props.intensity * \
                self.quadrant_masks[1] * self.sc_junction_intensity_props.mask
         right = self.sc_junction_intensity_props.intensity * \

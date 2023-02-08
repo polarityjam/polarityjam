@@ -236,8 +236,8 @@ class PropertiesCollection:
         self.dataset.at[
             self._index, "junction_intensity_per_interface_area"] = sc_junction_props.junction_intensity_per_interface_area
         self.dataset.at[self._index, "junction_cluster_density"] = sc_junction_props.junction_cluster_density
-        self.dataset.at[self._index, "junction_cue_intensity_ratio"] = sc_junction_props.junction_cue_intensity_ratio
-        self.dataset.at[self._index, "junction_quadrant_cue_intensity_ratio"] = sc_junction_props.junction_quadrant_cue_intensity_ratio
+        self.dataset.at[self._index, "junction_cue_directional_intensity_ratio"] = sc_junction_props.junction_cue_directional_intensity_ratio
+        self.dataset.at[self._index, "junction_cue_undirectional_intensity_ratio"] = sc_junction_props.junction_cue_undirectional_intensity_ratio
 
     def add_morans_i_props(self, morans_i: Moran):
         """Adds Moran's I value to the dataset.

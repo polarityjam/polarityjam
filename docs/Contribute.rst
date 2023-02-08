@@ -23,3 +23,20 @@ Together we can solve remaining issues (if any) and you become part of the proje
 Option B - You have no clue about programming: Write us! We talk about it and decide what we can do!
 
 Looking forward to your ideas and comments!
+
+
+Contributing to PolarityJaM
+---------------------------
+
+
+Clone PolarityJaM repository from source as ::
+
+    git clone https://github.com/polarityjam/polarityjam
+    cd polarityjam
+    git checkout main
+
+Optionally install pre-commit. This will ensure that the pushed code passes the linting steps::
+
+    pre-commit install
+
+Although the last step is not necessary, it is highly recommended, as it will help you to pass the linting step.

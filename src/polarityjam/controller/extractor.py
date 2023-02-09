@@ -156,7 +156,8 @@ class Extractor:
 
         self.extract_cell_features(collection, bio_med_image, bio_med_segmentation, filename_prefix)
 
-        self.extract_group_features(collection, bio_med_segmentation, filename_prefix)
+        if self.params.extract_group_features:
+            self.extract_group_features(collection, bio_med_segmentation, filename_prefix)
 
         # mark the beginning of a new image that is potentially extracted
         PropertyCollector.set_reset_index(collection)
@@ -168,7 +169,8 @@ class Extractor:
 
         return collection
 
-    def extract_group_features(self, collection, bio_med_segmentation, filename_prefix):
+    def extract_group_features(self, collection: PropertiesCollection,
+                               bio_med_segmentation: BioMedicalInstanceSegmentation, filename_prefix: str):
         """Extracts features from a group of cells.
 
         Args:
@@ -180,6 +182,14 @@ class Extractor:
                 Name prefix for the image used for all produced output.
 
         """
+
+        if len(collection) < 2:
+            get_logger().warn(
+                """Neighborhood analysis not possible.
+                 Not enough cells to calculate group features! 
+                 Switch off neighborhood analysis (extract_group_features = False) or improve segmentation!"""
+            )
+
         foi_vec = collection.get_properties_by_img_name(filename_prefix)[self.params.feature_of_interest].values
         bio_med_segmentation.set_feature_of_interest(self.params.feature_of_interest, foi_vec)
 

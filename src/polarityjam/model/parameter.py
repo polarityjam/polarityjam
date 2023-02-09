@@ -94,6 +94,7 @@ class RuntimeParameter(Parameter):
     def __init__(self, attrs=None):
         if attrs is None:
             attrs = {}
+        self.extract_group_features = None
         self.membrane_thickness = None
         self.feature_of_interest = None
         self.min_cell_size = None

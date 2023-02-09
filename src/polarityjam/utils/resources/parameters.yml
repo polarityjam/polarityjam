@@ -22,6 +22,7 @@ clear_border : True
 min_cell_size : 50
 
 # RuntimeParameter
+extract_group_features : True
 membrane_thickness : 5
 feature_of_interest : "cell_area"
 min_nucleus_size : 10

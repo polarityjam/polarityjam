@@ -20,6 +20,9 @@ class PropertiesCollection:
         self._index = 1
         self._reset_index = 1
 
+    def __len__(self):
+        return len(self.dataset)
+
     def current_index(self):
         """Returns the current index of the dataset."""
         return self._index

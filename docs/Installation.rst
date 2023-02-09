@@ -5,8 +5,8 @@ Installation
 Feature Extraction Pipeline
 ---------------------------
 
-The feature extraction pipeline is the process of extracting all relevant features from all input ima0ges.
-The result will always be a csv file containing for each image its individual cells as rows and their
+The feature extraction pipeline is the process of extracting all relevant features from all input images.
+The result will always be a `.csv` file for each image containing its individual cells as rows and their
 corresponding feature values as columns. Additionally, plots will be created. Depending on the run
 configuration these visualizations can be used for quality control but might also be suitable for a
 publication. Look at the Output section to get to know more.

@@ -5,13 +5,13 @@ Usage
 
 Run options
 -----------
-To start the extraction feature extraction process make sure you followed the manual installation
+To start the feature extraction process, make sure you followed the manual installation
 procedure. Then run polarityjam on the comandline to look at the available run modes.
-There are 3 options to start a feature extraction process run, run_stack, and run_key which
+There are 3 options to start the feature extraction process run, run_stack, and run_key which
 are summarized in the table below.
 
 +------------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| mode       | arguments                                                                | description                                                                                                                                                |
+| Mode       | Arguments                                                                | Description                                                                                                                                                |
 +============+==========================================================================+============================================================================================================================================================+
 | run        | - paramfile.yml                                                          | Should be used when a single image needs to be processed.                                                                                                  |
 |            | - input.tif                                                              |                                                                                                                                                            |
@@ -21,7 +21,7 @@ are summarized in the table below.
 |            | - inputpath                                                              |                                                                                                                                                            |
 |            | - outputpath                                                             |                                                                                                                                                            |
 +------------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| run_key    | - paramfile.yml                                                          | Should be used when the images that needs to be processed have a complex folder structure with many subfolders that need to be excluded from the analysis  |
+| run_key    | - paramfile.yml                                                          | Should be used when the images that need to be processed have a complex folder structure with multiple sub-folders that need to be excluded from the analysis  |
 |            | - inputpath                                                              |                                                                                                                                                            |
 |            | - inputkey.csv                                                           |                                                                                                                                                            |
 |            | - outputpath                                                             |                                                                                                                                                            |
@@ -31,17 +31,17 @@ are summarized in the table below.
 Parameter file
 --------------
 
-Most important argument to provide for all modes is the `parmeter.yml` file. In this file in the yml format all options
-can be specified how the feature extraction pipeline shout treat the data and what extraction steps to perform.
-The following tables lists all options that are available for executing the pipeline. Although they are separated in
-four different topics, they can be defined in a single parameter.yml.
+Most important argument to provide for all modes is the `parmeter.yml` file. In this `.yml` file format, all options
+can be specified how the feature extraction pipeline treats the data and what extraction steps to perform.
+The following tables list and describe all options that are available for executing the pipeline. Although they are separated in
+four different topics, they can be defined in a single `parameter.yml` file.
 
 
 Image Parameter
 +++++++++++++++
 
 +----------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| parameter                  | Category      | type                    | default  | options     | description                                                                                                                                                      |
+| Parameter                  | Category      | Type                    | Default  | Options     | Description                                                                                                                                                      |
 +============================+===============+=========================+==========+=============+==================================================================================================================================================================+
 +----------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | channel_junction           | image         | integer                 |          | -1,0,1,2    | Specifies which channel in the input image(s) holds information about the junction signals. -1 to indicate there is no channel.                                  |
@@ -61,7 +61,7 @@ Segmentation Parameter
 ++++++++++++++++++++++
 
 +--------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| parameter                | Category      | type                    | default  | options     | description                                                                                                                                                                                                |
+| Parameter                | Category      | Type                    | Default  | Options     | Description                                                                                                                                                                                                |
 +==========================+===============+=========================+==========+=============+============================================================================================================================================================================================================+
 +--------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | manually_annotated_mask  | segmentation  | string                  |          |             | PolarityJaM looks for an available segmentation in the input path. This parameter specifies the suffix for manually annotated masks. Leave empty to use the suffix "_seg.npy" (cellpose default).          |
@@ -93,7 +93,7 @@ Runtime Parameter
 
 
 +----------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| parameter                  | Category      | type                    | default  | options     | description                                                                                                                                                      |
+| Parameter                  | Category      | Type                    | Default  | Options     | Description                                                                                                                                                      |
 +============================+===============+=========================+==========+=============+==================================================================================================================================================================+
 +----------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | membrane_thickness         | input         | integer                 | 5        | 0 - inf     | Expected membrane thickness.                                                                                                                                     |
@@ -114,7 +114,7 @@ Plot Parameter
 ++++++++++++++
 
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
-| parameter                | Category  | type     | default       | options               | description                                                                               |
+| Parameter                | Category  | Type     | Default       | Options               | Description                                                                               |
 +==========================+===========+==========+===============+=======================+===========================================================================================+
 | plot_junctions           | plot      | bool     | True          | True, False           | Indicates whether to perform the junction polarity plot.                                  |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
@@ -162,14 +162,14 @@ Key file
 --------
 
 Often, analysts are challenged not only with the problem of actually performing the analysis,
-but also how and where to store the data. Iterative acquisition of images as well as various
+but also with the problem of how and where to store the data. Iterative acquisition of images as well as various
 experimental settings sometimes require complex folder structures and naming schema to organize data.
-Frequently, researchers phase the problem of data being distributed over several physical devices,
+Frequently, researchers face the problem of data being distributed over several physical devices,
 leaving them with the problem of how to execute a certain tool on a dedicated subset of images.
-Not often a high amount of time is necessary before the analysis is finally performed.
+Not often a lot of time is necessary to spend before the analysis is performed.
 Moreover, performing analysis steps on several experimental conditions often requires repeating the
 whole pipeline several times to get the desired output. To tackle this problem,
-polarityjam offers the execution option run_key that accepts a csv file describing the storage
+polarityjam offers the execution option run_key that accepts a `.csv` file describing the storage
 structures and conditions. To still be able to migrate the data without altering the csv,
 paths are relative to a given root folder (e.g. inputpath).
 
@@ -194,7 +194,7 @@ Web app
 --------
 
 The R-shiny web app further analyses the results of the feature extraction process in the browser.
-There are several statistics available which parameters can be adapted during runtime to immediately
+There are several statistics available whose parameters can be adapted/adjusted during runtime to immediately
 observe the change in the corresponding visualization. Thus, exploring the data and revealing
 interesting patterns is heavily facilitated. To get to know more about the statics jump to circular
 statistics and continue reading or visit the method section.

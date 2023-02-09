@@ -1,8 +1,8 @@
 Visualizations
 ==============
 
-Polarityjam optionally plots some of the features mentioned above for all cells. All plots are optionally.
-If the plots are not needed we recommend to disable plotting in the paramters file to speed up calculation time.
+Polarityjam optionally plots some of the features mentioned above for all cells. All plots are optional.
+If the plots are not needed, we recommend to disable plotting in the parameters file to speed up calculation time.
 The following visualizations can be generated:
 
 - cellpose segmentation
@@ -16,9 +16,9 @@ The following visualizations can be generated:
 
 Segmentation
 ------------
-Segmentation of input image(s) are done with cellpose. Quality control of the segmentation output is a crucial step
-for later downstream analysis. For that purpose the feature extraction pipeline creates for every input image a plot
-showing the given channel configuration and the corresponding segmentation. An example can be seen below.
+Segmentation of input image(s) is done with cellpose. Quality control of the segmentation output is a crucial step
+for further downstream analysis. For the same purpose, the feature extraction pipeline creates for every input image,
+a plot showing the given channel configuration and the corresponding segmentation. An example can be seen below.
 Here, first image (from left to right) is the junction channel, second the nuclei channel, and third the
 segmentation mask.
 
@@ -30,7 +30,7 @@ Elongation
 ----------
 
 This plot shows the elongation of each cell and its corresponding nucleus in an input image.
-The color ranging from blue to red giving a visual impression of the eccentricity. Coming from mathematics,
+The color ranging from blue to red giving a visual impression of the eccentricity. Mathematically,
 eccentricity actually is a non-negative real number that uniquely characterizes the shape of a conic section.
 Since cells are closed and always form at most an ellipse the value can never be larger than or equal to 1.
 Hence, the eccentricity here is a value ranging from 0 (here: blue) to close to 1 (here: red).

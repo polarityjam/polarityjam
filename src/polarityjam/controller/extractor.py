@@ -60,13 +60,16 @@ class Extractor:
                 bio_med_image.nucleus.data).overlay_instance_segmentation(
                 bio_med_segmentation.segmentation_mask_connected)
             bio_med_image.nucleus.add_mask("nuclei_mask_seg", nuclei_mask_seg)
+
         organelle_mask_seg = None
         if bio_med_image.has_organelle():
             organelle_mask_seg = BioMedicalMask.from_threshold_otsu(
                 bio_med_image.organelle.data).overlay_instance_segmentation(
                 bio_med_segmentation.segmentation_mask_connected)
             bio_med_image.organelle.add_mask("organelle_mask_seg", organelle_mask_seg)
+
         excluded = 0
+        sc_masks_list = []
         # iterate through each unique segmented cell
         for connected_component_label in bio_med_segmentation.segmentation_mask_connected.get_labels():
 
@@ -82,11 +85,27 @@ class Extractor:
             if self.threshold_size(sc_masks):
                 get_logger().info(
                     "Cell \"%s\" falls under threshold! Removed from analysis!" % connected_component_label)
-                excluded += 1
                 # remove a cell from the segmentation
-                bio_med_segmentation.remove_instance_label(connected_component_label)
-                continue  # todo: could alter the loop list! Need to threshold before looping
+                removed_islands_labels = bio_med_segmentation.remove_instance_label(connected_component_label)
+                get_logger().info(
+                    "Cell(s) \"%s\" became isolated and have additionally ben removed from the analysis!" % ", ".join(
+                        removed_islands_labels))
 
+                # exclude all islands from the analysis - e.g. keep only those that have not been removed from the RAG
+                sc_masks_list = [i for i in sc_masks_list if i.connected_component_label not in removed_islands_labels]
+
+                # counter for excluded cells
+                excluded += 1 + len(removed_islands_labels)
+                continue
+
+            sc_masks_list.append(sc_masks)
+
+        num_cells = len(bio_med_segmentation.segmentation_mask_connected) - excluded
+        get_logger().info("Excluded cells: %s" % str(excluded))
+        get_logger().info("Leftover cells: %s" % str(num_cells))
+
+        # calculate properties for each cell
+        for sc_masks in sc_masks_list:
             sc_props_collection = SingleCellPropertyCollector.calc_sc_props(
                 sc_masks, bio_med_image, self.params
             )
@@ -96,11 +115,8 @@ class Extractor:
                 collection,
                 filename_prefix,
                 bio_med_image.img_hash,
-                connected_component_label
+                sc_masks.connected_component_label
             )
-        num_cells = len(bio_med_segmentation.segmentation_mask_connected) - excluded
-        get_logger().info("Excluded cells: %s" % str(excluded))
-        get_logger().info("Leftover cells: %s" % str(num_cells))
 
     def extract(
             self,

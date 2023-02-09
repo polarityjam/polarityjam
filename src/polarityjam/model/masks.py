@@ -282,8 +282,10 @@ class BioMedicalInstanceSegmentation:
     def update_graphs(self):
         self.neighborhood_graph = BioMedicalInstanceSegmentation.get_rag(self.segmentation_mask)
         self.neighborhood_graph_connected = BioMedicalInstanceSegmentation.get_rag(
-            self.segmentation_mask_connected)  # could create potential islands
-        self.segmentation_mask_connected, _ = self.remove_islands()
+            self.segmentation_mask_connected)  # could have islands
+        self.segmentation_mask_connected, island_list = self.remove_islands()
+
+        return island_list
 
     def init_segmentation_mask(self, islands: np.ndarray):
         connected_component_mask = BioMedicalInstanceSegmentationMask(np.copy(self.segmentation_mask.data))
@@ -295,14 +297,14 @@ class BioMedicalInstanceSegmentation:
         return connected_component_mask
 
     def remove_instance_label(self, instance_label):
-        """Removes an instance label from the segmentation
+        """Removes an instance label from the segmentation inplace.
 
         Args:
             instance_label:
                 The instance label to remove.
 
         Returns:
-            Inplace removal of the instance label.
+            All cells that have been additionally removed because they were not connected to the main graph anymore.
 
         """
         self.neighborhood_graph.remove_node(instance_label)
@@ -310,7 +312,7 @@ class BioMedicalInstanceSegmentation:
         self.segmentation_mask_connected = self.segmentation_mask_connected.remove_instance(
             instance_label)
 
-        self.update_graphs()
+        return self.update_graphs()
 
     def set_feature_of_interest(self, feature_of_interest_name: str, feature_of_interest_vec: np.ndarray):
         nodes = sorted(self.neighborhood_graph_connected.nodes)

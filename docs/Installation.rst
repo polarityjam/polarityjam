@@ -23,10 +23,12 @@ Execute the following steps to manually install the polarityjam feature extracti
 
 .. code-block:: console
 
+
     git clone https://github.com/polarityjam/polarityjam.git # via git or download via browser
     cd polarityjam
+    conda env create -f polarityjam.yml
+    conda activate polarityjam
     pip install -e .
-
 
 .. tip::
 
@@ -59,10 +61,15 @@ Execute the following steps on the commandline:
 .. code-block:: console
 
     git clone https://github.com/polarityjam/polarityjam-app.git # via git or download via browser
-
     cd polarityjam-app
-    conda env create -f polarityjam.yml
-    conda activate polarityjam
+    conda env create -f polarityjam-app.yml
+    conda activate polarityjam-app
     Rscript app/app.R
 
-Open the browser in the URL given in the output of the R-shiny call. (Usually smth. like http://127.0.0.1:6660)
+Open the browser in the URL given in the output of the R-shiny call (usually http://127.0.0.1:8888 ).
+
+Run with Rstudio
+++++++++++++++++
+
+Alternatively, you can also open the app.R your local polarityjam-app/app folder with Rstudio
+and simply click on "Run App".

@@ -73,13 +73,7 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
     div_line = LineString([a, b])
 
     # determine number of divisions
-    div_angle = int(360 / num_partitions)
-
-    cumulative_angle = cue_direction + int(div_angle / 2)
-    divisors = []
-    while cumulative_angle < 360:
-        divisors.append(rotate(div_line, cumulative_angle, origin=a))
-        cumulative_angle += div_angle
+    divisors = get_divisor_lines(a, cue_direction, div_line, num_partitions)
 
     div_coords = []
     for div in divisors:
@@ -115,3 +109,13 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
         num_partitions, len(masks))
 
     return masks, polygons
+
+
+def get_divisor_lines(origin, cue_direction, div_line, num_partitions):
+    div_angle = int(360 / num_partitions)
+    cumulative_angle = cue_direction + int(div_angle / 2)
+    divisors = []
+    while cumulative_angle < 360:
+        divisors.append(rotate(div_line, cumulative_angle, origin=origin))
+        cumulative_angle += div_angle
+    return divisors

@@ -2,6 +2,7 @@ import json
 
 import pandas as pd
 
+from polarityjam import RuntimeParameter
 from polarityjam.model.image import BioMedicalImage
 from polarityjam.model.moran import Moran
 from polarityjam.model.properties import SingleCellMarkerProps, SingleCellNucleusProps, SingleCellProps, \
@@ -16,7 +17,7 @@ class PropertiesCollection:
         self.dataset = pd.DataFrame()
         self.out_path_dict = {}
         self.img_dict = {}
-        self.feature_of_interest_dict = {}
+        self.runtime_params_dict = {}
         self._index = 1
         self._reset_index = 1
 
@@ -52,7 +53,7 @@ class PropertiesCollection:
         """
         return self.img_dict[img_name]
 
-    def get_foi_name_by_img_name(self, img_name: str) -> str:
+    def get_runtime_params_by_img_name(self, img_name: str) -> RuntimeParameter:
         """Get the feature of interest given the image name.
 
         Args:
@@ -63,12 +64,14 @@ class PropertiesCollection:
             The feature of interest as numpy array
 
         """
-        return self.feature_of_interest_dict[img_name]
+        return self.runtime_params_dict[img_name]
 
     def get_properties_by_img_name(self, img_name: str, sorted: bool = True) -> pd.DataFrame:
         """Get the properties of the image given its image name.
 
         Args:
+            sorted:
+                If true, the properties are sorted by the label of the single cell
             img_name:
                 The image name of which the properties should be returned
 

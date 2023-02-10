@@ -162,7 +162,7 @@ class Extractor:
         # mark the beginning of a new image that is potentially extracted
         PropertyCollector.set_reset_index(collection)
         PropertyCollector.add_out_path(collection, filename_prefix, output_path)
-        PropertyCollector.add_foi(collection, filename_prefix, self.params.feature_of_interest)
+        PropertyCollector.add_runtime_params(collection, filename_prefix, self.params)
         PropertyCollector.add_img(collection, filename_prefix, bio_med_image)
 
         get_logger().info("Done feature extraction for file: %s" % str(filename_prefix))
@@ -189,6 +189,7 @@ class Extractor:
                  Not enough cells to calculate group features! 
                  Switch off neighborhood analysis (extract_group_features = False) or improve segmentation!"""
             )
+            return
 
         foi_vec = collection.get_properties_by_img_name(filename_prefix)[self.params.feature_of_interest].values
         bio_med_segmentation.set_feature_of_interest(self.params.feature_of_interest, foi_vec)

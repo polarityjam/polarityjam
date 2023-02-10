@@ -85,8 +85,8 @@ class PropertyCollector:
         props_collection.out_path_dict[filename] = path
 
     @staticmethod
-    def add_foi(props_collection: PropertiesCollection, filename: str, foi: str):
-        props_collection.feature_of_interest_dict[filename] = foi
+    def add_runtime_params(props_collection: PropertiesCollection, filename: str, runtime_params: RuntimeParameter):
+        props_collection.runtime_params_dict[filename] = runtime_params
 
     @staticmethod
     def add_img(props_collection: PropertiesCollection, filename: str, img: BioMedicalImage):

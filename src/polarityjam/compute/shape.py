@@ -56,7 +56,7 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
         The list of partitioned masks counter clock wise from the cue direction
 
     """
-    # cv2 needs flipped y axis
+    # cv2 needs flipped y-axis
     sc_mask_f = np.flip(sc_mask, axis=0)
 
     # get the contour of the single cell mask
@@ -73,7 +73,7 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
     div_line = LineString([a, b])
 
     # determine number of divisions
-    divisors = get_divisor_lines(a, cue_direction, div_line, num_partitions)
+    divisors, div_angle = get_divisor_lines(a, cue_direction, div_line, num_partitions)
 
     div_coords = []
     for div in divisors:
@@ -112,10 +112,26 @@ def partition_single_cell_mask(sc_mask: np.ndarray, cue_direction: int,
 
 
 def get_divisor_lines(origin, cue_direction, div_line, num_partitions):
+    """Rotates a line from an origin point on the line based on a cue direction as often as specified
+
+    Args:
+        origin:
+            origin point on the line
+        cue_direction:
+            The orientation of the cue (e.g. flow)
+        div_line:
+            shapely line object
+        num_partitions:
+            The number of desired partitions
+
+    Returns:
+        The list of partitioned masks counter clock wise from the cue direction
+
+    """
     div_angle = int(360 / num_partitions)
     cumulative_angle = cue_direction + int(div_angle / 2)
     divisors = []
     while cumulative_angle < 360:
         divisors.append(rotate(div_line, cumulative_angle, origin=origin))
         cumulative_angle += div_angle
-    return divisors
+    return divisors, div_angle

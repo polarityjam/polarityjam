@@ -99,6 +99,9 @@ class BioMedicalMask(Mask):
             np.ma.masked_where(self.data == False, self.data)
         )
 
+    def combine(self, other_mask: BioMedicalMask):
+        return BioMedicalMask(np.logical_and(self.data, other_mask.data))
+
 
 class BioMedicalInstanceSegmentationMask(Mask):
     """Class representing an instance segmentation mask."""

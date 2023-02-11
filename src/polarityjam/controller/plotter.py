@@ -915,12 +915,12 @@ class Plotter:
             b = [x0, y0 + row['cell_major_axis_length']]  # lies horizontally
             ground_line = LineString([a, b])
 
-            d_lines = get_divisor_lines(a, params.cue_direction, ground_line, 4)
+            d_lines, _ = get_divisor_lines(a, params.cue_direction, ground_line, 4)
             for d_line in d_lines:
                 x1, y1 = [i[0] for i in d_line.boundary.centroid.coords.xy]
                 ax[1].plot((y0, y1), (x0, x1), '--r', linewidth=0.5)
 
-            d_lines = get_divisor_lines(a, params.cue_direction, ground_line, 2)
+            d_lines, _ = get_divisor_lines(a, params.cue_direction, ground_line, 2)
             for d_line in d_lines:
                 x1, y1 = [i[0] for i in d_line.boundary.centroid.coords.xy]
                 ax[0].plot((y0, y1), (x0, x1), '--r', linewidth=0.5)

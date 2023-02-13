@@ -9,7 +9,10 @@ import matplotlib
 import numpy as np
 import pandas
 from matplotlib import pyplot as plt
+from shapely.affinity import rotate
+from shapely.geometry import LineString
 
+from polarityjam.compute.shape import get_divisor_lines
 from polarityjam.model.collection import PropertiesCollection
 from polarityjam.model.image import BioMedicalChannel
 from polarityjam.model.masks import BioMedicalInstanceSegmentationMask, BioMedicalMask
@@ -797,8 +800,8 @@ class Plotter:
 
         return fig, axes
 
-    def plot_ratio_method(self, collection: PropertiesCollection, img_name: str, close: bool = False):
-        """Plots the ratio method of a specific image in the collection
+    def plot_marker_cue_intensity_ratio(self, collection: PropertiesCollection, img_name: str, close: bool = False):
+        """Plots the marker cue intensity ratios of a specific image in the collection
 
         Args:
             collection:
@@ -809,63 +812,130 @@ class Plotter:
                 whether to close the figure after saving
 
         """
+        get_logger().info("Plotting: marker cue intensity ratios")
+
         img = collection.get_image_by_img_name(img_name)
+        params = collection.get_runtime_params_by_img_name(img_name)
 
         im_junction = img.junction
         cell_mask = img.segmentation.segmentation_mask_connected
 
+        mcdir = collection.get_properties_by_img_name(img_name)["marker_cue_directional_intensity_ratio"].values
+        mcdir_mask = cell_mask.relabel(mcdir)
+
+        mcuir = collection.get_properties_by_img_name(img_name)["marker_cue_undirectional_intensity_ratio"].values
+        mcuir_mask = cell_mask.relabel(mcuir)
+
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
-        get_logger().info("Plotting: ratio method")
+        ax, fig = self._plot_cue_intensity_ratio(cell_mask, collection, im_junction, img_name, mcdir_mask, mcuir_mask,
+                                                 params)
 
-        # figure and axes
-        fig, ax = self._get_figure(1)
-
-        # show junction and cell mask overlay
-        ax.imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
-        ax.imshow(cell_mask, cmap=plt.cm.Set3, alpha=0.25)
-
-        # show cell outlines
-        ax.imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
-
-        # plot major axis around coordinates of each cell
-        for index, row in collection.get_properties_by_img_name(img_name).iterrows():
-            x0 = row['cell_X']
-            y0 = row['cell_Y']
-
-            # upper
-            x1 = x0 + math.sin(np.pi / 4.0) * 0.5 * row['cell_major_axis_length']
-            y1 = y0 + math.cos(np.pi / 4.0) * 0.5 * row['cell_major_axis_length']
-            x2 = x0 + math.cos(np.pi / 4.0) * 0.5 * row['cell_major_axis_length']
-            y2 = y0 - math.sin(np.pi / 4.0) * 0.5 * row['cell_major_axis_length']
-
-            ax.plot((y0, y1), (x0, x1), '--r', linewidth=0.5)
-            ax.plot((y0, y2), (x0, x2), '--r', linewidth=0.5)
-            ax.plot(y0, x0, '.b', markersize=5)
-
-            # lower
-            x1 = x0 - math.sin(np.pi / 4.0) * 0.5 * row['cell_major_axis_length']
-            y1 = y0 - math.cos(np.pi / 4.0) * 0.5 * row['cell_major_axis_length']
-            x2 = x0 - math.cos(np.pi / 4.0) * 0.5 * row['cell_major_axis_length']
-            y2 = y0 + math.sin(np.pi / 4.0) * 0.5 * row['cell_major_axis_length']
-
-            ax.plot((y0, y1), (x0, x1), '--r', linewidth=0.5)
-            ax.plot((y0, y2), (x0, x2), '--r', linewidth=0.5)
-            ax.plot(y0, x0, '.b', markersize=5)
-
-        add_title(ax, "ratio method", im_junction.data, self.params.show_graphics_axis)
+        add_title(ax[0], "marker cue directional intensity ratio", im_junction.data, self.params.show_graphics_axis)
+        add_title(ax[1], "marker cue undirectional intensity ratio", im_junction.data, self.params.show_graphics_axis)
 
         self._finish_plot(
             fig,
             collection.get_out_path_by_name(img_name),
             img_name,
-            "_ratio_method",
-            [ax],
+            "_marker_ratio_method",
+            ax,
+            pixel_to_micron_ratio,
+            close
+        )
+
+    def plot_junction_cue_intensity_ratio(self, collection: PropertiesCollection, img_name: str, close: bool = False):
+        """Plots the junction cue intensity ratios of a specific image in the collection
+
+        Args:
+            collection:
+                The collection containing the features
+            img_name:
+                The name of the image to plot
+            close:
+                whether to close the figure after saving
+
+        """
+        get_logger().info("Plotting: junction cue intensity ratios")
+
+        img = collection.get_image_by_img_name(img_name)
+        params = collection.get_runtime_params_by_img_name(img_name)
+
+        im_junction = img.junction
+        cell_mask = img.segmentation.segmentation_mask_connected
+
+        jcdir = collection.get_properties_by_img_name(img_name)["junction_cue_directional_intensity_ratio"].values
+        jcdir_mask = cell_mask.relabel(jcdir)
+
+        jcuir = collection.get_properties_by_img_name(img_name)["junction_cue_undirectional_intensity_ratio"].values
+        jcuir_mask = cell_mask.relabel(jcuir)
+
+        pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
+
+        ax, fig = self._plot_cue_intensity_ratio(cell_mask, collection, im_junction, img_name, jcdir_mask, jcuir_mask,
+                                                 params)
+
+        add_title(ax[0], "junction cue directional intensity ratio", im_junction.data, self.params.show_graphics_axis)
+        add_title(ax[1], "junction cue undirectional intensity ratio", im_junction.data, self.params.show_graphics_axis)
+
+        self._finish_plot(
+            fig,
+            collection.get_out_path_by_name(img_name),
+            img_name,
+            "_junction_ratio_method",
+            ax,
             pixel_to_micron_ratio,
             close
         )
 
         return fig, ax
+
+    def _plot_cue_intensity_ratio(self, cell_mask, collection, im_junction, img_name, directional_mask,
+                                  undirectional_mask, params):
+        # figure and axes
+        fig, ax = self._get_figure(2)
+        # show junction and cell mask overlay
+        ax[0].imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
+        cax1 = ax[0].imshow(directional_mask.mask_background().data, cmap=plt.cm.Set3, alpha=0.5)
+        ax[1].imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
+        cax2 = ax[1].imshow(undirectional_mask.mask_background().data, cmap=plt.cm.Set3, alpha=0.5)
+        # show cell outlines
+        ax[0].imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
+        ax[1].imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
+        for index, row in collection.get_properties_by_img_name(img_name).iterrows():
+            # please note x0 lies on the y-axis and y0 on the x-axis in a coordinate system
+            x0 = row['cell_X']
+            y0 = row['cell_Y']
+
+            # plot center of cell
+            ax[0].plot(y0, x0, '.b', markersize=5)
+            ax[1].plot(y0, x0, '.b', markersize=5)
+
+            a = [x0, y0]
+            b = [x0, y0 + row['cell_major_axis_length']]  # lies horizontally
+            ground_line = LineString([a, b])
+
+            d_lines, _ = get_divisor_lines(a, params.cue_direction, ground_line, 4)
+            for d_line in d_lines:
+                x1, y1 = [i[0] for i in d_line.boundary.centroid.coords.xy]
+                ax[1].plot((y0, y1), (x0, x1), '--r', linewidth=0.5)
+
+            d_lines, _ = get_divisor_lines(a, params.cue_direction, ground_line, 2)
+            for d_line in d_lines:
+                x1, y1 = [i[0] for i in d_line.boundary.centroid.coords.xy]
+                ax[0].plot((y0, y1), (x0, x1), '--r', linewidth=0.5)
+
+        u = np.round(np.max(directional_mask.data), 2)
+        m = np.round(np.min(directional_mask.mask_background().data), 2)
+        add_colorbar(
+            fig, cax1, ax[0], [m, np.round((u + m) / 2, 2), u], "directed intensity ratio"
+        )
+
+        add_colorbar(
+            fig, cax2, ax[1], [0, 0.5, 1], "undirected intensity ratio"
+        )
+
+        return ax, fig
 
     def plot_foi(self, collection: PropertiesCollection, img_name: str, close: bool = False):
         """Plots the field of interest of a specific image in the collection
@@ -889,7 +959,7 @@ class Plotter:
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
         single_cell_dataset = collection.dataset.loc[collection.dataset["filename"] == img_name]
-        foi_name = collection.get_foi_name_by_img_name(img_name)
+        foi_name = collection.get_runtime_params_by_img_name(img_name).feature_of_interest
         foi = single_cell_dataset[foi_name]
         # figure and axes
         fig, ax = self._get_figure(1)
@@ -1099,6 +1169,9 @@ class Plotter:
                 if img.has_nuclei():
                     self.plot_marker_nucleus_orientation(collection, key, close)
 
+                if self.params.plot_ratio_method:
+                    self.plot_marker_cue_intensity_ratio(collection, key, close)
+
             if self.params.plot_junctions and img.has_junction():
                 self.plot_junction_polarity(collection, key, close)
                 self.plot_corners(collection, key, close)
@@ -1106,9 +1179,8 @@ class Plotter:
             if self.params.plot_orientation:
                 self.plot_eccentricity(collection, key, close)
 
-            # Note: disabled for now.
-            # if self.params.plot_ratio_method:
-            #     self.plot_ratio_method(collection, key, close)
+            if self.params.plot_ratio_method:
+                self.plot_junction_cue_intensity_ratio(collection, key, close)
 
             if self.params.plot_cyclic_orientation:
                 self.plot_orientation(collection, key, close)

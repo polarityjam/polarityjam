@@ -157,29 +157,33 @@ Marker features
 Junction features
 -----------------
 
-+----------------------------------------+--------------------------------------------------------------------------------+
-| Feature                                | Explanation                                                                    |
-+========================================+================================================================================+
-| junction_centroid_X                    | The X coordinate of the center of the junction expression.                     |
-+----------------------------------------+--------------------------------------------------------------------------------+
-| junction_centroid_Y                    | The Y coordinate of the center of the junction expression.                     |
-+----------------------------------------+--------------------------------------------------------------------------------+
-| junction_perimeter                     | The perimeter of the junction area.                                            |
-+----------------------------------------+--------------------------------------------------------------------------------+
-| junction_protein_area                  | The area with junction protein expression.                                     |
-+----------------------------------------+--------------------------------------------------------------------------------+
-| junction_mean_intensity                | The mean junction intensity value.                                             |
-+----------------------------------------+--------------------------------------------------------------------------------+
-| junction_protein_intensity             | The mean protein intensity by area.                                            |
-+----------------------------------------+--------------------------------------------------------------------------------+
-| junction_interface_linearity_index     | The linearity index of the junction.                                           |
-+----------------------------------------+--------------------------------------------------------------------------------+
-| junction_interface_occupancy           | The  ratio between junction area and junction protein area.                    |
-+----------------------------------------+--------------------------------------------------------------------------------+
-| junction_intensity_per_interface_area  | The ratio between the junction protein intensity and the junction area.        |
-+----------------------------------------+--------------------------------------------------------------------------------+
-| junction_cluster_density               | The ratio between the junction protein intensity and the junction protein area |
-+----------------------------------------+--------------------------------------------------------------------------------+
++----------------------------------------+---------------------------------------------------------------------------------------------+
+| Feature                                | Explanation                                                                                 |
++========================================+=============================================================================================+
+| junction_centroid_X                    | The X coordinate of the center of the junction expression.                                  |
++----------------------------------------+---------------------------------------------------------------------------------------------+
+| junction_centroid_Y                    | The Y coordinate of the center of the junction expression.                                  |
++----------------------------------------+---------------------------------------------------------------------------------------------+
+| junction_perimeter                     | The perimeter of the junction area.                                                         |
++----------------------------------------+---------------------------------------------------------------------------------------------+
+| junction_protein_area                  | The area with junction protein expression.                                                  |
++----------------------------------------+---------------------------------------------------------------------------------------------+
+| junction_mean_intensity                | The mean junction intensity value.                                                          |
++----------------------------------------+---------------------------------------------------------------------------------------------+
+| junction_protein_intensity             | The mean protein intensity by area.                                                         |
++----------------------------------------+---------------------------------------------------------------------------------------------+
+| junction_interface_linearity_index     | The linearity index of the junction.                                                        |
++----------------------------------------+---------------------------------------------------------------------------------------------+
+| junction_interface_occupancy           | The  ratio between junction area and junction protein area.                                 |
++----------------------------------------+---------------------------------------------------------------------------------------------+
+| junction_intensity_per_interface_area  | The ratio between the junction protein intensity and the junction area.                     |
++----------------------------------------+---------------------------------------------------------------------------------------------+
+| junction_cluster_density               | The ratio between the junction protein intensity and the junction protein area              |
++----------------------------------------+---------------------------------------------------------------------------------------------+
+| junction_cue_intensity_ratio           | The ratio of the left vs right cell membrane intensity in cue direction.                    |
++----------------------------------------+---------------------------------------------------------------------------------------------+
+| junction_quadrant_cue_intensity_ratio  | The ratio of the sum of cell membrane quarters in cue direction and all membrane intensity. |
++----------------------------------------+---------------------------------------------------------------------------------------------+
 
 
 Neighborhood features

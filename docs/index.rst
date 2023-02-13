@@ -48,7 +48,7 @@ Welcome to polarityjam's documentation!
    Installation
    Usage
    Features
-   Visualizations
+   notebooks/polarityjam-notebook_vis.ipynb
    notebooks/polarityjam-notebook.ipynb
    notebooks/polarityjam-notebook_api.ipynb
    Methods

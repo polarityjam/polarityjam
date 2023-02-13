@@ -2,9 +2,10 @@ import json
 
 import pandas as pd
 
+from polarityjam import RuntimeParameter
 from polarityjam.model.image import BioMedicalImage
 from polarityjam.model.moran import Moran
-from polarityjam.model.properties import SingleCellMarkerProps, SingleCellNucleusProps, SingleCellCellProps, \
+from polarityjam.model.properties import SingleCellMarkerProps, SingleCellNucleusProps, SingleCellProps, \
     SingleCellOrganelleProps, SingleCellMarkerNucleiProps, SingleCellMarkerCytosolProps, SingleCellMarkerMembraneProps, \
     SingleCellJunctionProps, NeighborhoodProps
 
@@ -16,9 +17,12 @@ class PropertiesCollection:
         self.dataset = pd.DataFrame()
         self.out_path_dict = {}
         self.img_dict = {}
-        self.feature_of_interest_dict = {}
+        self.runtime_params_dict = {}
         self._index = 1
         self._reset_index = 1
+
+    def __len__(self):
+        return len(self.dataset)
 
     def current_index(self):
         """Returns the current index of the dataset."""
@@ -49,7 +53,7 @@ class PropertiesCollection:
         """
         return self.img_dict[img_name]
 
-    def get_foi_name_by_img_name(self, img_name: str) -> str:
+    def get_runtime_params_by_img_name(self, img_name: str) -> RuntimeParameter:
         """Get the feature of interest given the image name.
 
         Args:
@@ -60,12 +64,14 @@ class PropertiesCollection:
             The feature of interest as numpy array
 
         """
-        return self.feature_of_interest_dict[img_name]
+        return self.runtime_params_dict[img_name]
 
     def get_properties_by_img_name(self, img_name: str, sorted: bool = True) -> pd.DataFrame:
         """Get the properties of the image given its image name.
 
         Args:
+            sorted:
+                If true, the properties are sorted by the label of the single cell
             img_name:
                 The image name of which the properties should be returned
 
@@ -108,6 +114,9 @@ class PropertiesCollection:
         self.dataset.at[
             self._index, "marker_centroid_orientation_deg"] = sc_marker_props.marker_centroid_orientation_deg
 
+        self.dataset.at[self._index, "marker_cue_directional_intensity_ratio"] = sc_marker_props.marker_cue_directional_intensity_ratio
+        self.dataset.at[self._index, "marker_cue_undirectional_intensity_ratio"] = sc_marker_props.marker_cue_undirectional_intensity_ratio
+
     def add_sc_nucleus_props(self, nucleus_props: SingleCellNucleusProps):
         """Adds specific single cell nucleus properties to the dataset.
 
@@ -132,7 +141,7 @@ class PropertiesCollection:
         self.dataset.at[self._index, "nuc_major_to_minor_ratio"] = nucleus_props.nuc_major_to_minor_ratio
 
     def add_sc_general_props(
-            self, filename: str, img_hash: str, connected_component_label: int, sc_props: SingleCellCellProps):
+            self, filename: str, img_hash: str, connected_component_label: int, sc_props: SingleCellProps):
         """Adds general single cell properties to the dataset, including filename, image hash,
         connected component label and general properties.
 
@@ -236,6 +245,8 @@ class PropertiesCollection:
         self.dataset.at[
             self._index, "junction_intensity_per_interface_area"] = sc_junction_props.junction_intensity_per_interface_area
         self.dataset.at[self._index, "junction_cluster_density"] = sc_junction_props.junction_cluster_density
+        self.dataset.at[self._index, "junction_cue_directional_intensity_ratio"] = sc_junction_props.junction_cue_directional_intensity_ratio
+        self.dataset.at[self._index, "junction_cue_undirectional_intensity_ratio"] = sc_junction_props.junction_cue_undirectional_intensity_ratio
 
     def add_morans_i_props(self, morans_i: Moran):
         """Adds Moran's I value to the dataset.

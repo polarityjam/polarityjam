@@ -41,19 +41,35 @@ class Extractor:
         return False
 
     def extract_cell_features(self, collection, bio_med_image, bio_med_segmentation, filename_prefix):
+        """Extracts features from cells
+
+        Args:
+            collection:
+                PropertiesCollection object to which the extracted features will be added.
+            bio_med_image:
+                BioMedicalImage object containing the image information.
+            bio_med_segmentation:
+                BioMedicalInstanceSegmentation object containing the segmentation of the cells.
+            filename_prefix:
+                Name prefix for the image used for all produced output.
+
+        """
         nuclei_mask_seg = None
         if bio_med_image.has_nuclei():
             nuclei_mask_seg = BioMedicalMask.from_threshold_otsu(
                 bio_med_image.nucleus.data).overlay_instance_segmentation(
                 bio_med_segmentation.segmentation_mask_connected)
             bio_med_image.nucleus.add_mask("nuclei_mask_seg", nuclei_mask_seg)
+
         organelle_mask_seg = None
         if bio_med_image.has_organelle():
             organelle_mask_seg = BioMedicalMask.from_threshold_otsu(
                 bio_med_image.organelle.data).overlay_instance_segmentation(
                 bio_med_segmentation.segmentation_mask_connected)
             bio_med_image.organelle.add_mask("organelle_mask_seg", organelle_mask_seg)
+
         excluded = 0
+        sc_masks_list = []
         # iterate through each unique segmented cell
         for connected_component_label in bio_med_segmentation.segmentation_mask_connected.get_labels():
 
@@ -69,11 +85,27 @@ class Extractor:
             if self.threshold_size(sc_masks):
                 get_logger().info(
                     "Cell \"%s\" falls under threshold! Removed from analysis!" % connected_component_label)
-                excluded += 1
                 # remove a cell from the segmentation
-                bio_med_segmentation.remove_instance_label(connected_component_label)
-                continue  # todo: could alter the loop list! Need to threshold before looping
+                removed_islands_labels = bio_med_segmentation.remove_instance_label(connected_component_label)
+                get_logger().info(
+                    "Cell(s) \"%s\" became isolated and have additionally ben removed from the analysis!" % ", ".join(
+                        removed_islands_labels))
 
+                # exclude all islands from the analysis - e.g. keep only those that have not been removed from the RAG
+                sc_masks_list = [i for i in sc_masks_list if i.connected_component_label not in removed_islands_labels]
+
+                # counter for excluded cells
+                excluded += 1 + len(removed_islands_labels)
+                continue
+
+            sc_masks_list.append(sc_masks)
+
+        num_cells = len(bio_med_segmentation.segmentation_mask_connected) - excluded
+        get_logger().info("Excluded cells: %s" % str(excluded))
+        get_logger().info("Leftover cells: %s" % str(num_cells))
+
+        # calculate properties for each cell
+        for sc_masks in sc_masks_list:
             sc_props_collection = SingleCellPropertyCollector.calc_sc_props(
                 sc_masks, bio_med_image, self.params
             )
@@ -83,11 +115,8 @@ class Extractor:
                 collection,
                 filename_prefix,
                 bio_med_image.img_hash,
-                connected_component_label
+                sc_masks.connected_component_label
             )
-        num_cells = len(bio_med_segmentation.segmentation_mask_connected) - excluded
-        get_logger().info("Excluded cells: %s" % str(excluded))
-        get_logger().info("Leftover cells: %s" % str(num_cells))
 
     def extract(
             self,
@@ -127,19 +156,21 @@ class Extractor:
 
         self.extract_cell_features(collection, bio_med_image, bio_med_segmentation, filename_prefix)
 
-        self.extract_group_features(collection, bio_med_segmentation, filename_prefix)
+        if self.params.extract_group_features:
+            self.extract_group_features(collection, bio_med_segmentation, filename_prefix)
 
         # mark the beginning of a new image that is potentially extracted
         PropertyCollector.set_reset_index(collection)
         PropertyCollector.add_out_path(collection, filename_prefix, output_path)
-        PropertyCollector.add_foi(collection, filename_prefix, self.params.feature_of_interest)
+        PropertyCollector.add_runtime_params(collection, filename_prefix, self.params)
         PropertyCollector.add_img(collection, filename_prefix, bio_med_image)
 
         get_logger().info("Done feature extraction for file: %s" % str(filename_prefix))
 
         return collection
 
-    def extract_group_features(self, collection, bio_med_segmentation, filename_prefix):
+    def extract_group_features(self, collection: PropertiesCollection,
+                               bio_med_segmentation: BioMedicalInstanceSegmentation, filename_prefix: str):
         """Extracts features from a group of cells.
 
         Args:
@@ -151,6 +182,15 @@ class Extractor:
                 Name prefix for the image used for all produced output.
 
         """
+
+        if len(collection) < 2:
+            get_logger().warn(
+                """Neighborhood analysis not possible.
+                 Not enough cells to calculate group features! 
+                 Switch off neighborhood analysis (extract_group_features = False) or improve segmentation!"""
+            )
+            return
+
         foi_vec = collection.get_properties_by_img_name(filename_prefix)[self.params.feature_of_interest].values
         bio_med_segmentation.set_feature_of_interest(self.params.feature_of_interest, foi_vec)
 

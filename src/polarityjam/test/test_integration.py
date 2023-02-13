@@ -149,6 +149,7 @@ class TestIntegration(TestCommon):
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))
         self.assertEqual(3, num_csv)
 
+    @unittest.skipIf(platform.system().lower() == 'windows', "Plotting too memory extensive. Skipping test!")
     def test_run_key(self):
         in_path = str(self.get_test_image_folder("gn"))
         in_key = str(self.get_test_key_file())

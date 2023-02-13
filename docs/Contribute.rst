@@ -17,10 +17,13 @@ How can I become a contributor?
 -------------------------------
 
 
-Option A - You are experienced in python programming or R programming: Fork the project, implement your idea and make a Pull request.
-Together we can solve remaining issues (if any) and you become part of the project!
+Option A - You are experienced in python programming or R programming:
+Fork the project, implement your idea and make a Pull request.
+Together we can solve remaining issues (if any)
+and you become part of the project!
 
-Option B - You have no clue about programming: Write us! We talk about it and decide what we can do!
+Option B - You have no clue about programming:
+Write us! We talk about it and decide what we can do!
 
 Looking forward to your ideas and comments!
 
@@ -35,7 +38,8 @@ Clone PolarityJaM repository from source as ::
     cd polarityjam
     git checkout main
 
-Optionally install pre-commit. This will ensure that the pushed code passes the linting steps::
+Optionally install `pre-commit <https://pre-commit.com/>`_.
+This will ensure that the pushed code passes the linting steps::
 
     pre-commit install
 

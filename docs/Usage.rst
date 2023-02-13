@@ -10,31 +10,31 @@ procedure. Then run polarityjam on the comandline to look at the available run m
 There are 3 options to start the feature extraction process run, run_stack, and run_key which
 are summarized in the table below.
 
-+------------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Mode       | Arguments                                                                | Description                                                                                                                                                |
-+============+==========================================================================+============================================================================================================================================================+
-| run        | - paramfile.yml                                                          | Should be used when a single image needs to be processed.                                                                                                  |
-|            | - input.tif                                                              |                                                                                                                                                            |
-|            | - outputpath                                                             |                                                                                                                                                            |
-+------------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| run_stack  | - paramfile.yml                                                          | Should be used when a set of images in a folder needs to be processed                                                                                      |
-|            | - inputpath                                                              |                                                                                                                                                            |
-|            | - outputpath                                                             |                                                                                                                                                            |
-+------------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
++------------+--------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Mode       | Arguments                                                                | Description                                                                                                                                                    |
++============+==========================================================================+================================================================================================================================================================+
+| run        | - paramfile.yml                                                          | Should be used when a single image needs to be processed.                                                                                                      |
+|            | - input.tif                                                              |                                                                                                                                                                |
+|            | - outputpath                                                             |                                                                                                                                                                |
++------------+--------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| run_stack  | - paramfile.yml                                                          | Should be used when a set of images in a folder needs to be processed                                                                                          |
+|            | - inputpath                                                              |                                                                                                                                                                |
+|            | - outputpath                                                             |                                                                                                                                                                |
++------------+--------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | run_key    | - paramfile.yml                                                          | Should be used when the images that need to be processed have a complex folder structure with multiple sub-folders that need to be excluded from the analysis  |
-|            | - inputpath                                                              |                                                                                                                                                            |
-|            | - inputkey.csv                                                           |                                                                                                                                                            |
-|            | - outputpath                                                             |                                                                                                                                                            |
-+------------+--------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|            | - inputpath                                                              |                                                                                                                                                                |
+|            | - inputkey.csv                                                           |                                                                                                                                                                |
+|            | - outputpath                                                             |                                                                                                                                                                |
++------------+--------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
 Parameter file
 --------------
 
-Most important argument to provide for all modes is the `parmeter.yml` file. In this `.yml` file format, all options
+Most important argument to provide for all modes is the ``parmeter.yml`` file. In this ``.yml`` file format, all options
 can be specified how the feature extraction pipeline treats the data and what extraction steps to perform.
-The following tables list and describe all options that are available for executing the pipeline. Although they are separated in
-four different topics, they can be defined in a single `parameter.yml` file.
+The following tables list and describe all options that are available for executing the pipeline.
+Although they are separated in four different topics, they can be defined in a single ``parameter.yml`` file.
 
 
 Image Parameter
@@ -172,7 +172,7 @@ leaving them with the problem of how to execute a certain tool on a dedicated su
 Not often a lot of time is necessary to spend before the analysis is performed.
 Moreover, performing analysis steps on several experimental conditions often requires repeating the
 whole pipeline several times to get the desired output. To tackle this problem,
-polarityjam offers the execution option run_key that accepts a `.csv` file describing the storage
+polarityjam offers the execution option run_key that accepts a ``.csv`` file describing the storage
 structures and conditions. To still be able to migrate the data without altering the csv,
 paths are relative to a given root folder (e.g. inputpath).
 
@@ -218,6 +218,3 @@ This will not keep the output on the disk. To look at the output of the tests sp
 .. code-block:: console
 
     polarityjam_test --target-folder=/tmp/mytarget
-
-
-

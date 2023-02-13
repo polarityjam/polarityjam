@@ -55,6 +55,7 @@ repos:
       - id: fix-encoding-pragma
         args: [--remove]
       - id: end-of-file-fixer
+        exclude: ^docs/
       - id: mixed-line-ending
         args: [--fix=lf]
       - id: trailing-whitespace
@@ -122,6 +123,7 @@ repos:
     rev: v1.0.0
     hooks:
       - id: doc8
+        exclude: ^docs/
   - repo: https://github.com/asottile/pyupgrade
     rev: v2.7.2
     hooks:

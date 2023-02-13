@@ -24,7 +24,7 @@ Panel: Correlation analysis
 
 
 
-Panal: Compare
+Panel: Compare
 --------------
 
 

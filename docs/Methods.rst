@@ -1,3 +1,5 @@
+.. _methods:
+
 Methods
 =======
 .. role:: raw-html(raw)

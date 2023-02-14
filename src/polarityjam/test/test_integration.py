@@ -82,7 +82,7 @@ class TestIntegration(TestCommon):
 
         # two csv file in output
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))
-        self.assertEqual(2, num_csv)
+        self.assertEqual(3, num_csv)
 
     @unittest.skipIf(platform.system().lower() == 'windows', "Plotting too memory extensive. Skipping test!")
     def test_run_stack_no_golgi(self):
@@ -113,7 +113,7 @@ class TestIntegration(TestCommon):
         self.assertEqual(65, df3.shape[1])
         # three csv file in output
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))
-        self.assertEqual(3, num_csv)
+        self.assertEqual(4, num_csv)
 
     @unittest.skipIf(platform.system().lower() == 'windows', "Plotting too memory extensive. Skipping test!")
     def test_run_stack_no_nuclei(self):
@@ -147,7 +147,7 @@ class TestIntegration(TestCommon):
 
         # three csv file in output
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))
-        self.assertEqual(3, num_csv)
+        self.assertEqual(4, num_csv)
 
     @unittest.skipIf(platform.system().lower() == 'windows', "Plotting too memory extensive. Skipping test!")
     def test_run_key(self):

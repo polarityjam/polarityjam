@@ -387,8 +387,8 @@ class Plotter:
             )
             if self.params.show_polarity_angles:
                 ax.text(
-                    row["cell_Y"],
                     row["cell_X"],
+                    row["cell_Y"],
                     str(int(np.round(row["organelle_orientation_deg"], 0))),
                     color=self.params.font_color,
                     fontsize=self.params.fontsize_text_annotations,
@@ -481,8 +481,8 @@ class Plotter:
             )
             if self.params.show_polarity_angles:
                 ax.text(
-                    row["nuc_Y"],
                     row["nuc_X"],
+                    row["nuc_Y"],
                     str(int(np.round(row["nuc_displacement_orientation_deg"], 0))),
                     color=self.params.font_color,
                     fontsize=self.params.fontsize_text_annotations,
@@ -595,23 +595,23 @@ class Plotter:
         # plot mean expression value of cell and membrane as text
         for index, row in single_cell_dataset.iterrows():
             ax[0].text(
-                row["cell_Y"],
                 row["cell_X"],
+                row["cell_Y"],
                 str(np.round(row["marker_mean_expression"], 1)),
                 color=self.params.font_color,
                 fontsize=self.params.fontsize_text_annotations,
             )
             ax[1].text(
-                row["cell_Y"],
                 row["cell_X"],
+                row["cell_Y"],
                 str(np.round(row["marker_mean_expression_mem"], 1)),
                 color=self.params.font_color,
                 fontsize=self.params.fontsize_text_annotations,
             )
             if nuclei_mask is not None:
                 ax[2].text(
-                    row["nuc_Y"],
                     row["nuc_X"],
+                    row["nuc_Y"],
                     str(np.round(row["marker_mean_expression_nuc"], 1)),
                     color=self.params.font_color,
                     fontsize=self.params.fontsize_text_annotations,
@@ -782,8 +782,8 @@ class Plotter:
             )
             if self.params.show_polarity_angles:
                 ax.text(
-                    row["nuc_Y"],
                     row["nuc_X"],
+                    row["nuc_Y"],
                     str(int(np.round(row["marker_nucleus_orientation_deg"], 0))),
                     color=self.params.font_color,
                     fontsize=self.params.fontsize_text_annotations,
@@ -989,8 +989,8 @@ class Plotter:
                 # plot orientation degree
                 Plotter._add_single_cell_eccentricity_axis(
                     ax[0],
-                    row["cell_Y"],
                     row["cell_X"],
+                    row["cell_Y"],
                     row["cell_shape_orientation_rad"],
                     row["cell_major_axis_length"],
                     row["cell_minor_axis_length"],
@@ -1003,8 +1003,8 @@ class Plotter:
                 # plot orientation degree nucleus
                 Plotter._add_single_cell_eccentricity_axis(
                     ax[1],
-                    row["nuc_Y"],
                     row["nuc_X"],
+                    row["nuc_Y"],
                     row["nuc_shape_orientation_rad"],
                     row["nuc_major_axis_length"],
                     row["nuc_minor_axis_length"],
@@ -1016,8 +1016,8 @@ class Plotter:
             else:
                 Plotter._add_single_cell_eccentricity_axis(
                     ax,
-                    row["cell_Y"],
                     row["cell_X"],
+                    row["cell_Y"],
                     row["cell_shape_orientation_rad"],
                     row["cell_major_axis_length"],
                     row["cell_minor_axis_length"],
@@ -1209,7 +1209,6 @@ class Plotter:
         ax[0].imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
         ax[1].imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
         for index, row in collection.get_properties_by_img_name(img_name).iterrows():
-            # please note x0 lies on the y-axis and y0 on the x-axis in a coordinate system
             x0 = row["cell_X"]
             y0 = row["cell_Y"]
 
@@ -1218,7 +1217,7 @@ class Plotter:
             ax[1].plot(y0, x0, ".b", markersize=5)
 
             a = [x0, y0]
-            b = [x0, y0 + row["cell_major_axis_length"]]  # lies horizontally
+            b = [x0 + row["cell_major_axis_length"], y0]  # lies horizontally
             ground_line = LineString([a, b])
 
             d_lines, _ = get_divisor_lines(a, params.cue_direction, ground_line, 4)
@@ -1288,8 +1287,8 @@ class Plotter:
             m = np.where(mask.data == label, foi_val, m)
 
             ax.text(
-                row["cell_Y"],
                 row["cell_X"],
+                row["cell_Y"],
                 str(np.round(row[foi_name], 1)),
                 color=self.params.font_color,
                 fontsize=self.params.fontsize_text_annotations,
@@ -1390,8 +1389,8 @@ class Plotter:
                 # plot orientation degree
                 Plotter._add_single_cell_orientation_degree_axis(
                     ax[0],
-                    row["cell_Y"],
                     row["cell_X"],
+                    row["cell_Y"],
                     row["cell_shape_orientation_rad"],
                     row["cell_major_axis_length"],
                     row["cell_minor_axis_length"],
@@ -1403,8 +1402,8 @@ class Plotter:
                 # plot orientation degree nucleus
                 Plotter._add_single_cell_orientation_degree_axis(
                     ax[1],
-                    row["nuc_Y"],
                     row["nuc_X"],
+                    row["nuc_Y"],
                     row["nuc_shape_orientation_rad"],
                     row["nuc_major_axis_length"],
                     row["nuc_minor_axis_length"],
@@ -1416,8 +1415,8 @@ class Plotter:
                 # plot orientation degree
                 Plotter._add_single_cell_orientation_degree_axis(
                     ax,
-                    row["cell_Y"],
                     row["cell_X"],
+                    row["cell_Y"],
                     row["cell_shape_orientation_rad"],
                     row["cell_major_axis_length"],
                     row["cell_minor_axis_length"],

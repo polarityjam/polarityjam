@@ -107,15 +107,17 @@ class PropertiesCollection:
         self.dataset.at[self._index, "marker_mean_expression"] = sc_marker_props.mean_intensity
         self.dataset.at[
             self._index, "marker_sum_expression"] = sc_marker_props.marker_sum_expression
-        self.dataset.at[self._index, "marker_centroid_X"] = sc_marker_props.weighted_centroid[0]
-        self.dataset.at[self._index, "marker_centroid_Y"] = sc_marker_props.weighted_centroid[1]
+        self.dataset.at[self._index, "marker_centroid_X"] = sc_marker_props.weighted_centroid[1]  # x is second index
+        self.dataset.at[self._index, "marker_centroid_Y"] = sc_marker_props.weighted_centroid[0]
         self.dataset.at[
             self._index, "marker_centroid_orientation_rad"] = sc_marker_props.marker_centroid_orientation_rad
         self.dataset.at[
             self._index, "marker_centroid_orientation_deg"] = sc_marker_props.marker_centroid_orientation_deg
 
-        self.dataset.at[self._index, "marker_cue_directional_intensity_ratio"] = sc_marker_props.marker_cue_directional_intensity_ratio
-        self.dataset.at[self._index, "marker_cue_undirectional_intensity_ratio"] = sc_marker_props.marker_cue_undirectional_intensity_ratio
+        self.dataset.at[
+            self._index, "marker_cue_directional_intensity_ratio"] = sc_marker_props.marker_cue_directional_intensity_ratio
+        self.dataset.at[
+            self._index, "marker_cue_undirectional_intensity_ratio"] = sc_marker_props.marker_cue_undirectional_intensity_ratio
 
     def add_sc_nucleus_props(self, nucleus_props: SingleCellNucleusProps):
         """Adds specific single cell nucleus properties to the dataset.
@@ -125,8 +127,8 @@ class PropertiesCollection:
                 The single cell nucleus properties
 
         """
-        self.dataset.at[self._index, "nuc_X"] = nucleus_props.centroid[0]
-        self.dataset.at[self._index, "nuc_Y"] = nucleus_props.centroid[1]
+        self.dataset.at[self._index, "nuc_X"] = nucleus_props.centroid[1]  # x is second index
+        self.dataset.at[self._index, "nuc_Y"] = nucleus_props.centroid[0]
         self.dataset.at[
             self._index, "nuc_displacement_orientation_rad"] = nucleus_props.nuc_displacement_orientation_rad
         self.dataset.at[
@@ -159,8 +161,8 @@ class PropertiesCollection:
         self.dataset.at[self._index, "filename"] = filename
         self.dataset.at[self._index, "img_hash"] = img_hash
         self.dataset.at[self._index, "label"] = connected_component_label
-        self.dataset.at[self._index, "cell_X"] = sc_props.centroid[0]
-        self.dataset.at[self._index, "cell_Y"] = sc_props.centroid[1]
+        self.dataset.at[self._index, "cell_X"] = sc_props.centroid[1]  # x is second index
+        self.dataset.at[self._index, "cell_Y"] = sc_props.centroid[0]
         self.dataset.at[self._index, "cell_shape_orientation_rad"] = sc_props.cell_shape_orientation_rad
         self.dataset.at[self._index, "cell_shape_orientation_deg"] = sc_props.cell_shape_orientation_deg
         self.dataset.at[self._index, "cell_major_axis_length"] = sc_props.major_axis_length
@@ -179,8 +181,8 @@ class PropertiesCollection:
                 The single cell organelle properties
 
         """
-        self.dataset.at[self._index, "organelle_X"] = organelle_props.centroid[0]
-        self.dataset.at[self._index, "organelle_Y"] = organelle_props.centroid[1]
+        self.dataset.at[self._index, "organelle_X"] = organelle_props.centroid[1]  # x-axis is the second index
+        self.dataset.at[self._index, "organelle_Y"] = organelle_props.centroid[0]
         self.dataset.at[self._index, "nuc_organelle_distance"] = organelle_props.nuc_organelle_distance
         self.dataset.at[self._index, "organelle_orientation_rad"] = organelle_props.organelle_orientation_rad
         self.dataset.at[self._index, "organelle_orientation_deg"] = organelle_props.organelle_orientation_deg
@@ -228,10 +230,10 @@ class PropertiesCollection:
                 The single cell junction properties
 
         """
-        junctions_centroid_x, junctions_centroid_y = sc_junction_props.sc_junction_intensity_props.weighted_centroid
+        j_centroid_first, j_centroid_second = sc_junction_props.sc_junction_intensity_props.weighted_centroid
 
-        self.dataset.at[self._index, "junction_centroid_X"] = junctions_centroid_x
-        self.dataset.at[self._index, "junction_centroid_Y"] = junctions_centroid_y
+        self.dataset.at[self._index, "junction_centroid_X"] = j_centroid_second  # x-axis is the second index
+        self.dataset.at[self._index, "junction_centroid_Y"] = j_centroid_first
         self.dataset.at[self._index, "junction_perimeter"] = sc_junction_props.interface_perimeter
         self.dataset.at[self._index, "junction_protein_area"] = sc_junction_props.sc_junction_intensity_props.area
         # dataset.at[index, "junction_fragmented_perimeter"] = sc_junction_props.junction_fragmented_perimeter
@@ -245,8 +247,10 @@ class PropertiesCollection:
         self.dataset.at[
             self._index, "junction_intensity_per_interface_area"] = sc_junction_props.junction_intensity_per_interface_area
         self.dataset.at[self._index, "junction_cluster_density"] = sc_junction_props.junction_cluster_density
-        self.dataset.at[self._index, "junction_cue_directional_intensity_ratio"] = sc_junction_props.junction_cue_directional_intensity_ratio
-        self.dataset.at[self._index, "junction_cue_undirectional_intensity_ratio"] = sc_junction_props.junction_cue_undirectional_intensity_ratio
+        self.dataset.at[
+            self._index, "junction_cue_directional_intensity_ratio"] = sc_junction_props.junction_cue_directional_intensity_ratio
+        self.dataset.at[
+            self._index, "junction_cue_undirectional_intensity_ratio"] = sc_junction_props.junction_cue_undirectional_intensity_ratio
 
     def add_morans_i_props(self, morans_i: Moran):
         """Adds Moran's I value to the dataset.

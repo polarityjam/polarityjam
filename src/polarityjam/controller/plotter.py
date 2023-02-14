@@ -1213,8 +1213,8 @@ class Plotter:
             y0 = row["cell_Y"]
 
             # plot center of cell
-            ax[0].plot(y0, x0, ".b", markersize=5)
-            ax[1].plot(y0, x0, ".b", markersize=5)
+            ax[0].plot(x0, y0, ".b", markersize=5)
+            ax[1].plot(x0, y0, ".b", markersize=5)
 
             a = [x0, y0]
             b = [x0 + row["cell_major_axis_length"], y0]  # lies horizontally
@@ -1223,12 +1223,12 @@ class Plotter:
             d_lines, _ = get_divisor_lines(a, params.cue_direction, ground_line, 4)
             for d_line in d_lines:
                 x1, y1 = (i[0] for i in d_line.boundary.centroid.coords.xy)
-                ax[1].plot((y0, y1), (x0, x1), "--r", linewidth=0.5)
+                ax[1].plot((x0, x1), (y0, y1), "--r", linewidth=0.5)
 
             d_lines, _ = get_divisor_lines(a, params.cue_direction, ground_line, 2)
             for d_line in d_lines:
                 x1, y1 = (i[0] for i in d_line.boundary.centroid.coords.xy)
-                ax[0].plot((y0, y1), (x0, x1), "--r", linewidth=0.5)
+                ax[0].plot((x0, x1), (y0, y1), "--r", linewidth=0.5)
 
         u = np.round(np.max(directional_mask.data), 2)
         m = np.round(np.min(directional_mask.mask_background().data), 2)

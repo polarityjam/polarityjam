@@ -131,6 +131,7 @@ def run_stack(args):
     get_logger().info("Parameters: %s" % json.dumps(parameters, sort_keys=True, indent=4))
 
     file_list = get_tif_list(inpath)
+    merged_properties_df = pd.DataFrame()
 
     for filepath in file_list:
         filepath = Path(filepath)
@@ -143,8 +144,17 @@ def run_stack(args):
             "Processing file with file stem  \"%s\" and file extension: \"%s\"" % (filepath.stem, filepath.suffix)
         )
 
-        # start routine
-        _run(filepath, parameters, output_path, filename)
+        # single run
+        properties_df, cellpose_mask = _run(filepath, parameters, output_path, filename)
+
+        if merged_properties_df.empty:
+            merged_properties_df = properties_df.copy()
+        else:
+            merged_properties_df = pd.concat([merged_properties_df, properties_df], ignore_index=True)
+
+        merged_file = str(Path(output_path).joinpath("merged_properties.csv"))
+        get_logger().info("Writing merged features to disk: %s" % merged_file)
+        merged_properties_df.to_csv(merged_file, index=False)
 
     _finish(parameters, output_path)
 
@@ -183,6 +193,7 @@ def run_key(args):
 
     # empty DF summarizing overall results
     summary_df = pd.DataFrame()
+    summary_properties_df = pd.DataFrame()
 
     offset = 0
     for k, row in key_file.iterrows():
@@ -222,22 +233,34 @@ def run_key(args):
             else:
                 merged_properties_df = pd.concat([merged_properties_df, properties_df], ignore_index=True)
 
+            merged_file = str(output_path.joinpath("merged_table_%s" % row["short_name"] + ".csv"))
+            get_logger().info("Writing merged features to disk: %s" % merged_file)
+            merged_properties_df.to_csv(merged_file, index=False)
+
             summary_df.at[offset + file_index, "folder_name"] = row["folder_name"]
             summary_df.at[offset + file_index, "short_name"] = row["short_name"]
             summary_df.at[offset + file_index, "filepath"] = filepath
             summary_df.at[offset + file_index, "cell_number"] = len(np.unique(cellpose_mask))
 
+
         offset = offset + len(file_list)
-        merged_file = str(output_path.joinpath("merged_table_%s" % row["short_name"] + ".csv"))
-        get_logger().info("Writing merged features to disk: %s" % merged_file)
-        merged_properties_df.to_csv(merged_file, index=False)
 
-    summary_df_path = output_path_base.joinpath("summary_table" + ".csv")
-    get_logger().info("Writing summary table to disk: %s" % summary_df_path)
-    summary_df.to_csv(str(summary_df_path), index=False)
 
-    keyfile_path = output_path_base.joinpath("key_file" + ".csv")
-    get_logger().info("Writing key file to disk: %s" % keyfile_path)
-    key_file.to_csv(str(keyfile_path), index=False)
+        summary_df_path = output_path_base.joinpath("summary_table" + ".csv")
+        get_logger().info("Writing summary table to disk: %s" % summary_df_path)
+        summary_df.to_csv(str(summary_df_path), index=False)
+
+        if summary_properties_df.empty:
+            summary_properties_df = merged_properties_df.copy()
+        else:
+            summary_properties_df = pd.concat([summary_properties_df, merged_properties_df], ignore_index=True)
+
+        summary_file = str(output_path_base.joinpath("summary_table_properties.csv"))
+        get_logger().info("Writing merged features to disk: %s" % summary_file)
+        summary_properties_df.to_csv(summary_file, index=False)
+
+        keyfile_path = output_path_base.joinpath("key_file" + ".csv")
+        get_logger().info("Writing key file to disk: %s" % keyfile_path)
+        key_file.to_csv(str(keyfile_path), index=False)
 
     _finish(parameters, output_path_base)

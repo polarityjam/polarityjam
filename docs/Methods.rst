@@ -1,3 +1,5 @@
+.. _methods:
+
 Methods
 =======
 .. role:: raw-html(raw)
@@ -34,7 +36,7 @@ Region adjacency graph (neighborhood statistics)
 
 Our neighborhood statistic is calculated with the aid of a python module called `pysal <https://pysal.org/>`_  in
 combination with the scikit-image graph implementation. Each cell is modelled as a node in the graph.
-Additionally, a region of interest (ROI) can be specified. This feature is included in the graph
+Additionally, a feature of interest (FOI) can be specified. This feature is included in the graph
 structure and a `morans I <https://en.wikipedia.org/wiki/Moran%27s_I>`_ correlation analysis can be performed.
 
 

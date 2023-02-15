@@ -1,7 +1,7 @@
+.. _usage:
+
 Usage
 =====
-
-
 
 Run options
 -----------
@@ -28,11 +28,27 @@ are summarized in the table below.
 +------------+--------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
+The following provides examples of how to run the feature extraction process using the polariyjam command line tool:
+
+.. code-block:: bash
+
+    # Run a single image
+    polarityjam run paramfile.yml input.tif outputpath
+
+    # Run a stack of images
+    polarityjam run_stack paramfile.yml inputpath outputpath
+
+    # Run a set of images with a complex folder structure
+    polarityjam run_key paramfile.yml inputpath inputkey.csv outputpath
+
+
 Parameter file
 --------------
 
 Most important argument to provide for all modes is the ``parmeter.yml`` file. In this ``.yml`` file format, all options
 can be specified how the feature extraction pipeline treats the data and what extraction steps to perform.
+You might want to look at `this example parameter file <https://github.com/polarityjam/polarityjam/blob/main/src/polarityjam/utils/resources/parameters.yml>`_.
+
 The following tables list and describe all options that are available for executing the pipeline.
 Although they are separated in four different topics, they can be defined in a single ``parameter.yml`` file.
 
@@ -188,10 +204,35 @@ The structure of the csv is given as follows:
 +--------------+-------------+
 
 
-Folder structure will also be created in the provided output path. Specify a short_name different to the folder_name to rename each folder. (e.g. folder set_1 will be named cond_1 in the output path)
+Folder structure will also be created in the provided output path. Specify a short_name different to the
+folder_name to rename each folder. (e.g. folder set_1 will be named cond_1 in the output path)
+
+To better understand the concept, in the following you see a tree structure of the input and output folders visualized: ::
+
+    input
+    ├── set_1
+    │   ├── myfile1.tif
+    │   └── myfile2.tif
+    └── set_2
+        └── myfile3.tif
+
+The corresponding output folder structure would be: ::
+
+    output
+    ├── cond_1
+    │   ├── myfile1.csv
+    │   ├── myfile2.csv
+    │   └── merged_table_cond_1.csv
+    ├── cond_2
+    │   ├── myfile3.csv
+    │   └── merged_table_cond_2.csv
+    ├── key_file.csv
+    ├── run_20220610_13-10-10.log
+    ├── run_20220610_13-10-10_param.yml
+    └── summary_table.csv
 
 .. warning::
-    Using OS specific paths here might hurt reproducibility! (e.g. windows paths are different than unix paths!)
+    Using OS specific paths in the ``key-file.csv`` might hurt reproducibility! (e.g. windows paths are different than unix paths!)
 
 Web app
 --------

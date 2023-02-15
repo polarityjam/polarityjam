@@ -35,7 +35,7 @@ plot_junctions : True
 plot_polarity : True
 plot_orientation : True
 plot_marker : True
-plot_ratio_method : False
+plot_ratio_method : True
 plot_cyclic_orientation : True
 plot_foi : True
 outline_width : 2

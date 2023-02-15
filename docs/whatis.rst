@@ -1,3 +1,5 @@
+.. _software suite:
+
 What is PolarityJaM?
 ====================
 
@@ -21,7 +23,7 @@ analysed in the web-app and interesting patterns can be revealed. Typically, gai
 into data requires a significant investment of time and domain knowledge.
 To minimize the amount of time needed to quickly look at complex cell patterns and potentially
 discover interesting collective behavior, visualizing the features can be done interactively in an
-online setting. Simply visit `www.polarityjam.com <www.polarityjam.com>`_ to experience what is possible,
+online setting. Simply visit `www.polarityjam.com <https://www.polarityjam.com>`_ to experience what is possible,
 without the need to execute anything.
 
 
@@ -30,9 +32,9 @@ Feature Extraction Pipeline
 The feature extraction pipeline lets you extract relevant features from your image(s) and collect
 them in a ``.csv`` file. Optionally, the user can choose between several options to visualize the input
 images(s) and have a first look at the result from the information extraction process. To know
-what features can be extracted, visit the `Usage <Usage>`_ section.
+what features can be extracted, visit the :ref:`usage` section.
 To know more about the features, visualizations and methodology behind
-this process check out the method section.
+this process check out the :ref:`methods` section.
 
 Often, an analysis performed is barely reproducible due to missing information about version,
 specific parameters and more. PolarityJaM feature extraction pipeline additionally stores all necessary
@@ -49,5 +51,17 @@ Online Service
 
 Once the feature extraction process is finished, the information can be statistically analysed to
 discover structural patterns. Easiest way to achieve this is to use our service, hosted at
-`www.polarityjam.com <www.polarityjam.com>`_, by simply uploading the ``.csv`` file from the feature
+`www.polarityjam.com <https://www.polarityjam.com>`_, by simply uploading the ``.csv`` file from the feature
 extraction process. Alternatively, the app can be executed locally.
+
+Security
+--------
+
+We take security of our service very seriously! Data might stem from sensitive experiments and should treated
+with care. Therefore, we do not store any data on our servers. All uploaded data is deleted once
+the user closes the browser tab. Of course it is not sent to any third party during the statistical analysis.
+We are certified by ePrivacy. Feel free to look at our `certificate <https://www.eprivacy.eu/kunden/vergebene-siegel/firma/max-delbrueck-centrum-fuer-molekulare-medizin/>`_.
+
+.. image:: images/ePrivacyApp_F.svg
+   :width: 300px
+   :align: center

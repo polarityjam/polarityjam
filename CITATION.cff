@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Albrecht
+    given-names: Jan Philipp
+    orcid: https://orcid.org/0000-0002-3792-9695
+  - family-names: Giese
+    given-names: Wolfgang
+title: "PolarityJaM"
+abstract: A software package that lets you study cell polarity, junctions and morphology.
+license: MIT
+version: 0.1.0
+date-released: 2023-01-15
+repository: "https://github.com/polarityjam/polarityjam.git"
+type: software

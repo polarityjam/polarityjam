@@ -25,13 +25,13 @@ def save_current_fig(graphics_output_format, output_path, filename, filename_suf
 
 
 def add_vector(ax, x_pos_p1, y_pos_p1, x_pos_p2, y_pos_p2, markersize=2, font_color="w"):
-    ax.plot(y_pos_p1, x_pos_p1, '.g', markersize=markersize)
-    ax.plot(y_pos_p2, x_pos_p2, '.m', markersize=markersize)
+    ax.plot(x_pos_p1, y_pos_p1, '.g', markersize=markersize)
+    ax.plot(x_pos_p2, y_pos_p2, '.m', markersize=markersize)
     ax.arrow(
-        y_pos_p1,
         x_pos_p1,
-        y_pos_p2 - y_pos_p1,
+        y_pos_p1,
         x_pos_p2 - x_pos_p1,
+        y_pos_p2 - y_pos_p1,
         color=font_color,
         width=4
     )
@@ -67,7 +67,7 @@ def add_scalebar(ax, length_scalebar_microns, pixel_to_micron_ratio, size_vertic
 
 def add_title(ax, plot_title: str, im_junction: np.ndarray, axis_on: bool):
     ax.set_title(plot_title)
-    ax.set_xlim(0, im_junction.shape[1])
+    ax.set_xlim(0, im_junction.shape[1])  # x-axis is second dimension in numpy array
     ax.set_ylim(0, im_junction.shape[0])
     ax.invert_yaxis()
     if not axis_on:

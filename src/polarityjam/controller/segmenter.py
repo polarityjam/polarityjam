@@ -98,7 +98,7 @@ class CellposeSegmenter(Segmenter):
         get_logger().info("Image shape: %s" % str(img.shape))
 
         params_prep_img = ImageParameter()
-        px_to_m_r = params_prep_img.pixel_to_micron_ratio
+        px_to_m_r = img_parameter.pixel_to_micron_ratio
         params_prep_img.reset()
         params_prep_img.pixel_to_micron_ratio = px_to_m_r
 

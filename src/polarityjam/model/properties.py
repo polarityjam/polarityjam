@@ -167,7 +167,11 @@ class SingleCellMarkerProps(SingleInstanceProps):
     def marker_cue_directional_intensity_ratio(self):
         left = self.intensity * self.half_masks[0] * self.mask
         right = self.intensity * self.half_masks[1] * self.mask
-        return np.mean(left) / np.mean(right)
+
+        left_m = np.mean(left)
+        right_m = np.mean(right)
+
+        return 1 - 2*left_m/(left + right_m)
 
     @property
     def marker_cue_undirectional_intensity_ratio(self):
@@ -325,7 +329,11 @@ class SingleCellJunctionProps:
                self.sc_junction_intensity_props.mask
         right = self.sc_junction_intensity_props.intensity * self.half_masks[1] * \
                 self.sc_junction_intensity_props.mask
-        return np.mean(left) / np.mean(right)
+
+        left_m = np.mean(left)
+        right_m = np.mean(right)
+
+        return 1 - 2 * left_m / (left + right_m)
 
     @property
     def junction_cue_undirectional_intensity_ratio(self):

@@ -41,9 +41,9 @@ Single cell features
 +----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | label                      | The cellpose segmentation label of the particular cell.                                                                                    |
 +----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| cell_X                     | The X coordinate of the center of the cell.                                                                                                |
+| cell_X                     | The X coordinate (horizontal axis) of the center of the cell.                                                                              |
 +----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
-| cell_Y                     | The Y coordinate of the center of the cell.                                                                                                |
+| cell_Y                     | The Y coordinate (vertical axis) of the center of the cell.                                                                                |
 +----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
 | cell_shape_orientation_deg | Long axis of ellipsoid fit of the cell in degree.                                                                                          |
 +----------------------------+--------------------------------------------------------------------------------------------------------------------------------------------+
@@ -69,9 +69,9 @@ Nucleus features
 +-----------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 | Feature                           | Explanation                                                                                                                                        |
 +===================================+====================================================================================================================================================+
-| nuc_X                             | X position of the cell nucleus.                                                                                                                    |
+| nuc_X                             | X position (horizontal axis) of the cell nucleus.                                                                                                  |
 +-----------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
-| nuc_Y                             | Y position of the cell nucleus.                                                                                                                    |
+| nuc_Y                             | Y position (vertical axis) of the cell nucleus.                                                                                                    |
 +-----------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 | nuc_displacement_orientation_rad  | The displacement orientation of the nucleus from the center of the cell in rad.                                                                    |
 +-----------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -99,56 +99,56 @@ Nucleus features
 
 Organelle features
 ------------------
-+----------------------------+--------------------------------------------------------+
-| Feature                    | Explanation                                            |
-+============================+========================================================+
-| organelle_X                | The X coordinate of the center of the cell organelle.  |
-+----------------------------+--------------------------------------------------------+
-| organelle_Y                | The Y coordinate of the center of the cell organelle.  |
-+----------------------------+--------------------------------------------------------+
-| nuc_organelle_distance     | Distance from cell organelle to the nucleus.           |
-+----------------------------+--------------------------------------------------------+
-| organelle_orientation_rad  | The orientation in rad of the organelle to the nucleus |
-+----------------------------+--------------------------------------------------------+
-| organelle_orientation_deg  | The orientation in deg of the organelle to the nucleus |
-+----------------------------+--------------------------------------------------------+
++----------------------------+--------------------------------------------------------------------------+
+| Feature                    | Explanation                                                              |
++============================+==========================================================================+
+| organelle_X                | The X coordinate (horizontal axis) of the center of the cell organelle.  |
++----------------------------+--------------------------------------------------------------------------+
+| organelle_Y                | The Y coordinate (vertical axis) of the center of the cell organelle.    |
++----------------------------+--------------------------------------------------------------------------+
+| nuc_organelle_distance     | Distance from cell organelle to the nucleus.                             |
++----------------------------+--------------------------------------------------------------------------+
+| organelle_orientation_rad  | The orientation in rad of the organelle to the nucleus                   |
++----------------------------+--------------------------------------------------------------------------+
+| organelle_orientation_deg  | The orientation in deg of the organelle to the nucleus                   |
++----------------------------+--------------------------------------------------------------------------+
 
 
 
 
 Marker features
 ---------------
-+---------------------------------+---------------------------------------------------------------+
-| Feature                         | Explanation                                                   |
-+=================================+===============================================================+
-| marker_mean_expression          | Mean expression of the channel with the marker.               |
-+---------------------------------+---------------------------------------------------------------+
-| marker_sum_expression           | The absolute sum of the expression of the marker.             |
-+---------------------------------+---------------------------------------------------------------+
-| marker_centroid_X               | The X coordinate of the center of the marker expression.      |
-+---------------------------------+---------------------------------------------------------------+
-| marker_centroid_Y               | The Y coordinate of the center of the marker expression.      |
-+---------------------------------+---------------------------------------------------------------+
-| marker_centroid_orientation_rad | Intrinsic asymmetry of the cell.                              |
-+---------------------------------+---------------------------------------------------------------+
-| marker_centroid_orientation_deg | Intrinsic asymmetry of the cell.                              |
-+---------------------------------+---------------------------------------------------------------+
-| marker_mean_expression_mem      | Mean membrane expression.                                     |
-+---------------------------------+---------------------------------------------------------------+
-| marker_sum_expression_mem       | The absolut sum of the membrane expression.                   |
-+---------------------------------+---------------------------------------------------------------+
-| marker_mean_expression_nuc      | The mean expression of the nucleus.                           |
-+---------------------------------+---------------------------------------------------------------+
-| marker_sum_expression_nuc       | The absolut sum of the nucleus expression.                    |
-+---------------------------------+---------------------------------------------------------------+
-| marker_mean_expression_cyt      | The mean expression of the cell cytosol.                      |
-+---------------------------------+---------------------------------------------------------------+
-| marker_sum_expression_cyt       | The absolut sum of the cell cytosol expression.               |
-+---------------------------------+---------------------------------------------------------------+
-| marker_nucleus_orientation_rad  | The orientation in rad of the marker centroid to the nucleus. |
-+---------------------------------+---------------------------------------------------------------+
-| marker_nucleus_orientation_deg  | The orientation in rad of the marker centroid to the nucleus. |
-+---------------------------------+---------------------------------------------------------------+
++---------------------------------+---------------------------------------------------------------------------------+
+| Feature                         | Explanation                                                                     |
++=================================+=================================================================================+
+| marker_mean_expression          | Mean expression of the channel with the marker.                                 |
++---------------------------------+---------------------------------------------------------------------------------+
+| marker_sum_expression           | The absolute sum of the expression of the marker.                               |
++---------------------------------+---------------------------------------------------------------------------------+
+| marker_centroid_X               | The X coordinate (horizontal axis) of the center of the marker expression.      |
++---------------------------------+---------------------------------------------------------------------------------+
+| marker_centroid_Y               | The Y coordinate (vertical axis) of the center of the marker expression.        |
++---------------------------------+---------------------------------------------------------------------------------+
+| marker_centroid_orientation_rad | Intrinsic asymmetry of the cell.                                                |
++---------------------------------+---------------------------------------------------------------------------------+
+| marker_centroid_orientation_deg | Intrinsic asymmetry of the cell.                                                |
++---------------------------------+---------------------------------------------------------------------------------+
+| marker_mean_expression_mem      | Mean membrane expression.                                                       |
++---------------------------------+---------------------------------------------------------------------------------+
+| marker_sum_expression_mem       | The absolut sum of the membrane expression.                                     |
++---------------------------------+---------------------------------------------------------------------------------+
+| marker_mean_expression_nuc      | The mean expression of the nucleus.                                             |
++---------------------------------+---------------------------------------------------------------------------------+
+| marker_sum_expression_nuc       | The absolut sum of the nucleus expression.                                      |
++---------------------------------+---------------------------------------------------------------------------------+
+| marker_mean_expression_cyt      | The mean expression of the cell cytosol.                                        |
++---------------------------------+---------------------------------------------------------------------------------+
+| marker_sum_expression_cyt       | The absolut sum of the cell cytosol expression.                                 |
++---------------------------------+---------------------------------------------------------------------------------+
+| marker_nucleus_orientation_rad  | The orientation in rad of the marker centroid to the nucleus.                   |
++---------------------------------+---------------------------------------------------------------------------------+
+| marker_nucleus_orientation_deg  | The orientation in rad of the marker centroid to the nucleus.                   |
++---------------------------------+---------------------------------------------------------------------------------+
 
 
 
@@ -160,9 +160,9 @@ Junction features
 +----------------------------------------+---------------------------------------------------------------------------------------------+
 | Feature                                | Explanation                                                                                 |
 +========================================+=============================================================================================+
-| junction_centroid_X                    | The X coordinate of the center of the junction expression.                                  |
+| junction_centroid_X                    | The X coordinate (horizontal axis) of the center of the junction expression.                |
 +----------------------------------------+---------------------------------------------------------------------------------------------+
-| junction_centroid_Y                    | The Y coordinate of the center of the junction expression.                                  |
+| junction_centroid_Y                    | The Y coordinate (vertical axis) of the center of the junction expression.                  |
 +----------------------------------------+---------------------------------------------------------------------------------------------+
 | junction_perimeter                     | The perimeter of the junction area.                                                         |
 +----------------------------------------+---------------------------------------------------------------------------------------------+

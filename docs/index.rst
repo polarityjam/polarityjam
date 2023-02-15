@@ -49,11 +49,12 @@ Welcome to polarityjam's documentation!
    Usage
    Features
    notebooks/polarityjam-notebook_vis.ipynb
+   Web-App
    notebooks/polarityjam-notebook.ipynb
    notebooks/polarityjam-notebook_api.ipynb
    Methods
-   Web-App
    Contribute
+   Cite
 
 ..
    Indices and tables

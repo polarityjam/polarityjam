@@ -171,7 +171,7 @@ class SingleCellMarkerProps(SingleInstanceProps):
         left_m = np.mean(left)
         right_m = np.mean(right)
 
-        return 1 - 2*left_m/(left + right_m)
+        return 1 - 2*left_m/(left_m + right_m)
 
     @property
     def marker_cue_undirectional_intensity_ratio(self):
@@ -333,7 +333,7 @@ class SingleCellJunctionProps:
         left_m = np.mean(left)
         right_m = np.mean(right)
 
-        return 1 - 2 * left_m / (left + right_m)
+        return 1 - 2 * left_m / (left_m + right_m)
 
     @property
     def junction_cue_undirectional_intensity_ratio(self):

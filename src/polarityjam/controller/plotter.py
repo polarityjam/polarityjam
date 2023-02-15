@@ -66,8 +66,8 @@ class Plotter:
             single_cell_mask = cell_mask.get_single_instance_maks(cell_label)
             invert_outline_cell = (
                 single_cell_mask.get_outline_from_mask(self.params.outline_width)
-                    .invert()
-                    .to_instance_mask()
+                .invert()
+                .to_instance_mask()
             )
             single_cell_inlay_mask = single_cell_mask.overlay_instance_segmentation(
                 invert_outline_cell
@@ -92,8 +92,8 @@ class Plotter:
                 single_nucleus_mask = nuclei_mask.get_single_instance_maks(cell_label)
                 invert_outline_nuc = (
                     single_nucleus_mask.get_outline_from_mask(self.params.outline_width)
-                        .invert()
-                        .to_instance_mask()
+                    .invert()
+                    .to_instance_mask()
                 )
                 single_nuc_inlay_mask = (
                     single_nucleus_mask.overlay_instance_segmentation(
@@ -1198,13 +1198,9 @@ class Plotter:
         fig, ax = self._get_figure(2)
         # show junction and cell mask overlay
         ax[0].imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
-        cax1 = ax[0].imshow(
-            directional_mask.mask_background().data, cmap=plt.cm.Set3, alpha=0.5
-        )  # todo: different color mapping
+        cax1 = ax[0].imshow(directional_mask.mask_background().data, cmap=cm.cm.balance, alpha=0.5)
         ax[1].imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
-        cax2 = ax[1].imshow(
-            undirectional_mask.mask_background().data, cmap=plt.cm.Set3, alpha=0.5
-        )
+        cax2 = ax[1].imshow(undirectional_mask.mask_background().data, cmap=cm.cm.balance, alpha=0.5)
         # show cell outlines
         ax[0].imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
         ax[1].imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
@@ -1230,16 +1226,7 @@ class Plotter:
                 x1, y1 = (i[0] for i in d_line.boundary.centroid.coords.xy)
                 ax[0].plot((x0, x1), (y0, y1), "--r", linewidth=0.5)
 
-        u = np.round(np.max(directional_mask.data), 2)
-        m = np.round(np.min(directional_mask.mask_background().data), 2)
-        add_colorbar(
-            fig,
-            cax1,
-            ax[0],
-            [m, np.round((u + m) / 2, 2), u],
-            "directed intensity ratio",
-        )
-
+        add_colorbar(fig, cax1, ax[0], [-1, 0, 1], "directed intensity ratio")
         add_colorbar(fig, cax2, ax[1], [0, 0.5, 1], "undirected intensity ratio")
 
         return ax, fig
@@ -1508,6 +1495,7 @@ class Plotter:
         """
         for key in collection.img_dict.keys():
             img = collection.get_image_by_img_name(key)
+            r_params = collection.get_runtime_params_by_img_name(key)
 
             if self.params.plot_polarity and img.has_nuclei() and img.has_organelle():
                 self.plot_organelle_polarity(collection, key, close)
@@ -1537,7 +1525,8 @@ class Plotter:
                 self.plot_orientation(collection, key, close)
 
             if self.params.plot_foi:
-                self.plot_foi(collection, key, close)
+                if r_params.extract_group_features:
+                    self.plot_foi(collection, key, close)
 
     @staticmethod
     def _add_single_cell_orientation_degree_axis(

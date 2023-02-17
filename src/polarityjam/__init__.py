@@ -1,4 +1,4 @@
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __author__ = "Jan Philipp Albrecht, Wolfgang Giese"
 
 # imports for python API - do not delete!

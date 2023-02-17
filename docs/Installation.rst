@@ -20,7 +20,7 @@ with a working conda installation:
 
 .. code-block:: console
 
-    conda create -n polarityjam python=3.8
+    conda create -y -n polarityjam python=3.8
     conda activate polarityjam
     pip install polarityjam
 

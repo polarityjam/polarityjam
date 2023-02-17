@@ -34,5 +34,5 @@ jobs:
     - name: publish
       run: |
         TWINE_PASSWORD=${{ secrets.PYPI_API_TOKEN }}
-        TWINE_USERNAME=gitlab-ci-token
+        TWINE_USERNAME=${{ secrets.PYPI_DEPLOY_USER }}
         python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*

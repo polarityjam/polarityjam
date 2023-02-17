@@ -1,5 +1,5 @@
 """polarityjam album solution."""
-from album.runner.api import get_args, get_package_path, setup
+from album.runner.api import get_args, setup
 
 env_file = """name: Polarityjam
 channels:
@@ -7,40 +7,10 @@ channels:
   - defaults
 dependencies:
   - python=3.8.13
-  - git=2.34
   - pip
   - pip:
-     - numpy==1.21.5
-     - cellpose==1.0.1
-     - pandas==1.4.1
-     - scipy==1.8.0
-     - scikit-image==0.19.2
-     - matplotlib==3.5.1
-     - PyYAML==6.0
-     - cmocean==2.0
-     - pyunpack==0.2.2
-     - networkx==2.6.3
-     - GitPython==3.1
+     - polarityjam==0.1.0
 """
-
-
-def install():
-    """Install the package."""
-    import os
-    import subprocess
-    import sys
-    from pathlib import Path
-
-    from git import Repo
-
-    print("Installing polarityjam and dependencies")
-    polarityjam_repo = Path(get_package_path()).joinpath("polarityjam")
-    os.mkdir(polarityjam_repo)
-    # todo: point to commit hash
-    Repo.clone_from("https://github.com/polarityjam/polarityjam.git", polarityjam_repo)
-    subprocess.check_call(
-        [sys.executable, "-m", "pip", "install", "-e", Path(polarityjam_repo)]
-    )
 
 
 def run():
@@ -175,7 +145,6 @@ setup(
             "description": "CSV file containing the keys for the input.",
         },
     ],
-    install=install,
     run=run,
     pre_test=prepare_test,
     test=test,

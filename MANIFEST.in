@@ -1,1 +1,2 @@
 include src/polarityjam/test/resources/data.zip
+recursive-include src/ *.txt *.yml *.csv

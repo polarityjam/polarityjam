@@ -78,3 +78,30 @@ jobs:
     - name: Running_macos
       run: |
         python -m unittest discover src/polarityjam/test/
+
+  pypi-release:
+    needs: [build_linux, build_windows, build_macos]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.8" ]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.80
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.8"
+    - name: install
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install setuptools wheel twine
+
+    - name: package
+      run: |
+        python setup.py sdist bdist_wheel
+
+    - name: publish
+      run: |
+        TWINE_PASSWORD=${{ secrets.PYPI_API_TOKEN }} TWINE_USERNAME=${{ secrets.PYPI_DEPLOY_USER }} python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*

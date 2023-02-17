@@ -1,0 +1,37 @@
+name: auto-release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  pypi-release:
+    runs-on: ubuntu-latest
+      strategy:
+        matrix:
+          python-version: [ "3.8" ]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.80
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.8"
+    - name: install
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install setuptools wheel twine
+
+    - name: package
+      run: |
+        python -m setup.py sdist bdist_wheel
+
+    - name: publish
+      run: |
+        TWINE_PASSWORD=${{ secrets.PYPI_API_TOKEN }}
+        TWINE_USERNAME=gitlab-ci-token
+        python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*

@@ -1,6 +1,6 @@
 # Feature extraction pipeline
 
-The feature extraction pipeline to study vascular cell dynamics and more. 
+The feature extraction pipeline to study endothelial cell polarity, junctions and morphology. 
 
 For installation, usage, and more read our [wiki](https://polarityjam.readthedocs.io/en/latest/).
 

@@ -1,3 +1,4 @@
+"""Parameter classes holding the configuration of the feature extraction process."""
 import os
 from pathlib import Path
 
@@ -8,9 +9,12 @@ class Parameter:
     """Base class for all parameters."""
 
     def __init__(self, *args, **kwargs):
+        """Initialize the parameter class with its default values."""
         # init with default values from resources
         current_path = Path(os.path.dirname(os.path.realpath(__file__)))
-        param_base_file = Path(current_path).joinpath("..", "utils", "resources", "parameters.yml")
+        param_base_file = Path(current_path).joinpath(
+            "..", "utils", "resources", "parameters.yml"
+        )
         args_init = read_parameters(str(param_base_file))
 
         for key in args_init:
@@ -30,19 +34,22 @@ class Parameter:
             setattr(self, key, val)
 
     def reset(self):
+        """Reset all parameters to None."""
         for key in self.__dict__:
             self._setattr(key, None)
 
     @classmethod
     def from_yml(cls, path: str):
+        """Create a parameter object from a yml file."""
         params = read_parameters(path)
 
-        cls(**params)
+        return cls(params)
 
     def __str__(self, indent=1):
-        s = '%s:  \n' % self.__class__.__name__
+        """Return a string representation of the parameter object."""
+        s = "%s:  \n" % self.__class__.__name__
         for attr in self.__dict__:
-            s += '{:<30}{:<40}\n'.format(attr, str(getattr(self, attr)))
+            s += f"{attr:<30}{str(getattr(self, attr)):<40}\n"
         return s
 
 
@@ -50,6 +57,7 @@ class SegmentationParameter(Parameter):
     """Parameter class for the parameters necessary for the segmentation of images."""
 
     def __init__(self, attrs=None):
+        """Initialize the segmentation parameter class."""
         if attrs is None:
             attrs = {}
         self.manually_annotated_mask = None
@@ -69,7 +77,9 @@ class SegmentationParameter(Parameter):
 
 class ImageParameter(Parameter):
     """Parameter class for the parameters necessary for the image processing."""
+
     def __init__(self, attrs=None):
+        """Initialize the image parameter class."""
         if attrs is None:
             attrs = {}
         self.channel_junction = None
@@ -80,18 +90,12 @@ class ImageParameter(Parameter):
 
         super().__init__(**attrs)
 
-    def __len__(self):
-        c = 0
-        for key in self.__dict__:
-            if getattr(self, key) is not None:
-                c += 1
-
-        return c
-
 
 class RuntimeParameter(Parameter):
     """Parameter class for the parameters necessary for the calculation of the features."""
+
     def __init__(self, attrs=None):
+        """Initialize the runtime parameter class."""
         if attrs is None:
             attrs = {}
         self.extract_group_features = None
@@ -108,7 +112,9 @@ class RuntimeParameter(Parameter):
 
 class PlotParameter(Parameter):
     """Parameter class for the parameters necessary for the plotting of the results."""
+
     def __init__(self, attrs=None):
+        """Initialize the plot parameter class."""
         if attrs is None:
             attrs = {}
         self.plot_junctions = None

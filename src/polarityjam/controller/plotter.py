@@ -42,11 +42,11 @@ class Plotter:
         return fig, ax
 
     def _get_inlines(
-            self,
-            im_marker: BioMedicalChannel,
-            cell_mask: BioMedicalInstanceSegmentationMask,
-            nuclei_mask: BioMedicalInstanceSegmentationMask,
-            single_cell_dataset: pandas.DataFrame,
+        self,
+        im_marker: BioMedicalChannel,
+        cell_mask: BioMedicalInstanceSegmentationMask,
+        nuclei_mask: BioMedicalInstanceSegmentationMask,
+        single_cell_dataset: pandas.DataFrame,
     ) -> List[np.ndarray]:
         inlines_cell = BioMedicalInstanceSegmentationMask.empty(im_marker.data.shape)
         inlines_mem = np.zeros((im_marker.data.shape[0], im_marker.data.shape[1]))
@@ -55,7 +55,7 @@ class Plotter:
         for cell_label in single_cell_dataset["label"]:
             feature_row = single_cell_dataset.loc[
                 single_cell_dataset["label"] == cell_label
-                ]
+            ]
             intensity_cell = feature_row["marker_mean_expression"].values[0]
             intensity_mem = feature_row["marker_mean_expression_mem"].values[0]
 
@@ -108,9 +108,9 @@ class Plotter:
         return [inlines_cell.data, inlines_mem, inlines_nuc.data]
 
     def _masked_cell_outlines(
-            self,
-            channel: BioMedicalChannel,
-            instance_seg_mask: BioMedicalInstanceSegmentationMask,
+        self,
+        channel: BioMedicalChannel,
+        instance_seg_mask: BioMedicalInstanceSegmentationMask,
     ) -> np.ndarray:
         # cell outlines
         outlines_cells = BioMedicalMask.empty(channel.data.shape)
@@ -123,17 +123,17 @@ class Plotter:
 
         # convert cell outlines to image
         outlines_cells_rgba = outlines_cells.to_instance_mask().mask_background()
-        outlines_cells_rgba = np.dstack([outlines_cells_rgba.data] * 3)
+        outlines_cells_rgba_stack = np.dstack([outlines_cells_rgba.data] * 3)
 
-        return outlines_cells_rgba
+        return outlines_cells_rgba_stack
 
     def plot_channels(
-            self,
-            seg_img: np.ndarray,
-            seg_img_params: ImageParameter,
-            output_path: Union[str, Path],
-            filename: Union[str, Path],
-            close=False,
+        self,
+        seg_img: np.ndarray,
+        seg_img_params: ImageParameter,
+        output_path: Union[str, Path],
+        filename: Union[str, Path],
+        close=False,
     ):
         """Plots the separate channels from the input image given, based on its parameters.
 
@@ -155,8 +155,8 @@ class Plotter:
         filename, _ = os.path.splitext(os.path.basename(filename))
 
         if (
-                seg_img_params.channel_junction is not None
-                and seg_img_params.channel_nucleus is not None
+            seg_img_params.channel_junction is not None
+            and seg_img_params.channel_nucleus is not None
         ):
             fig, ax = self._get_figure(2)
 
@@ -204,13 +204,13 @@ class Plotter:
         return fig, axes
 
     def plot_mask(
-            self,
-            mask: np.ndarray,
-            seg_img: np.ndarray,
-            seg_img_params: ImageParameter,
-            output_path: Union[str, Path],
-            filename: Union[str, Path],
-            close: bool = False,
+        self,
+        mask: np.ndarray,
+        seg_img: np.ndarray,
+        seg_img_params: ImageParameter,
+        output_path: Union[str, Path],
+        filename: Union[str, Path],
+        close: bool = False,
     ):
         """Plots the segmentation mask, together with the separate channels from the input image.
 
@@ -249,8 +249,8 @@ class Plotter:
         mask_ = np.where(mask > 0, mask_, np.nan)
 
         if (
-                seg_img_params.channel_junction is not None
-                and seg_img_params.channel_nucleus is not None
+            seg_img_params.channel_junction is not None
+            and seg_img_params.channel_nucleus is not None
         ):
             fig, ax = self._get_figure(3)
 
@@ -306,7 +306,7 @@ class Plotter:
         return fig, axes
 
     def plot_organelle_polarity(
-            self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
         """Plots the organelle polarity of a specific image in the collection
 
@@ -416,7 +416,7 @@ class Plotter:
         return fig, [ax]
 
     def plot_nuc_displacement_orientation(
-            self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
         """Plots the nucleus displacement orientation of a specific image in the collection
 
@@ -510,7 +510,7 @@ class Plotter:
         return fig, [ax]
 
     def plot_marker_expression(
-            self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
         """Plots the marker expression of a specific image in the collection
 
@@ -529,7 +529,7 @@ class Plotter:
         cell_mask = img.segmentation.segmentation_mask_connected
         single_cell_dataset = collection.dataset.loc[
             collection.dataset["filename"] == img_name
-            ]
+        ]
 
         nuclei_mask = None
         if img.img_params.channel_nucleus >= 0:
@@ -650,7 +650,7 @@ class Plotter:
         return fig, axes
 
     def plot_marker_polarity(
-            self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
         """Plots the marker polarity of a specific image in the collection
 
@@ -708,7 +708,7 @@ class Plotter:
         return fig, [ax]
 
     def plot_marker_nucleus_orientation(
-            self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
         """Plots the marker polarity of a specific image in the collection
 
@@ -811,7 +811,7 @@ class Plotter:
         return fig, [ax]
 
     def plot_junction_polarity(
-            self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
         """Plots the junction polarity of a specific image in the collection
 
@@ -871,7 +871,7 @@ class Plotter:
         return fig, [ax]
 
     def plot_corners(
-            self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
         """Plots the corners of a specific image in the collection
 
@@ -921,7 +921,7 @@ class Plotter:
         return fig, [ax]
 
     def plot_eccentricity(
-            self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
         """Plots the eccentricity of a specific image in the collection
 
@@ -1061,7 +1061,7 @@ class Plotter:
         return fig, axes
 
     def plot_marker_cue_intensity_ratio(
-            self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
         """Plots the marker cue intensity ratios of a specific image in the collection
 
@@ -1122,7 +1122,7 @@ class Plotter:
         )
 
     def plot_junction_cue_intensity_ratio(
-            self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
         """Plots the junction cue intensity ratios of a specific image in the collection
 
@@ -1185,22 +1185,26 @@ class Plotter:
         return fig, ax
 
     def _plot_cue_intensity_ratio(
-            self,
-            cell_mask,
-            collection,
-            im_junction,
-            img_name,
-            directional_mask,
-            undirectional_mask,
-            params,
+        self,
+        cell_mask,
+        collection,
+        im_junction,
+        img_name,
+        directional_mask,
+        undirectional_mask,
+        params,
     ):
         # figure and axes
         fig, ax = self._get_figure(2)
         # show junction and cell mask overlay
         ax[0].imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
-        cax1 = ax[0].imshow(directional_mask.mask_background().data, cmap=cm.cm.balance, alpha=0.5)
+        cax1 = ax[0].imshow(
+            directional_mask.mask_background().data, cmap=cm.cm.balance, alpha=0.5
+        )
         ax[1].imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
-        cax2 = ax[1].imshow(undirectional_mask.mask_background().data, cmap=cm.cm.balance, alpha=0.5)
+        cax2 = ax[1].imshow(
+            undirectional_mask.mask_background().data, cmap=cm.cm.balance, alpha=0.5
+        )
         # show cell outlines
         ax[0].imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
         ax[1].imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
@@ -1232,7 +1236,7 @@ class Plotter:
         return ax, fig
 
     def plot_foi(
-            self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
         """Plots the field of interest of a specific image in the collection
 
@@ -1256,7 +1260,7 @@ class Plotter:
 
         single_cell_dataset = collection.dataset.loc[
             collection.dataset["filename"] == img_name
-            ]
+        ]
         foi_name = collection.get_runtime_params_by_img_name(
             img_name
         ).feature_of_interest
@@ -1306,7 +1310,7 @@ class Plotter:
         return fig, ax
 
     def plot_orientation(
-            self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
         """Plots the orientation of a specific image in the collection
 
@@ -1353,7 +1357,7 @@ class Plotter:
                 img_name
             )["nuc_shape_orientation_rad"].values
             nuc_shape_orientation_deg_vector = (
-                    nuc_shape_orientation_rad_vector * 180.0 / np.pi
+                nuc_shape_orientation_rad_vector * 180.0 / np.pi
             )
             nuclei_orientation = inst_nuclei_mask.relabel(
                 nuc_shape_orientation_deg_vector
@@ -1449,15 +1453,15 @@ class Plotter:
         return fig, ax
 
     def _finish_plot(
-            self,
-            fig,
-            output_path,
-            img_name,
-            output_suffix,
-            axes,
-            pixel_to_micron_ratio,
-            close=False,
-            image=None,
+        self,
+        fig,
+        output_path,
+        img_name,
+        output_suffix,
+        axes,
+        pixel_to_micron_ratio,
+        close=False,
+        image=None,
     ):
         # plot scale bar for this figure
         if self.params.plot_scalebar:
@@ -1530,15 +1534,15 @@ class Plotter:
 
     @staticmethod
     def _add_single_cell_orientation_degree_axis(
-            ax,
-            y0,
-            x0,
-            orientation,
-            major_axis_length,
-            minor_axis_length,
-            fontsize=3,
-            font_color="w",
-            markersize=2,
+        ax,
+        y0,
+        x0,
+        orientation,
+        major_axis_length,
+        minor_axis_length,
+        fontsize=3,
+        font_color="w",
+        markersize=2,
     ):
         (
             x1_ma,
@@ -1567,10 +1571,10 @@ class Plotter:
 
     @staticmethod
     def _add_nuclei_orientation(
-            fig,
-            ax,
-            im_junction: BioMedicalChannel,
-            nuclei_orientation: BioMedicalInstanceSegmentationMask,
+        fig,
+        ax,
+        im_junction: BioMedicalChannel,
+        nuclei_orientation: BioMedicalInstanceSegmentationMask,
     ):
         v_min = 0.0
         v_max = 180.0
@@ -1593,10 +1597,10 @@ class Plotter:
 
     @staticmethod
     def _add_cell_orientation(
-            fig,
-            ax,
-            im_junction: BioMedicalChannel,
-            cell_orientation: BioMedicalInstanceSegmentationMask,
+        fig,
+        ax,
+        im_junction: BioMedicalChannel,
+        cell_orientation: BioMedicalInstanceSegmentationMask,
     ):
         v_min = 0.0
         v_max = 180.0
@@ -1618,7 +1622,7 @@ class Plotter:
 
     @staticmethod
     def _calc_single_cell_axis_orientation_vector(
-            x, y, orientation, major_axis_length, minor_axis_length
+        x, y, orientation, major_axis_length, minor_axis_length
     ):
         x1_major = x + math.sin(orientation) * 0.5 * major_axis_length
         y1_major = y - math.cos(orientation) * 0.5 * major_axis_length
@@ -1643,10 +1647,10 @@ class Plotter:
 
     @staticmethod
     def _add_nuclei_eccentricity(
-            fig,
-            ax,
-            im_junction: BioMedicalChannel,
-            nuclei_eccentricity: BioMedicalInstanceSegmentationMask,
+        fig,
+        ax,
+        im_junction: BioMedicalChannel,
+        nuclei_eccentricity: BioMedicalInstanceSegmentationMask,
     ):
         v_min = 0.0
         v_max = 1.0
@@ -1668,10 +1672,10 @@ class Plotter:
 
     @staticmethod
     def _add_cell_eccentricity(
-            fig,
-            ax,
-            im_junction: BioMedicalChannel,
-            cell_eccentricity: BioMedicalInstanceSegmentationMask,
+        fig,
+        ax,
+        im_junction: BioMedicalChannel,
+        cell_eccentricity: BioMedicalInstanceSegmentationMask,
     ):
         v_min = 0.0
         v_max = 1.0
@@ -1693,16 +1697,16 @@ class Plotter:
 
     @staticmethod
     def _add_single_cell_eccentricity_axis(
-            ax,
-            y0,
-            x0,
-            orientation,
-            major_axis_length,
-            minor_axis_length,
-            eccentricity,
-            fontsize=3,
-            font_color="w",
-            markersize=2,
+        ax,
+        y0,
+        x0,
+        orientation,
+        major_axis_length,
+        minor_axis_length,
+        eccentricity,
+        fontsize=3,
+        font_color="w",
+        markersize=2,
     ):
         (
             x1_ma,

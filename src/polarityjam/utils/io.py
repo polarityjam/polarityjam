@@ -1,24 +1,22 @@
+"""Input output functions for the project."""
 import glob
 import os
 import shutil
 import time
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
 import skimage.io
 import yaml
 
-"""
-Global variable to save program call time.
-"""
-
+# Global variable to save program call time.
 CALL_TIME = None
 
 
 def read_parameters(parameter_file: str) -> dict:
-    """Reads in default parameters and replaces user defined parameters.
+    """Read in default parameters and replaces user defined parameters.
 
     Args:
         parameter_file:
@@ -31,7 +29,7 @@ def read_parameters(parameter_file: str) -> dict:
 
     param_base_file = Path(current_path).joinpath("resources", "parameters.yml")
 
-    with open(param_base_file, 'r') as yml_f:
+    with open(param_base_file) as yml_f:
         parameters = yaml.safe_load(yml_f)
 
     with open(parameter_file) as file:
@@ -45,7 +43,7 @@ def read_parameters(parameter_file: str) -> dict:
 
 
 def read_image(filename: Union[Path, str]) -> np.ndarray:
-    """Reads an RGB or grayscale image with the scikit-learn library. Swaps axis if channels are not on last position.
+    """Read an RGB or grayscale image with the scikit-learn library. Swaps axis if channels are not on last position.
 
     Args:
         filename:
@@ -69,7 +67,7 @@ def read_image(filename: Union[Path, str]) -> np.ndarray:
 
 
 def write_dict_to_yml(yml_file: Union[str, Path], d: dict) -> bool:
-    """Writes a dictionary to a file in yml format.
+    """Write a dictionary to a file in yml format.
 
     Args:
         yml_file:
@@ -85,14 +83,14 @@ def write_dict_to_yml(yml_file: Union[str, Path], d: dict) -> bool:
     p = Path(yml_file.parent)
     p.mkdir(parents=True, exist_ok=True)
 
-    with open(yml_file, 'w+') as yml_f:
+    with open(yml_file, "w+") as yml_f:
         yml_f.write(yaml.dump(d, Dumper=yaml.Dumper))
 
     return True
 
 
 def create_path_recursively(path: Union[str, Path]) -> bool:
-    """Creates a path. Creates missing parent folders.
+    """Create a path. Creates missing parent folders.
 
     Args:
         path:
@@ -140,7 +138,11 @@ def read_key_file(path: Union[str, Path]) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
-def list_files_recursively(path: Union[str, Path], root: Union[str, Path] = None, relative: bool = False) -> List[Path]:
+def list_files_recursively(
+    path: Union[str, Path],
+    root: Optional[Union[str, Path]] = None,
+    relative: bool = False,
+) -> List[Path]:
     """List all files in a folder recursively.
 
     Args:
@@ -161,15 +163,15 @@ def list_files_recursively(path: Union[str, Path], root: Union[str, Path] = None
     files_list = []
 
     for cur_root, dirs, files in os.walk(path_):
-        cur_root = Path(cur_root)
+        cur_root = Path(str(cur_root))  # type: ignore
 
         for d in dirs:
-            files_list += list_files_recursively(cur_root.joinpath(d), root, relative)
+            files_list += list_files_recursively(cur_root.joinpath(d), root, relative)  # type: ignore
         for fi in files:
             if relative:
-                files_list.append(cur_root.joinpath(fi).relative_to(root))
+                files_list.append(cur_root.joinpath(fi).relative_to(root))  # type: ignore
             else:
-                files_list.append(cur_root.joinpath(fi))
+                files_list.append(cur_root.joinpath(fi))  # type: ignore
         break
 
     return files_list
@@ -185,7 +187,7 @@ def get_doc_file_prefix() -> str:
     global CALL_TIME
 
     if not CALL_TIME:
-        CALL_TIME = time.strftime('%Y%m%d_%H-%M-%S')
+        CALL_TIME = time.strftime("%Y%m%d_%H-%M-%S")
 
     call_time = CALL_TIME
 
@@ -193,7 +195,7 @@ def get_doc_file_prefix() -> str:
 
 
 def copy(file: Union[str, Path], path_to: Union[str, Path]) -> Path:
-    """Copies a file A to either folder B or file B. Makes sure folder structure for target exists.
+    """Copy a file A to either folder B or file B. Makes sure folder structure for target exists.
 
     Args:
         file:

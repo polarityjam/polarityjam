@@ -33,10 +33,15 @@ class TestIntegration(TestCommon):
 
         return p
 
-    @unittest.skipIf(platform.system().lower() == 'windows', "Plotting too memory extensive. Skipping test!")
+    @unittest.skipIf(
+        platform.system().lower() == "windows",
+        "Plotting too memory extensive. Skipping test!",
+    )
     def test_nb_2(self):
         # copy to notebook tmp dir
-        path_nb = Path(os.path.dirname(os.path.realpath(__file__))).parent.parent.parent.joinpath(
+        path_nb = Path(
+            os.path.dirname(os.path.realpath(__file__))
+        ).parent.parent.parent.joinpath(
             "docs", "notebooks", "polarityjam-notebook_api.ipynb"
         )
         p = self.nb_to_py(path_nb, path_nb.stem, self.tmp_dir)
@@ -55,21 +60,35 @@ class TestIntegration(TestCommon):
                 elif replace_cell_pattern:
                     if line.startswith(replace_cell_pattern):
 
-                        print("input_file1 = Path(\"%s\")" % self.data_path.parent.joinpath(
-                            "data", "golgi_nuclei", "set_2", "060721_EGM2_18dyn_02.tif"))
-                        print("input_file2 = Path(\"%s\")" % self.data_path.parent.joinpath(
-                            "data", "golgi_nuclei", "set_1", "060721_EGM2_18dyn_01.tif"))
+                        print(
+                            'input_file1 = Path("%s")'
+                            % self.data_path.parent.joinpath(
+                                "data",
+                                "golgi_nuclei",
+                                "set_2",
+                                "060721_EGM2_18dyn_02.tif",
+                            )
+                        )
+                        print(
+                            'input_file2 = Path("%s")'
+                            % self.data_path.parent.joinpath(
+                                "data",
+                                "golgi_nuclei",
+                                "set_1",
+                                "060721_EGM2_18dyn_01.tif",
+                            )
+                        )
 
-                        print("output_path = Path(\"%s\")" % self.data_path.parent)
-                        print("output_file_prefix1 = \"060721_EGM2_18dyn_02\"")
-                        print("output_file_prefix2 = \"060721_EGM2_18dyn_01\"")
+                        print('output_path = Path("%s")' % self.data_path.parent)
+                        print('output_file_prefix1 = "060721_EGM2_18dyn_02"')
+                        print('output_file_prefix2 = "060721_EGM2_18dyn_01"')
 
                         while not next(myiter, "None").startswith(replace_cell_pattern):
                             print("")
                     else:
-                        print(line, end='')
+                        print(line, end="")
                 else:
-                    print(line, end='')
+                    print(line, end="")
 
         root = Path(p).parent
         sys.path.insert(0, str(root))
@@ -77,10 +96,15 @@ class TestIntegration(TestCommon):
         nb_test2 = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(nb_test2)
 
-    @unittest.skipIf(platform.system().lower() == 'windows', "Plotting too memory extensive. Skipping test!")
+    @unittest.skipIf(
+        platform.system().lower() == "windows",
+        "Plotting too memory extensive. Skipping test!",
+    )
     def test_nb_3(self):
         # copy to notebook tmp dir
-        path_nb = Path(os.path.dirname(os.path.realpath(__file__))).parent.parent.parent.joinpath(
+        path_nb = Path(
+            os.path.dirname(os.path.realpath(__file__))
+        ).parent.parent.parent.joinpath(
             "docs", "notebooks", "polarityjam-notebook_vis.ipynb"
         )
         p = self.nb_to_py(path_nb, path_nb.stem, self.tmp_dir)
@@ -98,16 +122,23 @@ class TestIntegration(TestCommon):
                     print("")
                 elif replace_cell_pattern:
                     if line.startswith(replace_cell_pattern):
-                        print("output_path = Path(\"%s\")" % self.data_path.parent)
-                        print("input_file = Path(\"%s\")" % self.data_path.parent.joinpath(
-                            "data", "golgi_nuclei", "set_2", "060721_EGM2_18dyn_02.tif"))
-                        print("output_file_prefix = \"060721_EGM2_18dyn_02\"")
+                        print('output_path = Path("%s")' % self.data_path.parent)
+                        print(
+                            'input_file = Path("%s")'
+                            % self.data_path.parent.joinpath(
+                                "data",
+                                "golgi_nuclei",
+                                "set_2",
+                                "060721_EGM2_18dyn_02.tif",
+                            )
+                        )
+                        print('output_file_prefix = "060721_EGM2_18dyn_02"')
                         while not next(myiter, "None").startswith(replace_cell_pattern):
                             print("")
                     else:
-                        print(line, end='')
+                        print(line, end="")
                 else:
-                    print(line, end='')
+                    print(line, end="")
 
         root = Path(p).parent
         sys.path.insert(0, str(root))
@@ -115,16 +146,22 @@ class TestIntegration(TestCommon):
         nb_test3 = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(nb_test3)
 
-    @unittest.skipIf(platform.system().lower() == 'windows', "Plotting too memory extensive. Skipping test!")
+    @unittest.skipIf(
+        platform.system().lower() == "windows",
+        "Plotting too memory extensive. Skipping test!",
+    )
     def test_nb(self):
         # copy to notebook tmp dir
-        path_nb = Path(os.path.dirname(os.path.realpath(__file__))).parent.parent.parent.joinpath(
+        path_nb = Path(
+            os.path.dirname(os.path.realpath(__file__))
+        ).parent.parent.parent.joinpath(
             "docs", "notebooks", "polarityjam-notebook.ipynb"
         )
         p = self.nb_to_py(path_nb, path_nb.stem, self.tmp_dir)
 
         # remove ipython formatting and set data path
         replace_cell_pattern = "### ADAPT ME ###"
+        replace_cell_pattern2 = "### CHANGE ME ###"
         with fileinput.FileInput(p, inplace=True) as f:
             myiter = iter(f)
             for line in f:
@@ -136,16 +173,37 @@ class TestIntegration(TestCommon):
                     print("")
                 elif replace_cell_pattern:
                     if line.startswith(replace_cell_pattern):
-                        print("output_path = Path(\"%s\")" % self.data_path.parent)
-                        print("input_file = Path(\"%s\")" % self.data_path.parent.joinpath(
-                            "data", "golgi_nuclei", "set_2", "060721_EGM2_18dyn_02.tif"))
-                        print("output_file_prefix = \"060721_EGM2_18dyn_02\"")
+                        print('output_path = Path("%s")' % self.data_path.parent)
+                        print(
+                            'input_file = Path("%s")'
+                            % self.data_path.parent.joinpath(
+                                "data",
+                                "golgi_nuclei",
+                                "set_2",
+                                "060721_EGM2_18dyn_02.tif",
+                            )
+                        )
+                        print('output_file_prefix = "060721_EGM2_18dyn_02"')
                         while not next(myiter, "None").startswith(replace_cell_pattern):
                             print("")
                     else:
-                        print(line, end='')
+                        print(line, end="")
+                elif replace_cell_pattern2:
+                    if line.startswith(replace_cell_pattern2):
+                        print(
+                            'path_to_yml = Path("%s")'
+                            % self.get_test_parameter_file(
+                                "parameters_golgi_nuclei.yml"
+                            )
+                        )
+                        while not next(myiter, "None").startswith(
+                            replace_cell_pattern2
+                        ):
+                            print("")
+                    else:
+                        print(line, end="")
                 else:
-                    print(line, end='')
+                    print(line, end="")
 
         root = Path(p).parent
         sys.path.insert(0, str(root))

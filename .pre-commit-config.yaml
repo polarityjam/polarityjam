@@ -11,7 +11,10 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [numpy==1.21.0, scipy, pandas, types-requests]
-        exclude: .scripts/ci/download_data.py|squidpy/datasets/_(dataset|image).py # See https://github.com/pre-commit/mirrors-mypy/issues/33
+        exclude: |
+          (?x)^(
+            (.scripts/ci/download_data.py|squidpy/datasets/_(dataset|image).py|src/polarityjam/test/.*)
+          )$
   - repo: https://github.com/psf/black
     rev: 22.10.0
     hooks:
@@ -115,6 +118,7 @@ repos:
     rev: v1.9.0
     hooks:
       - id: python-no-eval
+        exclude: src/polarityjam/controller/segmenter.py
       - id: python-use-type-annotations
       - id: python-check-blanket-noqa
       - id: rst-backticks

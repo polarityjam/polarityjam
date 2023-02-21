@@ -51,7 +51,7 @@ class BioMedicalImage:
         self,
         img: np.ndarray,
         img_params: ImageParameter,
-        segmentation: Optional[BioMedicalInstanceSegmentation],
+        segmentation: Optional[BioMedicalInstanceSegmentation] = None,
     ):
         """Initialize the image with the given data."""
         self.img = img

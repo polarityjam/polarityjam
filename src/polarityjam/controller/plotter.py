@@ -535,7 +535,7 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_nuclei(), "Nuclei channel not available"
+        assert img.has_marker(), "Marker channel not available"
 
         im_marker = img.marker.data
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -544,7 +544,7 @@ class Plotter:
         ]
 
         nuclei_mask = None
-        if img.img_params.channel_nucleus >= 0:
+        if img.has_nuclei():
             nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg")
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio

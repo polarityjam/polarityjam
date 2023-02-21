@@ -1,3 +1,4 @@
+"""Module for plotting the features."""
 import json
 import math
 import os
@@ -14,24 +15,28 @@ from shapely.geometry import LineString
 from polarityjam.compute.shape import get_divisor_lines
 from polarityjam.model.collection import PropertiesCollection
 from polarityjam.model.image import BioMedicalChannel
-from polarityjam.model.masks import (BioMedicalInstanceSegmentationMask,
-                                     BioMedicalMask)
+from polarityjam.model.masks import BioMedicalInstanceSegmentationMask, BioMedicalMask
 from polarityjam.model.parameter import ImageParameter, PlotParameter
 from polarityjam.polarityjam_logging import get_logger
-from polarityjam.vizualization.plot import (add_colorbar, add_scalebar,
-                                            add_title, add_vector,
-                                            save_current_fig)
+from polarityjam.vizualization.plot import (
+    add_colorbar,
+    add_scalebar,
+    add_title,
+    add_vector,
+    save_current_fig,
+)
 
 
 class Plotter:
-    """Plotter class"""
+    """Plotter class."""
 
     def __init__(self, params: PlotParameter):
+        """Initialize Plotter."""
         self.params = params
         self.set_figure_dpi()
 
     def set_figure_dpi(self):
-        """Set figure dpi"""
+        """Set figure dpi."""
         matplotlib.rcParams["figure.dpi"] = self.params.dpi
 
     def _get_figure(self, n_subfigures: int):
@@ -135,7 +140,7 @@ class Plotter:
         filename: Union[str, Path],
         close=False,
     ):
-        """Plots the separate channels from the input image given, based on its parameters.
+        """Plot the separate channels from the input image given, based on its parameters.
 
         Args:
             seg_img:
@@ -212,8 +217,7 @@ class Plotter:
         filename: Union[str, Path],
         close: bool = False,
     ):
-        """Plots the segmentation mask, together with the separate channels from the input image.
-
+        """Plot the segmentation mask, together with the separate channels from the input image.
 
         Args:
             mask:
@@ -308,7 +312,7 @@ class Plotter:
     def plot_organelle_polarity(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
-        """Plots the organelle polarity of a specific image in the collection
+        """Plot the organelle polarity of a specific image in the collection.
 
         Args:
             collection:
@@ -320,6 +324,9 @@ class Plotter:
 
         """
         img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+        assert img.has_junction(), "Junctions channel not available"
+        assert img.has_nuclei(), "Nuclei channel not available"
 
         im_junction = img.junction.data
         con_inst_seg_mask = img.segmentation.segmentation_mask_connected
@@ -418,7 +425,7 @@ class Plotter:
     def plot_nuc_displacement_orientation(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
-        """Plots the nucleus displacement orientation of a specific image in the collection
+        """Plot the nucleus displacement orientation of a specific image in the collection.
 
         Args:
             collection:
@@ -430,6 +437,9 @@ class Plotter:
 
         """
         img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+        assert img.has_junction(), "Junctions channel not available"
+        assert img.has_nuclei(), "Nuclei channel not available"
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -469,7 +479,7 @@ class Plotter:
         ax.imshow(rgba_nuclei)
 
         # plot polarity vector
-        for index, row in collection.get_properties_by_img_name(img_name).iterrows():
+        for _, row in collection.get_properties_by_img_name(img_name).iterrows():
             add_vector(
                 ax,
                 row["cell_X"],
@@ -512,7 +522,7 @@ class Plotter:
     def plot_marker_expression(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
-        """Plots the marker expression of a specific image in the collection
+        """Plot the marker expression of a specific image in the collection.
 
         Args:
             collection:
@@ -524,6 +534,8 @@ class Plotter:
 
         """
         img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+        assert img.has_nuclei(), "Nuclei channel not available"
 
         im_marker = img.marker.data
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -593,7 +605,7 @@ class Plotter:
             add_colorbar(fig, cax_3, ax[2], yticks_nuc, "intensity nucleus")
 
         # plot mean expression value of cell and membrane as text
-        for index, row in single_cell_dataset.iterrows():
+        for _, row in single_cell_dataset.iterrows():
             ax[0].text(
                 row["cell_X"],
                 row["cell_Y"],
@@ -652,7 +664,7 @@ class Plotter:
     def plot_marker_polarity(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
-        """Plots the marker polarity of a specific image in the collection
+        """Plot the marker polarity of a specific image in the collection.
 
         Args:
             collection:
@@ -664,6 +676,8 @@ class Plotter:
 
         """
         img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+        assert img.has_marker(), "Marker channel not available"
 
         im_marker = img.marker
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -682,7 +696,7 @@ class Plotter:
         ax.imshow(self._masked_cell_outlines(im_marker, cell_mask), alpha=0.5)
 
         # add all polarity vectors
-        for index, row in collection.get_properties_by_img_name(img_name).iterrows():
+        for _, row in collection.get_properties_by_img_name(img_name).iterrows():
             add_vector(
                 ax,
                 row["cell_X"],
@@ -710,7 +724,7 @@ class Plotter:
     def plot_marker_nucleus_orientation(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
-        """Plots the marker polarity of a specific image in the collection
+        """Plot the marker polarity of a specific image in the collection.
 
         Args:
             collection:
@@ -722,6 +736,10 @@ class Plotter:
 
         """
         img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+        assert img.has_junction(), "Junction channel not available"
+        assert img.has_nuclei(), "Nuclei channel not available"
+        assert img.has_marker(), "Marker channel not available"
 
         im_junction = img.junction.data
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -770,7 +788,7 @@ class Plotter:
         ax.imshow(rgba_nuclei)
 
         # plot polarity vector
-        for index, row in collection.get_properties_by_img_name(img_name).iterrows():
+        for _, row in collection.get_properties_by_img_name(img_name).iterrows():
             add_vector(
                 ax,
                 row["nuc_X"],
@@ -813,7 +831,7 @@ class Plotter:
     def plot_junction_polarity(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
-        """Plots the junction polarity of a specific image in the collection
+        """Plot the junction polarity of a specific image in the collection.
 
         Args:
             collection:
@@ -825,6 +843,8 @@ class Plotter:
 
         """
         img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+        assert img.has_junction(), "Junction channel not available"
 
         im_junction = img.junction
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -843,7 +863,7 @@ class Plotter:
         ax.imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
 
         # add all polarity vectors
-        for index, row in collection.get_properties_by_img_name(img_name).iterrows():
+        for _, row in collection.get_properties_by_img_name(img_name).iterrows():
             add_vector(
                 ax,
                 row["cell_X"],
@@ -873,7 +893,7 @@ class Plotter:
     def plot_corners(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
-        """Plots the corners of a specific image in the collection
+        """Plot the corners of a specific image in the collection.
 
         Args:
             collection:
@@ -887,6 +907,9 @@ class Plotter:
         fig, ax = self._get_figure(1)
 
         img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+        assert img.has_junction(), "Junction channel not available"
+
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
         # plot marker intensity
@@ -895,7 +918,7 @@ class Plotter:
 
         ax.imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
 
-        for index, row in collection.dataset.loc[
+        for _, row in collection.dataset.loc[
             collection.dataset["filename"] == img_name
         ].iterrows():
             plt.scatter(
@@ -923,7 +946,7 @@ class Plotter:
     def plot_eccentricity(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
-        """Plots the eccentricity of a specific image in the collection
+        """Plot the eccentricity of a specific image in the collection.
 
         Args:
             collection:
@@ -935,11 +958,13 @@ class Plotter:
 
         """
         img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+        assert img.has_junction(), "Junction channel not available"
 
         im_junction = img.junction
         segmentation_mask = img.segmentation.segmentation_mask_connected
         inst_nuclei_mask = None
-        if img.img_params.channel_nucleus >= 0:
+        if img.has_nuclei():
             inst_nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg")
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
@@ -984,7 +1009,7 @@ class Plotter:
             Plotter._add_cell_eccentricity(fig, ax, im_junction, cell_eccentricity)
 
         # plot major and minor axis
-        for index, row in collection.get_properties_by_img_name(img_name).iterrows():
+        for _, row in collection.get_properties_by_img_name(img_name).iterrows():
             if inst_nuclei_mask is not None:
                 # plot orientation degree
                 Plotter._add_single_cell_eccentricity_axis(
@@ -1063,7 +1088,7 @@ class Plotter:
     def plot_marker_cue_intensity_ratio(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
-        """Plots the marker cue intensity ratios of a specific image in the collection
+        """Plot the marker cue intensity ratios of a specific image in the collection.
 
         Args:
             collection:
@@ -1077,6 +1102,10 @@ class Plotter:
         get_logger().info("Plotting: marker cue intensity ratios")
 
         img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+        assert img.has_junction(), "Junction channel not available"
+        assert img.has_marker(), "Marker channel not available"
+
         params = collection.get_runtime_params_by_img_name(img_name)
 
         im_junction = img.junction
@@ -1124,7 +1153,7 @@ class Plotter:
     def plot_junction_cue_intensity_ratio(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
-        """Plots the junction cue intensity ratios of a specific image in the collection
+        """Plot the junction cue intensity ratios of a specific image in the collection.
 
         Args:
             collection:
@@ -1138,6 +1167,9 @@ class Plotter:
         get_logger().info("Plotting: junction cue intensity ratios")
 
         img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+        assert img.has_junction(), "Junction channel not available"
+
         params = collection.get_runtime_params_by_img_name(img_name)
 
         im_junction = img.junction
@@ -1208,7 +1240,7 @@ class Plotter:
         # show cell outlines
         ax[0].imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
         ax[1].imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
-        for index, row in collection.get_properties_by_img_name(img_name).iterrows():
+        for _, row in collection.get_properties_by_img_name(img_name).iterrows():
             x0 = row["cell_X"]
             y0 = row["cell_Y"]
 
@@ -1238,7 +1270,7 @@ class Plotter:
     def plot_foi(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
-        """Plots the field of interest of a specific image in the collection
+        """Plot the field of interest of a specific image in the collection.
 
         Args:
             collection:
@@ -1252,6 +1284,7 @@ class Plotter:
         get_logger().info("Plotting: figure of interest")
 
         img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
 
         im_junction = img.junction
         mask = img.segmentation.segmentation_mask_connected
@@ -1271,7 +1304,7 @@ class Plotter:
 
         # plot the figure of interest
         m = np.copy(mask.data)
-        for index, row in single_cell_dataset.iterrows():
+        for _, row in single_cell_dataset.iterrows():
             foi_val = row[foi_name]
             label = row["label"]
 
@@ -1287,9 +1320,9 @@ class Plotter:
 
         cax = ax.imshow(np.ma.masked_where(m == 0, m), cmap=plt.cm.bwr, alpha=0.8)
 
-        min = np.nanmin(foi)
-        max = np.nanmax(foi)
-        yticks = [min, np.round(min + (max - min) / 2, 1), max]
+        nanmin = np.nanmin(foi)
+        nanmax = np.nanmax(foi)
+        yticks = [nanmin, np.round(nanmin + (nanmax - nanmin) / 2, 1), nanmax]
         add_colorbar(fig, cax, ax, yticks, foi_name)
 
         # set title and ax limits
@@ -1312,7 +1345,7 @@ class Plotter:
     def plot_orientation(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
-        """Plots the orientation of a specific image in the collection
+        """Plot the orientation of a specific image in the collection.
 
         Args:
             collection:
@@ -1324,6 +1357,8 @@ class Plotter:
 
         """
         img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+
         im_junction = img.junction
         instance_segmentation_con = img.segmentation.segmentation_mask_connected
 
@@ -1375,7 +1410,7 @@ class Plotter:
             Plotter._add_cell_orientation(fig, ax, im_junction, cell_orientation)
 
         # plot major and minor axis
-        for index, row in collection.get_properties_by_img_name(img_name).iterrows():
+        for _, row in collection.get_properties_by_img_name(img_name).iterrows():
             if inst_nuclei_mask is not None:
                 # plot orientation degree
                 Plotter._add_single_cell_orientation_degree_axis(
@@ -1488,7 +1523,7 @@ class Plotter:
             plt.close(fig)
 
     def plot_collection(self, collection: PropertiesCollection, close: bool = False):
-        """Plot all features of all images in the collection
+        """Plot all features of all images in the collection.
 
         Args:
             collection:

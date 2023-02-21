@@ -2,12 +2,11 @@
 from __future__ import annotations
 
 from hashlib import sha1
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 
 import numpy as np
 
-from polarityjam.model.masks import (BioMedicalInstanceSegmentation,
-                                     BioMedicalMask)
+from polarityjam.model.masks import BioMedicalInstanceSegmentation, BioMedicalMask
 from polarityjam.model.parameter import ImageParameter
 from polarityjam.polarityjam_logging import get_logger
 
@@ -52,7 +51,7 @@ class BioMedicalImage:
         self,
         img: np.ndarray,
         img_params: ImageParameter,
-        segmentation: BioMedicalInstanceSegmentation,
+        segmentation: Optional[BioMedicalInstanceSegmentation],
     ):
         """Initialize the image with the given data."""
         self.img = img

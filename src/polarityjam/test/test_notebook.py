@@ -171,37 +171,27 @@ class TestIntegration(TestCommon):
                     print("")
                 elif line.startswith("!"):
                     print("")
-                elif replace_cell_pattern:
-                    if line.startswith(replace_cell_pattern):
-                        print('output_path = Path("%s")' % self.data_path.parent)
-                        print(
-                            'input_file = Path("%s")'
-                            % self.data_path.parent.joinpath(
-                                "data",
-                                "golgi_nuclei",
-                                "set_2",
-                                "060721_EGM2_18dyn_02.tif",
-                            )
+                elif line.startswith(replace_cell_pattern):
+                    print('output_path = Path("%s")' % self.data_path.parent)
+                    print(
+                        'input_file = Path("%s")'
+                        % self.data_path.parent.joinpath(
+                            "data",
+                            "golgi_nuclei",
+                            "set_2",
+                            "060721_EGM2_18dyn_02.tif",
                         )
-                        print('output_file_prefix = "060721_EGM2_18dyn_02"')
-                        while not next(myiter, "None").startswith(replace_cell_pattern):
-                            print("")
-                    else:
-                        print(line, end="")
-                elif replace_cell_pattern2:
-                    if line.startswith(replace_cell_pattern2):
-                        print(
-                            'path_to_yml = Path("%s")'
-                            % self.get_test_parameter_file(
-                                "parameters_golgi_nuclei.yml"
-                            )
-                        )
-                        while not next(myiter, "None").startswith(
-                            replace_cell_pattern2
-                        ):
-                            print("")
-                    else:
-                        print(line, end="")
+                    )
+                    print('output_file_prefix = "060721_EGM2_18dyn_02"')
+                    while not next(myiter, "None").startswith(replace_cell_pattern):
+                        print("")
+                elif line.startswith(replace_cell_pattern2):
+                    print(
+                        'path_to_yml = Path("%s")'
+                        % self.get_test_parameter_file("parameters_golgi_nuclei.yml")
+                    )
+                    while not next(myiter, "None").startswith(replace_cell_pattern2):
+                        print("")
                 else:
                     print(line, end="")
 

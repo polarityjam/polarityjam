@@ -487,11 +487,11 @@ class SingleCellMasksCollection:
         self,
         connected_component_label: int,
         sc_mask: BioMedicalMask,
-        sc_nucleus_mask: BioMedicalMask,
-        sc_organelle_mask: BioMedicalMask,
-        sc_membrane_mask: BioMedicalMask,
-        sc_cytosol_mask: BioMedicalMask,
-        sc_junction_protein_mask: BioMedicalMask,
+        sc_nucleus_mask: Optional[BioMedicalMask],
+        sc_organelle_mask: Optional[BioMedicalMask],
+        sc_membrane_mask: Optional[BioMedicalMask],
+        sc_cytosol_mask: Optional[BioMedicalMask],
+        sc_junction_protein_mask: Optional[BioMedicalMask],
     ):
         """Initialize the SingleCellMasksCollection."""
         self.connected_component_label = connected_component_label

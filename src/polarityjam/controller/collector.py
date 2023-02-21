@@ -1,6 +1,6 @@
 """Module for collecting features from the single cell images."""
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 
@@ -193,12 +193,14 @@ class SingleCellPropertyCollector:
 
         # properties for nucleus:
         if img.has_nuclei():
+            assert sc_masks.sc_nucleus_mask is not None
             sc_nuc_props = SingleCellPropertyCollector.calc_sc_nucleus_props(
                 sc_masks.sc_nucleus_mask, sc_cell_props
             )
 
             # properties for organelle
             if img.has_organelle():
+                assert sc_masks.sc_organelle_mask is not None
                 sc_organelle_props = (
                     SingleCellPropertyCollector.calc_sc_organelle_props(
                         sc_masks.sc_organelle_mask, sc_nuc_props
@@ -210,6 +212,7 @@ class SingleCellPropertyCollector:
             sc_marker_props = SingleCellPropertyCollector.calc_sc_marker_props(
                 sc_masks.sc_mask, img.marker.data, runtime_params
             )
+            assert sc_masks.sc_membrane_mask is not None
             sc_marker_membrane_props = (
                 SingleCellPropertyCollector.calc_sc_marker_membrane_props(
                     sc_masks.sc_membrane_mask, img.marker.data
@@ -218,6 +221,7 @@ class SingleCellPropertyCollector:
 
             # properties for marker nuclei
             if img.has_nuclei():
+                assert sc_masks.sc_nucleus_mask is not None
                 sc_marker_nuclei_props = (
                     SingleCellPropertyCollector.calc_sc_marker_nuclei_props(
                         sc_masks.sc_nucleus_mask,
@@ -226,6 +230,7 @@ class SingleCellPropertyCollector:
                         sc_marker_props,
                     )
                 )
+                assert sc_masks.sc_cytosol_mask is not None
                 sc_marker_cytosol_props = (
                     SingleCellPropertyCollector.calc_sc_marker_cytosol_props(
                         sc_masks.sc_cytosol_mask, img.marker, sc_marker_nuclei_props
@@ -233,6 +238,8 @@ class SingleCellPropertyCollector:
                 )
 
         if img.has_junction():
+            assert sc_masks.sc_membrane_mask is not None
+            assert sc_masks.sc_junction_protein_area_mask is not None
             sc_junction_props = SingleCellPropertyCollector.calc_sc_junction_props(
                 img.junction,
                 sc_masks.sc_mask,
@@ -341,10 +348,11 @@ class SingleCellMaskCollector:
         bio_med_img: BioMedicalImage,
         connected_component_label: int,
         membrane_thickness: int,
-        nuclei_mask_seg: BioMedicalInstanceSegmentationMask,
-        organelle_mask_seg: BioMedicalInstanceSegmentationMask,
+        nuclei_mask_seg: Optional[BioMedicalInstanceSegmentationMask],
+        organelle_mask_seg: Optional[BioMedicalInstanceSegmentationMask],
     ) -> SingleCellMasksCollection:
         """Calculate masks for single cell."""
+        assert bio_med_img.segmentation is not None
         sc_mask = bio_med_img.segmentation.segmentation_mask_connected.get_single_instance_maks(
             connected_component_label
         )
@@ -356,13 +364,15 @@ class SingleCellMaskCollector:
         sc_cytosol_mask = None
         sc_junction_protein_mask = None
 
-        if nuclei_mask_seg is not None:
+        if bio_med_img.has_nuclei():
+            assert nuclei_mask_seg is not None
             sc_nucleus_mask = nuclei_mask_seg.get_single_instance_maks(
                 connected_component_label
             )
             sc_cytosol_mask = sc_nucleus_mask.operation(sc_mask, np.logical_xor)
 
-        if organelle_mask_seg is not None:
+        if bio_med_img.has_organelle():
+            assert organelle_mask_seg is not None
             sc_organelle_mask = organelle_mask_seg.get_single_instance_maks(
                 connected_component_label
             )
@@ -380,5 +390,5 @@ class SingleCellMaskCollector:
             sc_organelle_mask,
             sc_membrane_mask,
             sc_cytosol_mask,
-            sc_junction_protein_mask,  # type: ignore
+            sc_junction_protein_mask,
         )

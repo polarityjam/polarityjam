@@ -4,9 +4,9 @@ name: ci-python-unitest
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, dev]
   pull_request:
-    branches: [ main ]
+    branches: [main, dev]
 
 permissions:
   contents: read
@@ -19,22 +19,21 @@ jobs:
         python-version: ["3.8"]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.80
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.8"
-    - name: Install_linux
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install nbconvert==7.2.7 jupyter==1.0.0
-        pip install -e .
-        
-    - name: Running_linux
-      run: |
-        python -m unittest discover src/polarityjam/test/
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.80
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.8"
+      - name: Install_linux
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install nbconvert==7.2.7 jupyter==1.0.0
+          pip install -e .
 
-        
+      - name: Running_linux
+        run: |
+          python -m unittest discover src/polarityjam/test/
+
   build_windows:
     runs-on: windows-latest
     strategy:
@@ -42,21 +41,21 @@ jobs:
         python-version: ["3.8"]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.80
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.8"
-    - name: Install_windows
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install nbconvert==7.2.7 jupyter==1.0.0
-        pip install -e .
-        
-    - name: Running_windows
-      run: |
-        python -m unittest discover src/polarityjam/test/
-        
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.80
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.8"
+      - name: Install_windows
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install nbconvert==7.2.7 jupyter==1.0.0
+          pip install -e .
+
+      - name: Running_windows
+        run: |
+          python -m unittest discover src/polarityjam/test/
+
   build_macos:
     runs-on: macos-latest
     strategy:
@@ -64,20 +63,20 @@ jobs:
         python-version: ["3.8"]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.80
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.8"
-    - name: Install_macos
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install nbconvert==7.2.7 jupyter==1.0.0
-        pip install -e .
-        
-    - name: Running_macos
-      run: |
-        python -m unittest discover src/polarityjam/test/
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.80
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.8"
+      - name: Install_macos
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install nbconvert==7.2.7 jupyter==1.0.0
+          pip install -e .
+
+      - name: Running_macos
+        run: |
+          python -m unittest discover src/polarityjam/test/
 
   pypi-release:
     needs: [build_linux, build_windows, build_macos]
@@ -85,23 +84,23 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ "3.8" ]
+        python-version: ["3.8"]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.80
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.8"
-    - name: install
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install setuptools wheel twine
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.80
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.8"
+      - name: install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install setuptools wheel twine
 
-    - name: package
-      run: |
-        python setup.py sdist bdist_wheel
+      - name: package
+        run: |
+          python setup.py sdist bdist_wheel
 
-    - name: publish
-      run: |
-        TWINE_PASSWORD=${{ secrets.PYPI_API_TOKEN }} TWINE_USERNAME=${{ secrets.PYPI_DEPLOY_USER }} python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
+      - name: publish
+        run: |
+          TWINE_PASSWORD=${{ secrets.PYPI_API_TOKEN }} TWINE_USERNAME=${{ secrets.PYPI_DEPLOY_USER }} python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*

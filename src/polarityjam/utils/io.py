@@ -9,7 +9,7 @@ from typing import List, Optional, Union
 import numpy as np
 import pandas as pd
 import skimage.io
-import yaml
+import yaml  # type: ignore
 
 # Global variable to save program call time.
 CALL_TIME = None

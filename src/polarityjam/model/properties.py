@@ -9,9 +9,12 @@ from scipy import ndimage as ndi
 from skimage.measure._regionprops import RegionProperties
 
 from polarityjam.compute.compute import (
-    compute_angle_deg, compute_marker_vector_norm,
-    compute_reference_target_orientation_rad, compute_shape_orientation_rad,
-    straight_line_length)
+    compute_angle_deg,
+    compute_marker_vector_norm,
+    compute_reference_target_orientation_rad,
+    compute_shape_orientation_rad,
+    straight_line_length,
+)
 from polarityjam.compute.corner import get_contour, get_corner
 from polarityjam.compute.shape import partition_single_cell_mask
 from polarityjam.model.image import BioMedicalChannel
@@ -487,7 +490,7 @@ class SingleCellPropertiesCollection:
     def __init__(
         self,
         single_cell_props: SingleCellProps,
-        nucleus_props: SingleCellNucleusProps,
+        nucleus_props: Optional[SingleCellNucleusProps],
         organelle_props: Optional[SingleCellOrganelleProps],
         marker_props: Optional[SingleCellMarkerProps],
         marker_membrane_props: Optional[SingleCellMarkerMembraneProps],

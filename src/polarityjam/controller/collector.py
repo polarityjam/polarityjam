@@ -1,3 +1,4 @@
+"""Module for collecting features from the single cell images."""
 from pathlib import Path
 from typing import List, Union
 
@@ -7,24 +8,33 @@ from polarityjam import RuntimeParameter
 from polarityjam.compute.neighborhood import k_neighbor_dif
 from polarityjam.model.collection import PropertiesCollection
 from polarityjam.model.image import BioMedicalChannel, BioMedicalImage
-from polarityjam.model.masks import (BioMedicalInstanceSegmentation,
-                                     BioMedicalInstanceSegmentationMask,
-                                     BioMedicalMask, SingleCellMasksCollection)
+from polarityjam.model.masks import (
+    BioMedicalInstanceSegmentation,
+    BioMedicalInstanceSegmentationMask,
+    BioMedicalMask,
+    SingleCellMasksCollection,
+)
 from polarityjam.model.moran import Moran, run_morans
-from polarityjam.model.properties import (NeighborhoodProps,
-                                          SingleCellJunctionProps,
-                                          SingleCellMarkerCytosolProps,
-                                          SingleCellMarkerMembraneProps,
-                                          SingleCellMarkerNucleiProps,
-                                          SingleCellMarkerProps,
-                                          SingleCellNucleusProps,
-                                          SingleCellOrganelleProps,
-                                          SingleCellPropertiesCollection,
-                                          SingleCellProps)
+from polarityjam.model.properties import (
+    NeighborhoodProps,
+    SingleCellJunctionProps,
+    SingleCellMarkerCytosolProps,
+    SingleCellMarkerMembraneProps,
+    SingleCellMarkerNucleiProps,
+    SingleCellMarkerProps,
+    SingleCellNucleusProps,
+    SingleCellOrganelleProps,
+    SingleCellPropertiesCollection,
+    SingleCellProps,
+)
 
 
 class PropertyCollector:
-    """Static class, collects features "as they come" in a large dataset. Not responsible for feature calculation!"""
+    """Static class, collects features "as they come" in a large dataset.
+
+    Not responsible for feature calculation!
+
+    """
 
     @staticmethod
     def collect_sc_props(
@@ -34,7 +44,7 @@ class PropertyCollector:
         img_hash: str,
         connected_component_label: int,
     ):
-
+        """Collect single cell properties."""
         props_collection.add_sc_general_props(
             filename,
             img_hash,
@@ -77,8 +87,9 @@ class PropertyCollector:
     def collect_group_statistic(
         props_collection: PropertiesCollection, morans_i: Moran, length: int
     ):
+        """Collect group statistic."""
         props_collection.reset_index()
-        for i in range(1, length):
+        for _ in range(1, length):
             props_collection.add_morans_i_props(morans_i)
             props_collection.increase_index()
 
@@ -87,6 +98,7 @@ class PropertyCollector:
         props_collection: PropertiesCollection,
         neighborhood_props_list: List[NeighborhoodProps],
     ):
+        """Collect neighborhood properties."""
         props_collection.reset_index()
         for neighborhood_props in neighborhood_props_list:
             props_collection.add_neighborhood_props(neighborhood_props)
@@ -94,20 +106,24 @@ class PropertyCollector:
 
     @staticmethod
     def get_foi(props_collection: PropertiesCollection, foi: str):
+        """Get the Field of Interest (FOI) from the property collection."""
         return props_collection.dataset.at[props_collection.current_index() - 1, foi]
 
     @staticmethod
     def reset_index(props_collection: PropertiesCollection):
+        """Reset the index of the property collection."""
         props_collection.reset_index()
 
     @staticmethod
     def set_reset_index(props_collection: PropertiesCollection):
+        """Set the reset_index of the property collection."""
         props_collection.set_reset_index()
 
     @staticmethod
     def add_out_path(
         props_collection: PropertiesCollection, filename: str, path: Union[Path, str]
     ):
+        """Add the output path to the property collection."""
         props_collection.out_path_dict[filename] = path
 
     @staticmethod
@@ -116,12 +132,14 @@ class PropertyCollector:
         filename: str,
         runtime_params: RuntimeParameter,
     ):
+        """Add the runtime parameters to the property collection."""
         props_collection.runtime_params_dict[filename] = runtime_params
 
     @staticmethod
     def add_img(
         props_collection: PropertiesCollection, filename: str, img: BioMedicalImage
     ):
+        """Add the image to the property collection."""
         props_collection.img_dict[filename] = img
 
 
@@ -132,7 +150,7 @@ class GroupPropertyCollector:
     def calc_moran(
         bio_med_seg: BioMedicalInstanceSegmentation, feature_of_interest_name: str
     ):
-        # morans I analysis based on FOI
+        """Calculate Moran's I for a given feature of interest."""
         morans_i = run_morans(
             bio_med_seg.neighborhood_graph_connected, feature_of_interest_name
         )
@@ -143,6 +161,7 @@ class GroupPropertyCollector:
     def calc_neighborhood(
         bio_med_seg: BioMedicalInstanceSegmentation, feature_of_interest_name: str
     ):
+        """Calculate neighborhood properties for a given feature of interest."""
         return k_neighbor_dif(
             bio_med_seg.neighborhood_graph_connected, feature_of_interest_name
         )
@@ -157,8 +176,7 @@ class SingleCellPropertyCollector:
         img: BioMedicalImage,
         runtime_params: RuntimeParameter,
     ) -> SingleCellPropertiesCollection:
-        """calculates all properties for the single cell"""
-
+        """Calculate all properties for the single cell."""
         # properties for single cell
         sc_cell_props = SingleCellPropertyCollector.calc_sc_cell_props(
             sc_masks.sc_mask, runtime_params
@@ -174,13 +192,13 @@ class SingleCellPropertyCollector:
         sc_junction_props = None
 
         # properties for nucleus:
-        if sc_masks.sc_nucleus_mask is not None:
+        if img.has_nuclei():
             sc_nuc_props = SingleCellPropertyCollector.calc_sc_nucleus_props(
                 sc_masks.sc_nucleus_mask, sc_cell_props
             )
 
             # properties for organelle
-            if sc_nuc_props and sc_masks.sc_organelle_mask is not None:
+            if img.has_organelle():
                 sc_organelle_props = (
                     SingleCellPropertyCollector.calc_sc_organelle_props(
                         sc_masks.sc_organelle_mask, sc_nuc_props
@@ -188,7 +206,7 @@ class SingleCellPropertyCollector:
                 )
 
         # properties for marker
-        if img.marker.data is not None:
+        if img.has_marker():
             sc_marker_props = SingleCellPropertyCollector.calc_sc_marker_props(
                 sc_masks.sc_mask, img.marker.data, runtime_params
             )
@@ -199,12 +217,12 @@ class SingleCellPropertyCollector:
             )
 
             # properties for marker nuclei
-            if sc_masks.sc_nucleus_mask is not None:
+            if img.has_nuclei():
                 sc_marker_nuclei_props = (
                     SingleCellPropertyCollector.calc_sc_marker_nuclei_props(
                         sc_masks.sc_nucleus_mask,
                         img.marker.data,
-                        sc_nuc_props,
+                        sc_nuc_props,  # type: ignore
                         sc_marker_props,
                     )
                 )
@@ -214,7 +232,7 @@ class SingleCellPropertyCollector:
                     )
                 )
 
-        if img.junction.data is not None:
+        if img.has_junction():
             sc_junction_props = SingleCellPropertyCollector.calc_sc_junction_props(
                 img.junction,
                 sc_masks.sc_mask,
@@ -238,18 +256,21 @@ class SingleCellPropertyCollector:
     def calc_sc_cell_props(
         sc_mask: BioMedicalMask, param: RuntimeParameter
     ) -> SingleCellProps:
+        """Calculate properties for single cell."""
         return SingleCellProps(sc_mask, param)
 
     @staticmethod
     def calc_sc_nucleus_props(
         sc_nucleus_maks: BioMedicalMask, sc_props: SingleCellProps
     ) -> SingleCellNucleusProps:
+        """Calculate nucleus properties for single cell."""
         return SingleCellNucleusProps(sc_nucleus_maks, sc_props)
 
     @staticmethod
     def calc_sc_organelle_props(
         sc_organelle_mask: BioMedicalMask, sc_nucleus_props: SingleCellNucleusProps
     ) -> SingleCellOrganelleProps:
+        """Calculate organelle properties for single cell."""
         return SingleCellOrganelleProps(sc_organelle_mask, sc_nucleus_props)
 
     @staticmethod
@@ -258,6 +279,7 @@ class SingleCellPropertyCollector:
         im_marker: BioMedicalChannel,
         runtime_parameter: RuntimeParameter,
     ) -> SingleCellMarkerProps:
+        """Calculate marker properties for single cell."""
         return SingleCellMarkerProps(
             sc_mask, im_marker, runtime_parameter.cue_direction
         )
@@ -266,6 +288,7 @@ class SingleCellPropertyCollector:
     def calc_sc_marker_membrane_props(
         sc_membrane_mask: BioMedicalMask, im_marker: BioMedicalChannel
     ) -> SingleCellMarkerMembraneProps:
+        """Calculate marker membrane properties for single cell."""
         return SingleCellMarkerMembraneProps(sc_membrane_mask, im_marker)
 
     @staticmethod
@@ -275,6 +298,7 @@ class SingleCellPropertyCollector:
         sc_nucleus_props: SingleCellNucleusProps,
         sc_marker_props: SingleCellMarkerProps,
     ) -> SingleCellMarkerNucleiProps:
+        """Calculate marker nuclei properties for single cell."""
         return SingleCellMarkerNucleiProps(
             sc_nucleus_mask, im_marker, sc_nucleus_props, sc_marker_props
         )
@@ -285,6 +309,7 @@ class SingleCellPropertyCollector:
         im_marker: BioMedicalChannel,
         sc_marker_nuclei_props: SingleCellMarkerNucleiProps,
     ) -> SingleCellMarkerCytosolProps:
+        """Calculate marker cytosol properties for single cell."""
         return SingleCellMarkerCytosolProps(
             sc_cytosol_mask, im_marker, sc_marker_nuclei_props
         )
@@ -297,7 +322,7 @@ class SingleCellPropertyCollector:
         single_cell_junction_intensity_mask: BioMedicalMask,
         runtime_parameter: RuntimeParameter,
     ) -> SingleCellJunctionProps:
-
+        """Calculate junction properties for single cell."""
         return SingleCellJunctionProps(
             im_junction,
             single_cell_membrane_mask,
@@ -309,6 +334,8 @@ class SingleCellPropertyCollector:
 
 
 class SingleCellMaskCollector:
+    """Collect single cell masks."""
+
     @staticmethod
     def calc_sc_masks(
         bio_med_img: BioMedicalImage,
@@ -317,6 +344,7 @@ class SingleCellMaskCollector:
         nuclei_mask_seg: BioMedicalInstanceSegmentationMask,
         organelle_mask_seg: BioMedicalInstanceSegmentationMask,
     ) -> SingleCellMasksCollection:
+        """Calculate masks for single cell."""
         sc_mask = bio_med_img.segmentation.segmentation_mask_connected.get_single_instance_maks(
             connected_component_label
         )
@@ -339,7 +367,7 @@ class SingleCellMaskCollector:
                 connected_component_label
             )
 
-        if bio_med_img.junction is not None:
+        if bio_med_img.has_junction():
             masked_sc_junction_channel = bio_med_img.junction.mask(sc_membrane_mask)
             sc_junction_protein_mask = BioMedicalMask.from_threshold_otsu(
                 masked_sc_junction_channel.data, gaussian_filter=None
@@ -352,5 +380,5 @@ class SingleCellMaskCollector:
             sc_organelle_mask,
             sc_membrane_mask,
             sc_cytosol_mask,
-            sc_junction_protein_mask,
+            sc_junction_protein_mask,  # type: ignore
         )

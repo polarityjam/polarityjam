@@ -36,14 +36,18 @@ class TestCommon(unittest.TestCase):
 
     def extract_test_data(self):
         target = str(self.tmp_dir)
-        Archive(str(self.current_path.joinpath("resources", "data.zip"))).extractall(str(target))
+        Archive(str(self.current_path.joinpath("resources", "data.zip"))).extractall(
+            str(target)
+        )
 
     def get_test_image_path(self, image_name):
         if not self.data_path.exists():
             self.extract_test_data()
 
         files_list = list_files_recursively(self.data_path)
-        test_image_path = files_list[[i.stem + i.suffix for i in files_list].index(image_name)]
+        test_image_path = files_list[
+            [i.stem + i.suffix for i in files_list].index(image_name)
+        ]
 
         return test_image_path
 
@@ -68,10 +72,15 @@ class TestCommon(unittest.TestCase):
     def get_test_key_file(self):
         return self.current_path.joinpath("resources", "test_key_file.csv")
 
-    def load_parameters(self):
-        param_base_file = Path(self.current_path).joinpath("..", "utils", "resources", "parameters.yml")
+    def get_base_param_file(self):
+        return Path(self.current_path).joinpath(
+            "..", "utils", "resources", "parameters.yml"
+        )
 
-        with open(param_base_file, 'r') as yml_f:
+    def load_parameters(self):
+        param_base_file = self.get_base_param_file()
+
+        with open(param_base_file) as yml_f:
             parameters = yaml.safe_load(yml_f)
 
         parameters["channel_junction"] = 3

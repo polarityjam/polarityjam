@@ -1,28 +1,32 @@
+"""Segmentation class base and CellposeSegmentation class."""
+from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 import cellpose.models
 import numpy as np
 import skimage
 from skimage import morphology
 
-from polarityjam.model.parameter import SegmentationParameter, ImageParameter
+from polarityjam.model.parameter import ImageParameter, SegmentationParameter
 from polarityjam.polarityjam_logging import get_logger
-
-from abc import ABCMeta, abstractmethod
 
 
 class Segmenter:
     """Abstract class for an object performing a segmentation procedure."""
+
     __metaclass__ = ABCMeta
 
     @abstractmethod
     def __init__(self, params: SegmentationParameter):
+        """Initialize the segmenter with the given parameters."""
         self.params = params
 
     @abstractmethod
-    def segment(self, img: np.ndarray, path: str=None) -> np.ndarray:
-        """Should perform segmentation and return a mask image. Path can point to a model to load/state index/parameter
+    def segment(self, img: np.ndarray, path: Optional[str] = None) -> np.ndarray:
+        """Perform segmentation and return a mask image.
+
+        Path can point to a model to load/state index/parameter
         file or something else needed to load a checkpoint needed for segmentation.
 
         Args:
@@ -40,8 +44,12 @@ class Segmenter:
         raise NotImplementedError
 
     @abstractmethod
-    def prepare(self, img: np.ndarray, input_parameter: ImageParameter) -> Tuple[np.ndarray, ImageParameter]:
-        """Should perform preparation for a given image to perform the segmentation. Should return prepared image
+    def prepare(
+        self, img: np.ndarray, input_parameter: ImageParameter
+    ) -> Tuple[Optional[np.ndarray], ImageParameter]:
+        """Perform preparation for a given image to be able to do the segmentation.
+
+        Should return prepared image
         and its parameters. This could be a resizing, cropping, selecting channels, etc. E.g. whatever is needed to
         perform the segmentation.
 
@@ -59,14 +67,19 @@ class Segmenter:
 
 
 class CellposeSegmenter(Segmenter):
-    """Cellpose segmentation class"""
+    """Cellpose segmentation class."""
 
     def __init__(self, params: SegmentationParameter):
+        """Initialize the object with the given parameters."""
         super().__init__(params)
         self.params = params
 
-    def segment(self, img: np.ndarray, path: Union[Path, str]=None) -> np.ndarray:
-        """Performs the segmentation of the given image. If a path is given, the model is loaded from the given path.
+    def segment(
+        self, img: np.ndarray, path: Optional[Union[Path, str]] = None
+    ) -> np.ndarray:
+        """Perform the segmentation of the given image.
+
+        If a path is given, the model is loaded from the given path.
 
         Args:
             img:
@@ -80,8 +93,12 @@ class CellposeSegmenter(Segmenter):
         """
         return self._load_or_get_cellpose_segmentation(img, path)
 
-    def prepare(self, img: np.ndarray, img_parameter: ImageParameter) -> Tuple[np.ndarray, ImageParameter]:
-        """Prepares the image for segmentation. Returns an image that has the junction channel first, then the nucleus
+    def prepare(
+        self, img: np.ndarray, img_parameter: ImageParameter
+    ) -> Tuple[Optional[np.ndarray], ImageParameter]:
+        """Prepare the image for segmentation.
+
+        Returns an image that has the junction channel first, then the nucleus
         channel and the last channel is the cytoplasm channel.
 
         Args:
@@ -94,7 +111,6 @@ class CellposeSegmenter(Segmenter):
             A tuple of the prepared image and its parameters as ImageParameter object.
 
         """
-
         get_logger().info("Image shape: %s" % str(img.shape))
 
         params_prep_img = ImageParameter()
@@ -106,12 +122,16 @@ class CellposeSegmenter(Segmenter):
         im_nucleus = None
 
         if img_parameter.channel_junction >= 0:
-            get_logger().info("Junction channel at position: %s" % str(img_parameter.channel_junction))
+            get_logger().info(
+                "Junction channel at position: %s" % str(img_parameter.channel_junction)
+            )
             im_junction = img[:, :, img_parameter.channel_junction]
             params_prep_img.channel_junction = 0
 
         if img_parameter.channel_nucleus >= 0:
-            get_logger().info("Nucleus channel at position: %s" % str(img_parameter.channel_nucleus))
+            get_logger().info(
+                "Nucleus channel at position: %s" % str(img_parameter.channel_nucleus)
+            )
             im_nucleus = img[:, :, img_parameter.channel_nucleus]
             params_prep_img.channel_nucleus = 1
 
@@ -121,21 +141,37 @@ class CellposeSegmenter(Segmenter):
             return im_junction, params_prep_img
 
     def _get_cellpose_model(self):
-        """Gets the specified cellpose model"""
-
+        """Get the specified cellpose model."""
         if self.params.model_type == "custom":
             get_logger().info("Loading custom model from: %s" % self.params.model_path)
-            model = cellpose.models.CellposeModel(gpu=self.params.use_gpu, pretrained_model=self.params.model_path)
+            model = cellpose.models.CellposeModel(
+                gpu=self.params.use_gpu, pretrained_model=self.params.model_path
+            )
         else:
-            model = cellpose.models.Cellpose(gpu=self.params.use_gpu, model_type=self.params.model_type)
+            model = cellpose.models.Cellpose(
+                gpu=self.params.use_gpu, model_type=self.params.model_type
+            )
 
         return model
 
     def _get_cellpose_segmentation(self, im_seg, filepath):
-        """Gets the cellpose segmentation. Expects im_seg to have junction channel first, then nucleus channel."""
-        get_logger().info("Calculate cellpose segmentation. This might take some time...")
-        get_logger().info("Using model type '%s' with estimated cell diameter %s, cellprob_threshold %s and flow threshold %s" % (
-        self.params.model_type, self.params.estimated_cell_diameter, self.params.cellprob_threshold, self.params.flow_threshold))
+        """Get the cellpose segmentation.
+
+        Expects im_seg to have junction channel first, then nucleus channel.
+
+        """
+        get_logger().info(
+            "Calculate cellpose segmentation. This might take some time..."
+        )
+        get_logger().info(
+            "Using model type '%s' with estimated cell diameter %s, cellprob_threshold %s and flow threshold %s"
+            % (
+                self.params.model_type,
+                self.params.estimated_cell_diameter,
+                self.params.cellprob_threshold,
+                self.params.flow_threshold,
+            )
+        )
         model = self._get_cellpose_model()
         if im_seg.ndim > 1:
             channels = [1, 2]
@@ -145,15 +181,21 @@ class CellposeSegmenter(Segmenter):
         # masks, flows, styles, diams = model.eval(im_seg, channels=channels)
 
         if self.params.model_type == "custom":
-            masks, flows, styles = model.eval(im_seg, diameter=self.params.estimated_cell_diameter,
-                                              flow_threshold=self.params.flow_threshold,
-                                              cellprob_threshold=self.params.cellprob_threshold,
-                                              channels=channels)
+            masks, flows, styles = model.eval(
+                im_seg,
+                diameter=self.params.estimated_cell_diameter,
+                flow_threshold=self.params.flow_threshold,
+                cellprob_threshold=self.params.cellprob_threshold,
+                channels=channels,
+            )
         else:
-            masks, flows, styles, diams = model.eval(im_seg, diameter=self.params.estimated_cell_diameter,
-                                                     flow_threshold=self.params.flow_threshold,
-                                                     cellprob_threshold = self.params.cellprob_threshold,
-                                                     channels=channels)
+            masks, flows, styles, diams = model.eval(
+                im_seg,
+                diameter=self.params.estimated_cell_diameter,
+                flow_threshold=self.params.flow_threshold,
+                cellprob_threshold=self.params.cellprob_threshold,
+                channels=channels,
+            )
 
         if self.params.store_segmentation:
             segmentation_list = {"masks": masks}
@@ -183,27 +225,38 @@ class CellposeSegmenter(Segmenter):
 
             # in case an annotated mask is available
             cellpose_seg = np.load(str(segmentation), allow_pickle=True)
-            cellpose_mask = cellpose_seg.item()['masks']
+            cellpose_mask = cellpose_seg.item()["masks"]
 
         else:
             cellpose_mask = self._get_cellpose_segmentation(img_seg, filepath)
 
         if self.params.clear_border:
-            cellpose_mask_clear_border = skimage.segmentation.clear_border(cellpose_mask)
-            number_of_cellpose_borders = len(np.unique(cellpose_mask)) - len(np.unique(cellpose_mask_clear_border))
+            cellpose_mask_clear_border = skimage.segmentation.clear_border(
+                cellpose_mask
+            )
+            number_of_cellpose_borders = len(np.unique(cellpose_mask)) - len(
+                np.unique(cellpose_mask_clear_border)
+            )
             cellpose_mask = cellpose_mask_clear_border
 
-            get_logger().info("Removed number of cellpose borders: %s" % number_of_cellpose_borders)
+            get_logger().info(
+                "Removed number of cellpose borders: %s" % number_of_cellpose_borders
+            )
 
             cellpose_mask_remove_small_objects = morphology.remove_small_objects(
                 cellpose_mask, self.params.min_cell_size, connectivity=2
             )
             number_of_cellpose_small_objects = len(np.unique(cellpose_mask)) - len(
-                np.unique(cellpose_mask_remove_small_objects))
+                np.unique(cellpose_mask_remove_small_objects)
+            )
             cellpose_mask = cellpose_mask_remove_small_objects
 
-            get_logger().info("Removed number of small objects: %s" % number_of_cellpose_small_objects)
+            get_logger().info(
+                "Removed number of small objects: %s" % number_of_cellpose_small_objects
+            )
 
-        get_logger().info("Detected number of cellpose labels: %s" % len(np.unique(cellpose_mask)))
+        get_logger().info(
+            "Detected number of cellpose labels: %s" % len(np.unique(cellpose_mask))
+        )
 
         return cellpose_mask

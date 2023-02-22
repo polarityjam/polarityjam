@@ -1,3 +1,4 @@
+"""Module that extracts features from an image."""
 import os
 from pathlib import Path
 from typing import Union
@@ -5,25 +6,33 @@ from typing import Union
 import numpy as np
 
 from polarityjam import PropertiesCollection
-from polarityjam.controller.collector import (GroupPropertyCollector,
-                                              PropertyCollector,
-                                              SingleCellMaskCollector,
-                                              SingleCellPropertyCollector)
+from polarityjam.controller.collector import (
+    GroupPropertyCollector,
+    PropertyCollector,
+    SingleCellMaskCollector,
+    SingleCellPropertyCollector,
+)
 from polarityjam.model.image import BioMedicalImage
-from polarityjam.model.masks import (BioMedicalInstanceSegmentation,
-                                     BioMedicalInstanceSegmentationMask,
-                                     BioMedicalMask, SingleCellMasksCollection)
+from polarityjam.model.masks import (
+    BioMedicalInstanceSegmentation,
+    BioMedicalInstanceSegmentationMask,
+    BioMedicalMask,
+    SingleCellMasksCollection,
+)
 from polarityjam.model.parameter import ImageParameter, RuntimeParameter
 from polarityjam.polarityjam_logging import get_logger
 
 
 class Extractor:
+    """Extracts features from an image."""
+
     def __init__(self, params: RuntimeParameter):
+        """Initialize the Extractor object."""
         self.params = params
         self.collector = PropertyCollector()
 
     def threshold_size(self, sc_masks: SingleCellMasksCollection) -> bool:
-        """Thresholds a collection of single cell mask based on cell size, nucleus size and organelle size.
+        """Threshold a collection of single cell mask based on cell size, nucleus size and organelle size.
 
         Args:
             sc_masks:
@@ -50,7 +59,7 @@ class Extractor:
     def extract_cell_features(
         self, collection, bio_med_image, bio_med_segmentation, filename_prefix
     ):
-        """Extracts features from cells
+        """Extract features from cells.
 
         Args:
             collection:
@@ -176,7 +185,7 @@ class Extractor:
         output_path: Union[Path, str],
         collection: PropertiesCollection,
     ) -> PropertiesCollection:
-        """Extracts features from an input image into a given collection.
+        """Extract features from an input image into a given collection.
 
         Args:
             img:
@@ -232,7 +241,7 @@ class Extractor:
         bio_med_segmentation: BioMedicalInstanceSegmentation,
         filename_prefix: str,
     ):
-        """Extracts features from a group of cells.
+        """Extract features from a group of cells.
 
         Args:
             bio_med_segmentation:
@@ -243,7 +252,6 @@ class Extractor:
                 Name prefix for the image used for all produced output.
 
         """
-
         if len(collection) < 2:
             get_logger().warn(
                 """Neighborhood analysis not possible.

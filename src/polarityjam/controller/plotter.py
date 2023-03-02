@@ -455,7 +455,7 @@ class Plotter:
         nuc_polarity_angle_vec = collection.get_properties_by_img_name(img_name)[
             "nuc_displacement_orientation_deg"
         ].values
-        nuc_polarity_angle = img.segmentation.segmentation_mask.relabel(
+        nuc_polarity_angle = img.segmentation.segmentation_mask_connected.relabel(
             nuc_polarity_angle_vec
         )
 

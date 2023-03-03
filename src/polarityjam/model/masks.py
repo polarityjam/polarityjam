@@ -8,8 +8,6 @@ import skimage.filters
 from scipy import ndimage as ndi
 from skimage.future.graph import RAG
 
-from polarityjam.polarityjam_logging import get_logger
-
 _T = TypeVar("_T")
 
 
@@ -296,7 +294,7 @@ class BioMedicalInstanceSegmentationMask(Mask):
             new_labels = np.array([new_labels[label] for label in old_labels])
 
         err_str = """The number of new labels must match the number of old labels.
-            Got length {len_a} and length {len_b}.""".format(
+            Got new label length {len_a} and old label length {len_b}.""".format(
             len_a=len(new_labels), len_b=num_instances
         )
         assert len(new_labels) == num_instances, err_str
@@ -319,8 +317,11 @@ class BioMedicalInstanceSegmentation:
         self.neighborhood_graph = BioMedicalInstanceSegmentation.get_rag(
             self.segmentation_mask
         )
-        self.segmentation_mask_connected = self.init_segmentation_mask(
+        self.island_list = set(
             BioMedicalInstanceSegmentation.get_islands(self.neighborhood_graph)
+        )
+        self.segmentation_mask_connected = self.init_segmentation_mask(
+            list(self.island_list)
         )
         self.neighborhood_graph_connected = BioMedicalInstanceSegmentation.get_rag(
             self.segmentation_mask_connected
@@ -340,6 +341,12 @@ class BioMedicalInstanceSegmentation:
             self.segmentation_mask_connected
         )  # could have islands
         self.segmentation_mask_connected, island_list = self.remove_islands()
+
+        # recursively remove islands until there are no more islands
+        if len(island_list) > 0:
+            island_list.extend(self.update_graphs())
+
+        self.island_list.update(island_list)
 
         return island_list
 
@@ -431,12 +438,6 @@ class BioMedicalInstanceSegmentation:
         # remove islands from graph
         for elem in np.unique(list_of_islands):
             self.neighborhood_graph_connected.remove_node(elem)
-
-        get_logger().info("Removed number of islands: %s" % len(list_of_islands))
-        get_logger().info(
-            "Number of RAG nodes: %s "
-            % len(list(self.neighborhood_graph_connected.nodes))
-        )
 
         return connected_component_mask, list_of_islands
 

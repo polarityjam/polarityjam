@@ -86,7 +86,8 @@ Execute the following steps on the commandline:
     cd polarityjam-app
     conda env create -f polarityjam-app.yml
     conda activate polarityjam-app
-    Rscript app/app.R
+    cd app
+    Rscript app.R
 
 Open the browser in the URL given in the output of the R-shiny call (usually http://127.0.0.1:8888 ).
 

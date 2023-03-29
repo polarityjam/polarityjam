@@ -64,12 +64,15 @@ class SegmentationParameter(Parameter):
         self.store_segmentation = None
         self.use_given_mask = None
         self.model_type = None
+        self.model_type_nucleus = None
         self.model_path = None
         self.estimated_cell_diameter = None
+        self.estimated_cell_diameter_nucleus = None
         self.flow_threshold = None
         self.cellprob_threshold = None
         self.use_gpu = None
         self.clear_border = None
+        self.remove_small_objects = None
         self.min_cell_size = None
 
         super().__init__(**attrs)

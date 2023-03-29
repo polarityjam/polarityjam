@@ -1,7 +1,7 @@
 """Module that extracts features from an image."""
 import os
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 
@@ -218,7 +218,13 @@ class Extractor:
     @staticmethod
     def _get_nuclei_mask(bio_med_image):
         nuclei_mask_seg = None
-        if bio_med_image.has_nuclei():
+        if bio_med_image.segmentation.segmentation_mask_nuclei is not None:
+            nuclei_mask_seg = (
+                bio_med_image.segmentation_mask_nuclei.overlay_instance_segmentation(
+                    bio_med_image.segmentation.segmentation_mask_connected
+                )
+            )
+        elif bio_med_image.has_nuclei():
             nuclei_mask_seg = BioMedicalMask.from_threshold_otsu(
                 bio_med_image.nucleus.data
             ).overlay_instance_segmentation(
@@ -234,6 +240,9 @@ class Extractor:
         filename_prefix: str,
         output_path: Union[Path, str],
         collection: PropertiesCollection,
+        segmentation_mask_nuclei: Optional[
+            Union[np.ndarray, BioMedicalInstanceSegmentationMask]
+        ] = None,
     ) -> PropertiesCollection:
         """Extract features from an input image into a given collection.
 
@@ -250,6 +259,8 @@ class Extractor:
                 Path to the output directory.
             collection:
                 PropertiesCollection object to which the extracted features will be added.
+            segmentation_mask_nuclei:
+                np.ndarray of the nuclei mask. Enhances feature quality. Optional.
 
         Returns:
             PropertiesCollection object containing the extracted features.
@@ -260,7 +271,13 @@ class Extractor:
         bio_med_segmentation_mask = BioMedicalInstanceSegmentationMask(
             segmentation_mask
         )
-        bio_med_segmentation = BioMedicalInstanceSegmentation(bio_med_segmentation_mask)
+        if isinstance(segmentation_mask_nuclei, np.ndarray):
+            segmentation_mask_nuclei = BioMedicalInstanceSegmentationMask(
+                segmentation_mask_nuclei
+            )
+        bio_med_segmentation = BioMedicalInstanceSegmentation(
+            bio_med_segmentation_mask, segmentation_mask_nuclei
+        )
 
         get_logger().info(
             "Detected islands in the adjacency graph: %s"

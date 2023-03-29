@@ -13,13 +13,16 @@ manually_annotated_mask: "" # in case a manually annotated cellpose mask exists 
 store_segmentation: False
 use_given_mask: True
 model_type: "cyto" # "cyto", "cyto2", "custom"
+model_type_nucleus: "nuclei" # "custom"
 model_path: ""
 estimated_cell_diameter: 100
+estimated_cell_diameter_nucleus: 20
 flow_threshold: 0.4 # default cellpose value
 cellprob_threshold: 0.0 # default cellpose value
 
 use_gpu: False
 clear_border: True
+remove_small_objects: True
 min_cell_size: 50
 
 # RuntimeParameter

@@ -8,12 +8,12 @@ from polarityjam.model.parameter import (
     SegmentationParameter,
     ImageParameter,
 )
-from polarityjam.model.collection import PropertiesCollection
 from polarityjam.model.masks import (
     BioMedicalMask,
     BioMedicalInstanceSegmentationMask,
     BioMedicalInstanceSegmentation,
 )
+from polarityjam.model.collection import PropertiesCollection
 from polarityjam.model.image import BioMedicalImage
 from polarityjam.controller.extractor import Extractor
 from polarityjam.controller.plotter import Plotter

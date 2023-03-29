@@ -331,12 +331,12 @@ class SingleCellPropertyCollector:
     ) -> SingleCellJunctionProps:
         """Calculate junction properties for single cell."""
         return SingleCellJunctionProps(
-            im_junction,
-            single_cell_membrane_mask,
-            single_cell_junction_intensity_mask,
-            sc_mask,
-            runtime_parameter.cue_direction,
-            runtime_parameter.dp_epsilon,
+            im_junction=im_junction,
+            single_cell_membrane_mask=single_cell_membrane_mask,
+            single_cell_junction_intensity_mask=single_cell_junction_intensity_mask,
+            single_cell_mask=sc_mask,
+            cue_direction=runtime_parameter.cue_direction,
+            dp_epsilon=runtime_parameter.dp_epsilon,
         )
 
 

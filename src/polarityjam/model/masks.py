@@ -5,6 +5,7 @@ from typing import Any, Callable, List, Optional, Tuple, Type, TypeVar, Union
 
 import numpy as np
 import skimage.filters
+import skimage.restoration
 from scipy import ndimage as ndi
 from skimage.future.graph import RAG
 
@@ -20,13 +21,22 @@ class Mask:
 
     @classmethod
     def from_threshold_otsu(
-        cls: Type[_T], channel: np.ndarray, gaussian_filter=3
+        cls: Type[_T],
+        channel: np.ndarray,
+        gaussian_filter=None,
+        rolling_ball_radius=None,
     ) -> _T:
         """Initialize a mask from a channel using Otsu's method."""
         if gaussian_filter is not None:
             img_channel_blur = ndi.gaussian_filter(channel, sigma=3)
         else:
             img_channel_blur = channel
+
+        if rolling_ball_radius is not None:
+            img_channel_blur = skimage.restoration.rolling_ball(
+                img_channel_blur, radius=rolling_ball_radius
+            )
+
         interior_mask = np.where(
             img_channel_blur > skimage.filters.threshold_otsu(img_channel_blur),
             True,
@@ -311,9 +321,19 @@ class BioMedicalInstanceSegmentationMask(Mask):
 class BioMedicalInstanceSegmentation:
     """Class representing an entire instance segmentation."""
 
-    def __init__(self, segmentation_mask: BioMedicalInstanceSegmentationMask):
+    def __init__(
+        self,
+        segmentation_mask: BioMedicalInstanceSegmentationMask,
+        segmentation_mask_nuclei: Optional[BioMedicalInstanceSegmentationMask] = None,
+    ):
         """Initialize an instance segmentation from a mask."""
         self.segmentation_mask = segmentation_mask
+        self.segmentation_mask_nuclei = None
+        if segmentation_mask_nuclei is not None:
+            # assure same labels
+            self.segmentation_mask_nuclei = segmentation_mask_nuclei.to_semantic_mask().overlay_instance_segmentation(
+                segmentation_mask
+            )
         self.neighborhood_graph = BioMedicalInstanceSegmentation.get_rag(
             self.segmentation_mask
         )
@@ -386,6 +406,10 @@ class BioMedicalInstanceSegmentation:
         """
         self.neighborhood_graph.remove_node(instance_label)
         self.segmentation_mask = self.segmentation_mask.remove_instance(instance_label)
+        if self.segmentation_mask_nuclei is not None:
+            self.segmentation_mask_nuclei = (
+                self.segmentation_mask_nuclei.remove_instance(instance_label)
+            )
         self.segmentation_mask_connected = (
             self.segmentation_mask_connected.remove_instance(instance_label)
         )

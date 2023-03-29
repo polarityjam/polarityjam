@@ -3,7 +3,7 @@ import json
 import math
 import os
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 
 import cmocean as cm
 import matplotlib
@@ -215,6 +215,7 @@ class Plotter:
         seg_img_params: ImageParameter,
         output_path: Union[str, Path],
         filename: Union[str, Path],
+        mask_nuclei: Optional[np.ndarray] = None,
         close: bool = False,
     ):
         """Plot the segmentation mask, together with the separate channels from the input image.
@@ -230,6 +231,8 @@ class Plotter:
                 path to the output directory where plots are saved
             filename:
                 name of the file to save
+            mask_nuclei:
+                numpy array of the nuclei mask to plot. If None, no nuclei mask is plotted.
             close:
                 whether to close the figure after saving
 
@@ -238,25 +241,24 @@ class Plotter:
 
         filename, _ = os.path.splitext(os.path.basename(filename))
 
-        # color each cell differently
-        cell_idx = np.unique(mask)
-        cell_idx = np.delete(cell_idx, 0)
-        mask_ = np.copy(mask)
-
-        new_col = np.copy(cell_idx)
-        np.random.seed(42)  # set seed for reproducibility
-        np.random.shuffle(new_col)
-        for i in range(len(cell_idx)):
-            mask_[mask == cell_idx[i]] = new_col[i]
+        mask_ = self._rand_labels(mask)
 
         # ignore background
         mask_ = np.where(mask > 0, mask_, np.nan)
+        mask_nuclei_ = None
+
+        if mask_nuclei is not None:
+            mask_nuclei_ = self._rand_labels(mask_nuclei)
+
+            # ignore background
+            mask_nuclei_ = np.where(mask_nuclei > 0, mask_nuclei_, np.nan)
 
         if (
             seg_img_params.channel_junction is not None
             and seg_img_params.channel_nucleus is not None
         ):
-            fig, ax = self._get_figure(3)
+            num_fig = 4 if mask_nuclei is not None else 3
+            fig, ax = self._get_figure(num_fig)
 
             ax[0].imshow(seg_img[0, :, :])
             add_title(
@@ -281,8 +283,22 @@ class Plotter:
             )
 
             axes = [ax[0], ax[1], ax[2]]
+
+            if mask_nuclei is not None:
+                ax[3].imshow(seg_img[1, :, :])
+                ax[3].imshow(mask_nuclei_, cmap=plt.cm.gist_rainbow, alpha=0.5)
+                add_title(
+                    ax[3],
+                    "segmentation_nuclei",
+                    seg_img[0, :, :],
+                    self.params.show_graphics_axis,
+                )
+
+                axes = [ax[0], ax[1], ax[2], ax[3]]
+
         else:
-            fig, ax = self._get_figure(2)
+            num_fig = 3 if mask_nuclei is not None else 2
+            fig, ax = self._get_figure(num_fig)
 
             s_img = seg_img[:, :]
 
@@ -296,6 +312,16 @@ class Plotter:
             add_title(ax[1], "segmentation", s_img, self.params.show_graphics_axis)
 
             axes = [ax[0], ax[1]]
+
+            # ax 3
+            if mask_nuclei is not None:
+                ax[2].imshow(s_img)
+                ax[2].imshow(mask_nuclei_, cmap=plt.cm.gist_rainbow, alpha=0.5)
+                add_title(
+                    ax[2], "segmentation_nuclei", s_img, self.params.show_graphics_axis
+                )
+
+                axes = [ax[0], ax[1], ax[2]]
 
         self._finish_plot(
             fig,
@@ -1629,6 +1655,20 @@ class Plotter:
 
         # colorbar
         add_colorbar(fig, cax_1, ax, yticks, "shape orientation (degree)")
+
+    @staticmethod
+    def _rand_labels(mask):
+        """Randomly assign labels to the mask."""
+        # color each cell randomly
+        cell_idx = np.unique(mask)
+        cell_idx = np.delete(cell_idx, 0)
+        mask_ = np.copy(mask)
+        new_col = np.copy(cell_idx)
+        np.random.seed(42)  # set seed for reproducibility
+        np.random.shuffle(new_col)
+        for i in range(len(cell_idx)):
+            mask_[mask == cell_idx[i]] = new_col[i]
+        return mask_
 
     @staticmethod
     def _add_cell_orientation(

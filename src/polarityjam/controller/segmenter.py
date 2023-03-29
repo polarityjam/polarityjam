@@ -23,7 +23,9 @@ class Segmenter:
         self.params = params
 
     @abstractmethod
-    def segment(self, img: np.ndarray, path: Optional[str] = None) -> np.ndarray:
+    def segment(
+        self, img: np.ndarray, path: Optional[str] = None, mode: Optional[str] = None
+    ) -> np.ndarray:
         """Perform segmentation and return a mask image.
 
         Path can point to a model to load/state index/parameter
@@ -32,10 +34,11 @@ class Segmenter:
         Args:
             img:
                 The image prepared for segmentation.
-
             path:
                 Path to a model to load/state index/parameter file or smth. else needed to load a checkpoint needed
                 to perform the segmentation.
+            mode:
+                The mode of the segmentation. Could point to different models or something else.
 
         Returns:
             A mask as np.ndarray image.
@@ -75,7 +78,10 @@ class CellposeSegmenter(Segmenter):
         self.params = params
 
     def segment(
-        self, img: np.ndarray, path: Optional[Union[Path, str]] = None
+        self,
+        img: np.ndarray,
+        path: Optional[Union[Path, str]] = None,
+        mode: Optional[str] = None,
     ) -> np.ndarray:
         """Perform the segmentation of the given image.
 
@@ -86,12 +92,15 @@ class CellposeSegmenter(Segmenter):
                 The image prepared for segmentation.
             path:
                 Path to a model to load/state index/parameter file or smth. else needed to load a checkpoint needed
+            mode:
+                If mode is "nucleus", indicates that the nucleus channel should be segmented.
 
         Returns:
             A mask as np.ndarray image.
 
         """
-        return self._load_or_get_cellpose_segmentation(img, path)
+        cells = False if mode == "nucleus" else True
+        return self._load_or_get_cellpose_segmentation(img, path, cells)
 
     def prepare(
         self, img: np.ndarray, img_parameter: ImageParameter
@@ -140,7 +149,7 @@ class CellposeSegmenter(Segmenter):
         else:
             return im_junction, params_prep_img
 
-    def _get_cellpose_model(self):
+    def _get_cellpose_model(self, cells=True):
         """Get the specified cellpose model."""
         if self.params.model_type == "custom":
             get_logger().info("Loading custom model from: %s" % self.params.model_path)
@@ -148,42 +157,51 @@ class CellposeSegmenter(Segmenter):
                 gpu=self.params.use_gpu, pretrained_model=self.params.model_path
             )
         else:
+            model_type = (
+                self.params.model_type if cells else self.params.model_type_nucleus
+            )
             model = cellpose.models.Cellpose(
-                gpu=self.params.use_gpu, model_type=self.params.model_type
+                gpu=self.params.use_gpu, model_type=model_type
             )
 
         return model
 
-    def _get_cellpose_segmentation(self, im_seg, filepath):
+    def _get_cellpose_segmentation(self, im_seg, filepath, cells=True):
         """Get the cellpose segmentation.
 
         Expects im_seg to have junction channel first, then nucleus channel.
 
         """
+        seg_type = "cell" if cells else "nuclei"
+        model_type = self.params.model_type if cells else self.params.model_type_nucleus
+        estimated_cell_diameter = (
+            self.params.estimated_cell_diameter
+            if cells
+            else self.params.estimated_cell_diameter_nucleus
+        )
         get_logger().info(
-            "Calculate cellpose segmentation. This might take some time..."
+            "Calculate cellpose %s segmentation. This might take some time..."
+            % seg_type
         )
         get_logger().info(
             "Using model type '%s' with estimated cell diameter %s, cellprob_threshold %s and flow threshold %s"
             % (
-                self.params.model_type,
-                self.params.estimated_cell_diameter,
+                model_type,
+                estimated_cell_diameter,
                 self.params.cellprob_threshold,
                 self.params.flow_threshold,
             )
         )
-        model = self._get_cellpose_model()
+        model = self._get_cellpose_model(cells)
         if im_seg.ndim > 1:
             channels = [1, 2]
         else:
             channels = [0, 0]
 
-        # masks, flows, styles, diams = model.eval(im_seg, channels=channels)
-
         if self.params.model_type == "custom":
             masks, flows, styles = model.eval(
                 im_seg,
-                diameter=self.params.estimated_cell_diameter,
+                diameter=estimated_cell_diameter,
                 flow_threshold=self.params.flow_threshold,
                 cellprob_threshold=self.params.cellprob_threshold,
                 channels=channels,
@@ -191,7 +209,7 @@ class CellposeSegmenter(Segmenter):
         else:
             masks, flows, styles, diams = model.eval(
                 im_seg,
-                diameter=self.params.estimated_cell_diameter,
+                diameter=estimated_cell_diameter,
                 flow_threshold=self.params.flow_threshold,
                 cellprob_threshold=self.params.cellprob_threshold,
                 channels=channels,
@@ -199,26 +217,27 @@ class CellposeSegmenter(Segmenter):
 
         if self.params.store_segmentation:
             segmentation_list = {"masks": masks}
-            segmentation, _ = self._get_segmentation_file_name(filepath)
+            segmentation, _ = self._get_segmentation_file_name(filepath, cells)
 
             get_logger().info("Storing cellpose segmentation: %s" % segmentation)
             np.save(str(segmentation), segmentation_list, allow_pickle=True)
 
         return masks
 
-    def _get_segmentation_file_name(self, filepath):
+    def _get_segmentation_file_name(self, filepath, cells=True):
         stem = Path(filepath).stem
 
-        suffix = "_seg.npy"
+        suffix = "_seg.npy" if cells else "_seg_nuc.npy"
+
         if self.params.manually_annotated_mask:
             suffix = self.params.manually_annotated_mask
         segmentation = Path(filepath).parent.joinpath(stem + suffix)
 
         return segmentation, stem
 
-    def _load_or_get_cellpose_segmentation(self, img_seg, filepath):
+    def _load_or_get_cellpose_segmentation(self, img_seg, filepath, cells=True):
         get_logger().info("Look up cellpose segmentation...")
-        segmentation, _ = self._get_segmentation_file_name(filepath)
+        segmentation, _ = self._get_segmentation_file_name(filepath, cells)
 
         if segmentation.exists() and self.params.use_given_mask:
             get_logger().info("Load existing segmentation from %s ..." % segmentation)
@@ -226,9 +245,8 @@ class CellposeSegmenter(Segmenter):
             # in case an annotated mask is available
             cellpose_seg = np.load(str(segmentation), allow_pickle=True)
             cellpose_mask = cellpose_seg.item()["masks"]
-
         else:
-            cellpose_mask = self._get_cellpose_segmentation(img_seg, filepath)
+            cellpose_mask = self._get_cellpose_segmentation(img_seg, filepath, cells)
 
         if self.params.clear_border:
             cellpose_mask_clear_border = skimage.segmentation.clear_border(
@@ -243,6 +261,7 @@ class CellposeSegmenter(Segmenter):
                 "Removed number of cellpose borders: %s" % number_of_cellpose_borders
             )
 
+        if self.params.remove_small_objects:
             cellpose_mask_remove_small_objects = morphology.remove_small_objects(
                 cellpose_mask, self.params.min_cell_size, connectivity=2
             )

@@ -16,11 +16,10 @@ Circular data presents some unique challenges for statistical analysis because t
 be appropriate for this type of data. For instance, computing the average or mean of circular data by summing up the
 values and dividing by the number of observations will often provide wrong results.
 
-
 Here, we generally distinguish between directional, axial and linear data (or non-periodic data).
-Directional data are data with values in [0, 2:math:`\pi` ] or 0 to 360, in radians or degrees, respectively.
-Axial data are data with values [0, :math:`\pi` ] or 0 to 180 in degrees, meaning that it repeats itself after 180 degrees.
-Linear data is not circular data it is supported by the app to plot non-circular data and
+Directional data are data with values in [0, :math:`2\pi` ] or 0 to 360, in radians or degrees, respectively.
+Axial data are data with values [0, :math:`\pi` ] or 0 to 180 in degrees, meaning that it repeats itself after 180
+degrees. Linear data is not circular data it is supported by the app to plot non-circular data and
 compute circular-linear correlations.
 
 Panel: Data preparation
@@ -29,7 +28,7 @@ Panel: Data preparation
 The first panel allows upload of single csv files. The file must contain a sample column (default: "label"),
 which is numeric and contains whole numbers. Feature columns can have any name, but must contain numeric values,
 meaning integers or floats.
-any name. Additionally, column for grouping conditions must be specified, it must contain a limited amount
+any name. Additionally, a column for grouping conditions must be specified, it must contain a limited amount
 categorical values, so no numeric values.
 
 The data can be can be filtered by removing samples of a certain condition in the field "Identifier of conditions".
@@ -55,13 +54,13 @@ the length of the resultant vector R:
 
 .. math::
 
-    PI = \| \vec{R} \| = \sqrt{ \left(\frac{1}{N} \sum_{i=1}^N \cos(\theta_i) \right)^2 + \left(\frac{1}{N} \sum_{i=1}^N \sin(\theta_i)\right)^2 }
+    PI = \| \vec{R} \| = \sqrt{ \left(\frac{1}{N} \sum_{i=1}^N \cos(\theta_i) \right)^2
+                                                            + \left(\frac{1}{N} \sum_{i=1}^N \sin(\theta_i)\right)^2 }
 
-The polarity index takes values between 0 and 1, where 0 indicates no directional polarity and
-1 indicates perfect polarity.
+The polarity index takes values between 0 and 1, where 0 indicates no directional polarity and 1 indicates perfect polarity.
 
-The direction of the resultant vector,
-which is proposed as the circular mean direction is denoted :math:`\bar{alpha}' and defined by
+The direction of the resultant vector, which is proposed as the circular mean direction is denoted :math:`\bar{\alpha}`
+and defined by
 
 .. math::
 
@@ -71,17 +70,48 @@ In the app computation arctan is computed as
 
 .. math::
 
-    \begin{cases}
-        arctan*(S/C) = atan2 (S/C) & \text{ if S/C } \geq 0, \\
-        arctan*(S/C) = atan2 (S/C) + 2\pi & \text{ if S/C < 0 }
+    arctan*(S/C) = \begin{cases}
+         atan2 (S/C) & \text{ if S/C } \geq 0, \\
+        atan2 (S/C) + 2\pi & \text{ if S/C < 0 }
     \end{cases}
 
-in order to obtain 0 to 2:math:`\pi` (0 to 360). The atan2 is the common function defined in
+in order to obtain 0 to :math:`2\pi` (0 to 360). The atan2 is the common function defined in
 https://en.wikipedia.org/wiki/Atan2 or https://search.r-project.org/CRAN/refmans/raster/html/atan2.html .
 
+Sometimes the angular data refers to an, as for instance, the long axis of cells or nuclei, rather than a direction.
+These observations of axes orientation are referred to as axial data. The axial data are handled by "doubling the
+angles", meaning transforming each angle :math:`\alpha_i` to :math:`2\alpha_i` which removes the directional ambiguity.
+Assuming a vector from N axial measurements  :math:`\alpha_i, i=1, \dots, N`,  we first obtain the mean :math:`\bar{\alpha}*`
+and polarity index from the doubled angles :math:`2\alpha_i, i=1, \dots, N` as described above. The axial mean
+computed from :math:`\bar{\alpha} =  \frac{1}{2} \bar{\alpha}*` and the axial polarity index is the same as the values
+computed from the doubled values.
 
+For both directional and axial data the variance is computed from
 
+.. math::
+    S = 1 - PI
 
+Multiple quantities have been introduced as analogues to the linear standard deviation.
+We compute the angular deviation, which is given by
+
+.. math::
+
+    s_a = \sqrt{1 - PI}
+
+with values in the interval [0, :math:`\sqrt{2}`], and the circular standard deviation, which is defined as
+defined as
+
+.. math::
+
+    s_c = \sqrt{ - 2 ln PI}
+
+and ranges from 0 to :math:`\infty`.
+
+For linear data the mean and standard deviation are computed from the usual sample mean and
+standard deviation :cite:t:`berens2009circstat`.
+
+All statistical data including the mean, standard deviation, polarity index, angular standard deviation and circular
+standard, percentile are computed for each condition and can be downloaded.
 
 
 Panel: Correlation analysis
@@ -91,6 +121,10 @@ Panel: Correlation analysis
 
 Panel: Compare
 --------------
+
+For further information we recommend:
+
+.. bibliography::
 
 .. note::
     This documentation is still under development and will be extended later!

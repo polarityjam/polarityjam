@@ -105,13 +105,14 @@ defined as
 
     s_c = \sqrt{ - 2 ln PI}
 
-and ranges from 0 to :math:`\infty`.
-
-For linear data the mean and standard deviation are computed from the usual sample mean and
-standard deviation :cite:t:`berens2009circstat`.
+and ranges from 0 to :math:`\infty` :cite:t:`berens2009circstat`.
 
 All statistical data including the mean, standard deviation, polarity index, angular standard deviation and circular
 standard, percentile are computed for each condition and can be downloaded.
+
+Note, that for linear data the mean and standard deviation are computed from the usual sample mean and standard
+deviation, which is not further discussed here.
+
 
 
 Panel: Correlation analysis
@@ -122,7 +123,7 @@ Panel: Correlation analysis
 Panel: Compare
 --------------
 
-For further information we recommend:
+For further reading we recommend:
 
 .. bibliography::
 

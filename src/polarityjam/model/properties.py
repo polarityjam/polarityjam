@@ -457,16 +457,10 @@ class SingleCellJunctionProps:
     @property
     def junction_cue_directional_intensity_ratio(self):
         """Return the ratio of the left vs right cell membrane intensity in cue direction."""
-        sc_junction_intensity_mask = BioMedicalMask.from_threshold_otsu(
-            self.sc_junction_intensity_props.intensity.data
-            * self.sc_junction_intensity_props.mask.data,
-            gaussian_filter=None,
-            rolling_ball_radius=None,  # self.sc_junction_intensity_props.intensity_cropped.shape[0] // 100,
-        )
-        sc_junction_intensity_mask_r = sc_junction_intensity_mask.combine(
+        sc_junction_intensity_mask_r = self.single_cell_junction_intensity_mask.combine(
             self.half_masks[0]
         ).mask_background()
-        sc_junction_intensity_mask_l = sc_junction_intensity_mask.combine(
+        sc_junction_intensity_mask_l = self.single_cell_junction_intensity_mask.combine(
             self.half_masks[1]
         ).mask_background()
 
@@ -494,22 +488,16 @@ class SingleCellJunctionProps:
     @property
     def junction_cue_undirectional_intensity_ratio(self):
         """Return the ratio of the sum of cell membrane quarters in cue direction and the total membrane intensity."""
-        sc_junction_intensity_mask = BioMedicalMask.from_threshold_otsu(
-            self.sc_junction_intensity_props.intensity.data
-            * self.sc_junction_intensity_props.mask.data,
-            gaussian_filter=None,
-            rolling_ball_radius=None,  # self.sc_junction_intensity_props.intensity.shape[0] // 100,
-        )
-        sc_junction_intensity_mask_l = sc_junction_intensity_mask.combine(
+        sc_junction_intensity_mask_l = self.single_cell_junction_intensity_mask.combine(
             self.quadrant_masks[1]
         ).mask_background()
-        sc_junction_intensity_mask_r = sc_junction_intensity_mask.combine(
+        sc_junction_intensity_mask_r = self.single_cell_junction_intensity_mask.combine(
             self.quadrant_masks[3]
         ).mask_background()
-        sc_junction_intensity_mask_t = sc_junction_intensity_mask.combine(
+        sc_junction_intensity_mask_t = self.single_cell_junction_intensity_mask.combine(
             self.quadrant_masks[0]
         ).mask_background()
-        sc_junction_intensity_mask_b = sc_junction_intensity_mask.combine(
+        sc_junction_intensity_mask_b = self.single_cell_junction_intensity_mask.combine(
             self.quadrant_masks[2]
         ).mask_background()
 

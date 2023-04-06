@@ -232,7 +232,8 @@ class BioMedicalImage(AbstractBioMedicalImage):
             sc_junction_protein_mask,
         ) = self.get_single_cell_masks(connected_component_label, membrane_thickness)
 
-        contour = get_contour(sc_mask.data.astype(int))
+        sc_mask_f = np.flip(sc_mask.data, axis=0)  # y axis is flipped
+        contour = get_contour(sc_mask_f.astype(int))
 
         return SingleCellImage(
             self,

@@ -325,15 +325,23 @@ class BioMedicalInstanceSegmentation:
         self,
         segmentation_mask: BioMedicalInstanceSegmentationMask,
         segmentation_mask_nuclei: Optional[BioMedicalInstanceSegmentationMask] = None,
+        segmentation_mask_organelle: Optional[
+            BioMedicalInstanceSegmentationMask
+        ] = None,
     ):
         """Initialize an instance segmentation from a mask."""
         self.segmentation_mask = segmentation_mask
-        self.segmentation_mask_nuclei = None
+        self._segmentation_mask_nuclei = None
+        self._segmentation_mask_organelle = None
+
         if segmentation_mask_nuclei is not None:
             # assure same labels
-            self.segmentation_mask_nuclei = segmentation_mask_nuclei.to_semantic_mask().overlay_instance_segmentation(
-                segmentation_mask
-            )
+            self.segmentation_mask_nuclei = segmentation_mask_nuclei
+
+        if segmentation_mask_organelle is not None:
+            # assure same labels
+            self.segmentation_mask_organelle = segmentation_mask_organelle
+
         self.neighborhood_graph = BioMedicalInstanceSegmentation.get_rag(
             self.segmentation_mask
         )
@@ -346,6 +354,38 @@ class BioMedicalInstanceSegmentation:
         self.neighborhood_graph_connected = BioMedicalInstanceSegmentation.get_rag(
             self.segmentation_mask_connected
         )
+
+    @property
+    def segmentation_mask_nuclei(self):
+        """Get the nuclei segmentation mask."""
+        return self._segmentation_mask_nuclei
+
+    @segmentation_mask_nuclei.setter
+    def segmentation_mask_nuclei(self, value):
+        if value is not None:
+            self._segmentation_mask_nuclei = (
+                value.to_semantic_mask().overlay_instance_segmentation(
+                    self.segmentation_mask
+                )
+            )
+        else:
+            self._segmentation_mask_nuclei = value
+
+    @property
+    def segmentation_mask_organelle(self):
+        """Get the organelle segmentation mask."""
+        return self._segmentation_mask_organelle
+
+    @segmentation_mask_organelle.setter
+    def segmentation_mask_organelle(self, value):
+        if value is not None:
+            self._segmentation_mask_organelle = (
+                value.to_semantic_mask().overlay_instance_segmentation(
+                    self.segmentation_mask
+                )
+            )
+        else:
+            self._segmentation_mask_organelle = value
 
     def update_graphs(self) -> List[int]:
         """Update the graphs after a change in the segmentation mask.
@@ -409,6 +449,10 @@ class BioMedicalInstanceSegmentation:
         if self.segmentation_mask_nuclei is not None:
             self.segmentation_mask_nuclei = (
                 self.segmentation_mask_nuclei.remove_instance(instance_label)
+            )
+        if self.segmentation_mask_organelle is not None:
+            self.segmentation_mask_organelle = (
+                self.segmentation_mask_organelle.remove_instance(instance_label)
             )
         self.segmentation_mask_connected = (
             self.segmentation_mask_connected.remove_instance(instance_label)
@@ -503,26 +547,3 @@ class BioMedicalInstanceSegmentation:
                 list_of_islands.append(nodes)
 
         return list(np.unique(list_of_islands))
-
-
-class SingleCellMasksCollection:
-    """Collection of single cell masks and the corresponding label."""
-
-    def __init__(
-        self,
-        connected_component_label: int,
-        sc_mask: BioMedicalMask,
-        sc_nucleus_mask: Optional[BioMedicalMask],
-        sc_organelle_mask: Optional[BioMedicalMask],
-        sc_membrane_mask: Optional[BioMedicalMask],
-        sc_cytosol_mask: Optional[BioMedicalMask],
-        sc_junction_protein_mask: Optional[BioMedicalMask],
-    ):
-        """Initialize the SingleCellMasksCollection."""
-        self.connected_component_label = connected_component_label
-        self.sc_mask = sc_mask
-        self.sc_nucleus_mask = sc_nucleus_mask
-        self.sc_organelle_mask = sc_organelle_mask
-        self.sc_membrane_mask = sc_membrane_mask
-        self.sc_cytosol_mask = sc_cytosol_mask
-        self.sc_junction_protein_area_mask = sc_junction_protein_mask

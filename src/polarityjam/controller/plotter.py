@@ -351,13 +351,13 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junctions channel not available"
-        assert img.has_nuclei(), "Nuclei channel not available"
+        assert img.junction is not None, "Junctions channel not available"
+        assert img.nucleus is not None, "Nuclei channel not available"
 
         im_junction = img.junction.data
         con_inst_seg_mask = img.segmentation.segmentation_mask_connected
-        inst_nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg")
-        inst_organelle_mask = img.organelle.get_mask_by_name("organelle_mask_seg")
+        inst_nuclei_mask = img.segmentation.segmentation_mask_nuclei
+        inst_organelle_mask = img.segmentation.segmentation_mask_organelle
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -431,7 +431,7 @@ class Plotter:
         add_title(
             ax,
             "organelle orientation",
-            im_junction.data,
+            im_junction,
             self.params.show_graphics_axis,
         )
 
@@ -464,8 +464,8 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junctions channel not available"
-        assert img.has_nuclei(), "Nuclei channel not available"
+        assert img.junction is not None, "Junctions channel not available"
+        assert img.nucleus is not None, "Nuclei channel not available"
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -497,7 +497,7 @@ class Plotter:
         color_bar.set_label("polarity angle")
         color_bar.ax.set_yticks([0, 90, 180, 270, 360])
 
-        nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg").to_semantic_mask()
+        nuclei_mask = img.segmentation.segmentation_mask_nuclei.to_semantic_mask()
 
         # plot nuclei (blue)
         zero = np.zeros((img.junction.data.shape[0], img.junction.data.shape[1]))
@@ -561,9 +561,9 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_marker(), "Marker channel not available"
+        assert img.marker is not None, "Marker channel not available"
 
-        im_marker = img.marker.data
+        im_marker = img.marker
         cell_mask = img.segmentation.segmentation_mask_connected
         single_cell_dataset = collection.dataset.loc[
             collection.dataset["filename"] == img_name
@@ -571,7 +571,7 @@ class Plotter:
 
         nuclei_mask = None
         if img.has_nuclei():
-            nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg")
+            nuclei_mask = img.segmentation.segmentation_mask_nuclei
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -585,7 +585,7 @@ class Plotter:
 
         # plot marker intensity for all subplots
         for i in range(number_sub_figs):
-            ax[i].imshow(im_marker, cmap=plt.cm.gray, alpha=1.0)
+            ax[i].imshow(im_marker.data, cmap=plt.cm.gray, alpha=1.0)
 
         outlines_cell, outlines_mem, outlines_nuc = self._get_inlines(
             im_marker, cell_mask, nuclei_mask, single_cell_dataset
@@ -703,7 +703,7 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_marker(), "Marker channel not available"
+        assert img.marker is not None, "Marker channel not available"
 
         im_marker = img.marker
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -763,13 +763,16 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junction channel not available"
-        assert img.has_nuclei(), "Nuclei channel not available"
-        assert img.has_marker(), "Marker channel not available"
+        assert (
+            img.segmentation.segmentation_mask_nuclei is not None
+        ), "Nuclei segmentation not available"
+        assert img.junction is not None, "Junction channel not available"
+        assert img.nucleus is not None, "Nuclei channel not available"
+        assert img.marker is not None, "Marker channel not available"
 
         im_junction = img.junction.data
         segmentation_mask = img.segmentation.segmentation_mask_connected
-        inst_nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg")
+        inst_nuclei_mask = img.segmentation.segmentation_mask_nuclei
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -837,7 +840,7 @@ class Plotter:
         add_title(
             ax,
             "marker nucleus orientation",
-            im_junction.data,
+            im_junction,
             self.params.show_graphics_axis,
         )
 
@@ -870,7 +873,7 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junction channel not available"
+        assert img.junction is not None, "Junction channel not available"
 
         im_junction = img.junction
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -934,7 +937,7 @@ class Plotter:
 
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junction channel not available"
+        assert img.junction is not None, "Junction channel not available"
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -985,13 +988,16 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junction channel not available"
+        assert (
+            img.segmentation.segmentation_mask_nuclei is not None
+        ), "Nuclei segmentation not available"
+        assert img.junction is not None, "Junction channel not available"
 
         im_junction = img.junction
         segmentation_mask = img.segmentation.segmentation_mask_connected
         inst_nuclei_mask = None
         if img.has_nuclei():
-            inst_nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg")
+            inst_nuclei_mask = img.segmentation.segmentation_mask_nuclei
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -1129,8 +1135,8 @@ class Plotter:
 
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junction channel not available"
-        assert img.has_marker(), "Marker channel not available"
+        assert img.junction is not None, "Junction channel not available"
+        assert img.marker is not None, "Marker channel not available"
 
         params = collection.get_runtime_params_by_img_name(img_name)
 
@@ -1194,7 +1200,7 @@ class Plotter:
 
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junction channel not available"
+        assert img.junction is not None, "Junction channel not available"
 
         params = collection.get_runtime_params_by_img_name(img_name)
 
@@ -1311,6 +1317,7 @@ class Plotter:
 
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
+        assert img.junction is not None, "Junction channel not available"
 
         im_junction = img.junction
         mask = img.segmentation.segmentation_mask_connected
@@ -1384,13 +1391,17 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
+        assert img.junction is not None, "Junction channel not available"
 
         im_junction = img.junction
         instance_segmentation_con = img.segmentation.segmentation_mask_connected
 
         inst_nuclei_mask = None
         if img.has_nuclei():
-            inst_nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg")
+            assert (
+                img.segmentation.segmentation_mask_nuclei is not None
+            ), "Nuclei segmentation is not available"
+            inst_nuclei_mask = img.segmentation.segmentation_mask_nuclei
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 

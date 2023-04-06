@@ -1,7 +1,7 @@
 """Module that extracts features from an image."""
 import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -9,15 +9,13 @@ from polarityjam import PropertiesCollection
 from polarityjam.controller.collector import (
     GroupPropertyCollector,
     PropertyCollector,
-    SingleCellMaskCollector,
     SingleCellPropertyCollector,
 )
-from polarityjam.model.image import BioMedicalImage
+from polarityjam.model.image import BioMedicalImage, SingleCellImage
 from polarityjam.model.masks import (
     BioMedicalInstanceSegmentation,
     BioMedicalInstanceSegmentationMask,
     BioMedicalMask,
-    SingleCellMasksCollection,
 )
 from polarityjam.model.parameter import ImageParameter, RuntimeParameter
 from polarityjam.polarityjam_logging import get_logger
@@ -31,29 +29,23 @@ class Extractor:
         self.params = params
         self.collector = PropertyCollector()
 
-    def threshold_size(self, sc_masks: SingleCellMasksCollection) -> bool:
-        """Threshold a collection of single cell mask based on cell size, nucleus size and organelle size.
+    def threshold_size(self, sc_image: SingleCellImage) -> bool:
+        """Threshold a single cell image.
 
         Args:
-            sc_masks:
-                The collection of single cell masks to threshold.
+            sc_image:
+                SingleCellImage object containing the image information.
 
         Returns:
-            True if the size count was below the threshold, False otherwise.
+            True if any size count was below the threshold, False otherwise.
 
         """
-        if sc_masks.sc_mask.is_count_below_threshold(self.params.min_cell_size):
+        if sc_image.threshold_cell_size(self.params.min_cell_size):
             return True
-        if sc_masks.sc_nucleus_mask is not None:
-            if sc_masks.sc_nucleus_mask.is_count_below_threshold(
-                self.params.min_nucleus_size
-            ):
-                return True
-        if sc_masks.sc_organelle_mask is not None:
-            if sc_masks.sc_organelle_mask.is_count_below_threshold(
-                self.params.min_organelle_size
-            ):
-                return True
+        if sc_image.threshold_nucleus_size(self.params.min_nucleus_size):
+            return True
+        if sc_image.threshold_organelle_size(self.params.min_organelle_size):
+            return True
         return False
 
     def extract_cell_features(self, collection, bio_med_image, filename_prefix):
@@ -72,44 +64,30 @@ class Extractor:
             bio_med_image.segmentation is not None
         ), "Segmentation needed to extract cell features!"
 
-        nuclei_mask_seg = self._get_nuclei_mask(bio_med_image)
-        organelle_mask_seg = self._get_organelle_mask(bio_med_image)
-
-        sc_masks_list, threshold_cells = self._get_sc_masks(
-            bio_med_image, nuclei_mask_seg, organelle_mask_seg
+        bio_med_image.segmentation.segmentation_mask_nuclei = self._get_nuclei_mask(
+            bio_med_image
+        )
+        bio_med_image.segmentation.segmentation_mask_organelle = (
+            self._get_organelle_mask(bio_med_image)
         )
 
-        removed_islands = []
-        if self.params.extract_group_features:
-            (
-                removed_islands,
-                nuclei_mask_seg,
-                organelle_mask_seg,
-            ) = self._remove_threshold_cells(
-                bio_med_image, nuclei_mask_seg, organelle_mask_seg, threshold_cells
-            )
+        sc_image_list, threshold_cells = self._get_sc_images(bio_med_image)
 
-            get_logger().info(
-                "Number of additionally removed islands: %s" % len(removed_islands)
-            )
+        removed_islands = self._remove_threshold_cells(bio_med_image, threshold_cells)
 
-        # remove sc masks that have been excluded
+        get_logger().info(
+            "Number of additionally removed islands: %s" % len(removed_islands)
+        )
+
+        # remove sc images that have been excluded
         excluded_components = set(threshold_cells)
-        if removed_islands:
-            excluded_components.update(list(removed_islands))
+        excluded_components.update(list(bio_med_image.segmentation.island_list))
 
-        sc_masks_list = [
+        sc_image_list = [
             i
-            for i in sc_masks_list
+            for i in sc_image_list
             if i.connected_component_label not in excluded_components
         ]
-
-        # add masks to the image
-        if bio_med_image.has_organelle():
-            bio_med_image.organelle.add_mask("organelle_mask_seg", organelle_mask_seg)
-
-        if bio_med_image.has_nuclei():
-            bio_med_image.nucleus.add_mask("nuclei_mask_seg", nuclei_mask_seg)
 
         get_logger().info(
             "Label of all excluded cells: %s"
@@ -123,9 +101,9 @@ class Extractor:
         )
 
         # calculate properties for each cell
-        for sc_masks in sc_masks_list:
+        for sc_image in sc_image_list:
             sc_props_collection = SingleCellPropertyCollector.calc_sc_props(
-                sc_masks, bio_med_image, self.params
+                sc_image, self.params
             )
 
             PropertyCollector.collect_sc_props(
@@ -133,13 +111,11 @@ class Extractor:
                 collection,
                 filename_prefix,
                 bio_med_image.img_hash,
-                sc_masks.connected_component_label,
+                sc_image.connected_component_label,
             )
 
     @staticmethod
-    def _remove_threshold_cells(
-        bio_med_image, nuclei_mask_seg, organelle_mask_seg, threshold_cells
-    ):
+    def _remove_threshold_cells(bio_med_image, threshold_cells):
         # remove threshold cells from segmentation
         islands_to_remove = []
         for connected_component_label in threshold_cells:
@@ -156,53 +132,43 @@ class Extractor:
                 )
                 islands_to_remove.extend(removed_islands_labels)
 
-            # remove instance from the organelle instance mask
             if bio_med_image.has_organelle():
-                organelle_mask_seg = organelle_mask_seg.remove_instance(
-                    connected_component_label
-                )
                 # additionally remove the islands from the organelle mask
                 for island_label in removed_islands_labels:
-                    organelle_mask_seg = organelle_mask_seg.remove_instance(
+                    bio_med_image.segmentation.segmentation_mask_organelle = bio_med_image.segmentation.segmentation_mask_organelle.remove_instance(  # noqa: E501
                         island_label
                     )
 
-            # remove instance from the nucleus instance mask
             if bio_med_image.has_nuclei():
-                nuclei_mask_seg = nuclei_mask_seg.remove_instance(
-                    connected_component_label
-                )
                 # additionally remove the islands from the nuclei mask
                 for island_label in removed_islands_labels:
-                    nuclei_mask_seg = nuclei_mask_seg.remove_instance(island_label)
+                    bio_med_image.segmentation.segmentation_mask_nuclei = bio_med_image.segmentation.segmentation_mask_nuclei.remove_instance(  # noqa: E501
+                        island_label
+                    )
 
-        return islands_to_remove, nuclei_mask_seg, organelle_mask_seg
+        return islands_to_remove
 
-    def _get_sc_masks(self, bio_med_image, nuclei_mask_seg, organelle_mask_seg):
-        sc_masks_list = []
+    def _get_sc_images(self, bio_med_image) -> Tuple[List[SingleCellImage], List[int]]:
+        sc_image_list = []
         threshold_cells = []
         # iterate through each unique segmented cell
         for (
-            connected_component_label
+            cc_label
         ) in bio_med_image.segmentation.segmentation_mask_connected.get_labels():
 
-            sc_masks = SingleCellMaskCollector.calc_sc_masks(
-                bio_med_image,
-                connected_component_label,
-                self.params.membrane_thickness,
-                nuclei_mask_seg,
-                organelle_mask_seg,
+            single_cell_image = bio_med_image.focus(
+                cc_label, self.params.membrane_thickness
             )
-            sc_masks_list.append(sc_masks)
+            sc_image_list.append(single_cell_image)
 
             # threshold
-            if self.threshold_size(sc_masks):
+            if self.threshold_size(single_cell_image):
                 get_logger().info(
                     "Cell with label %s falls under threshold! Removed from analysis!"
-                    % connected_component_label
+                    % cc_label
                 )
-                threshold_cells.append(connected_component_label)
-        return sc_masks_list, threshold_cells
+                threshold_cells.append(cc_label)
+        return sc_image_list, threshold_cells
 
     @staticmethod
     def _get_organelle_mask(bio_med_image):
@@ -216,20 +182,20 @@ class Extractor:
         return organelle_mask_seg
 
     @staticmethod
-    def _get_nuclei_mask(bio_med_image):
+    def _get_nuclei_mask(bio_med_image: BioMedicalImage):
         nuclei_mask_seg = None
-        if bio_med_image.segmentation.segmentation_mask_nuclei is not None:
-            nuclei_mask_seg = (
-                bio_med_image.segmentation_mask_nuclei.overlay_instance_segmentation(
+        if bio_med_image.segmentation is not None:
+            if bio_med_image.segmentation.segmentation_mask_nuclei is not None:
+                nuclei_mask_seg = bio_med_image.segmentation.segmentation_mask_nuclei
+            elif bio_med_image.has_nuclei():
+                assert (
+                    bio_med_image.nucleus is not None
+                ), "Image has not nucleus channel!"
+                nuclei_mask_seg = BioMedicalMask.from_threshold_otsu(
+                    bio_med_image.nucleus.data
+                ).overlay_instance_segmentation(
                     bio_med_image.segmentation.segmentation_mask_connected
                 )
-            )
-        elif bio_med_image.has_nuclei():
-            nuclei_mask_seg = BioMedicalMask.from_threshold_otsu(
-                bio_med_image.nucleus.data
-            ).overlay_instance_segmentation(
-                bio_med_image.segmentation.segmentation_mask_connected
-            )
         return nuclei_mask_seg
 
     def extract(

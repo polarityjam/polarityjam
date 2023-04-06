@@ -1,7 +1,7 @@
 """Collection of functions involving cell shape operations."""
 from __future__ import annotations
 
-from typing import List, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union
 
 import cv2
 import numpy as np
@@ -13,7 +13,9 @@ from shapely.ops import split
 from polarityjam import BioMedicalMask
 from polarityjam.compute.compute import compute_ref_x_abs_angle_deg
 from polarityjam.compute.corner import get_contour
-from polarityjam.model.image import BioMedicalChannel
+
+if TYPE_CHECKING:
+    from polarityjam.model.image import BioMedicalChannel
 
 
 def mask_from_contours(
@@ -51,6 +53,7 @@ def partition_single_cell_mask(
     cue_direction: int,
     major_axes_length: Union[int, float],
     num_partitions: int,
+    contours: Optional[np.ndarray] = None,
 ) -> Tuple[List[np.ndarray], List[Polygon], np.ndarray]:
     """Partitions a single cell mask into multiple masks from its centroid.
 
@@ -63,6 +66,8 @@ def partition_single_cell_mask(
             The major axes length of the single cell
         num_partitions:
             The number of desired partitions
+        contours:
+            The contours of the single cell. If not provided, they will be computed.
 
     Returns:
         The list of partitioned masks counter clock wise from the cue direction
@@ -77,7 +82,9 @@ def partition_single_cell_mask(
     sc_mask_f = np.flip(sc_mask, axis=0)
 
     # get the contour of the single cell mask
-    contours = get_contour(sc_mask_f.astype(int))
+    if contours is None:
+        contours = get_contour(sc_mask_f.astype(int))
+
     pg = Polygon(contours)
     pg_convex = pg.convex_hull
 
@@ -190,10 +197,7 @@ def center_single_cell(
     cropped_img_list = []
     for img in img_list:
 
-        if isinstance(img, BioMedicalChannel):
-            img = img.data
-
-        if isinstance(img, BioMedicalMask):
+        if not isinstance(img, np.ndarray):
             img = img.data
 
         # flip y coordinate and treat as maximum

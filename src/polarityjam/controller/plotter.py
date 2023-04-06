@@ -988,15 +988,15 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert (
-            img.segmentation.segmentation_mask_nuclei is not None
-        ), "Nuclei segmentation not available"
         assert img.junction is not None, "Junction channel not available"
 
         im_junction = img.junction
         segmentation_mask = img.segmentation.segmentation_mask_connected
         inst_nuclei_mask = None
         if img.has_nuclei():
+            assert (
+                img.segmentation.segmentation_mask_nuclei is not None
+            ), "Nuclei segmentation not available"
             inst_nuclei_mask = img.segmentation.segmentation_mask_nuclei
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio

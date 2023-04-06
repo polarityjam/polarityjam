@@ -430,6 +430,14 @@ class BioMedicalInstanceSegmentation:
         # remove islands from mask
         for elemet in islands:
             connected_component_mask = connected_component_mask.remove_instance(elemet)
+            if self.segmentation_mask_nuclei is not None:
+                self.segmentation_mask_nuclei = (
+                    self.segmentation_mask_nuclei.remove_instance(elemet)
+                )
+            if self.segmentation_mask_organelle is not None:
+                self.segmentation_mask_organelle = (
+                    self.segmentation_mask_organelle.remove_instance(elemet)
+                )
 
         return connected_component_mask
 
@@ -499,9 +507,17 @@ class BioMedicalInstanceSegmentation:
             np.copy(self.segmentation_mask_connected.data)
         )
 
-        # remove islands from mask
+        # remove islands from masks
         for elemet in list_of_islands:
             connected_component_mask = connected_component_mask.remove_instance(elemet)
+            if self.segmentation_mask_nuclei is not None:
+                self.segmentation_mask_nuclei = (
+                    self.segmentation_mask_nuclei.remove_instance(elemet)
+                )
+            if self.segmentation_mask_organelle is not None:
+                self.segmentation_mask_organelle = (
+                    self.segmentation_mask_organelle.remove_instance(elemet)
+                )
 
         # remove islands from graph
         for elem in np.unique(list_of_islands):

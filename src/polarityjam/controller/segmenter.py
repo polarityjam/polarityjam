@@ -100,6 +100,9 @@ class CellposeSegmenter(Segmenter):
 
         """
         cells = False if mode == "nucleus" else True
+        get_logger().info(
+            "Start segmentation procedure for %s..." % ("cells" if cells else "nuclei")
+        )
         return self._load_or_get_cellpose_segmentation(img, path, cells)
 
     def prepare(
@@ -132,14 +135,16 @@ class CellposeSegmenter(Segmenter):
 
         if img_parameter.channel_junction >= 0:
             get_logger().info(
-                "Junction channel at position: %s" % str(img_parameter.channel_junction)
+                "Junction channel used for segmentation at position: %s"
+                % str(img_parameter.channel_junction)
             )
             im_junction = img[:, :, img_parameter.channel_junction]
             params_prep_img.channel_junction = 0
 
         if img_parameter.channel_nucleus >= 0:
             get_logger().info(
-                "Nucleus channel at position: %s" % str(img_parameter.channel_nucleus)
+                "Nucleus channel used for segmentation at position: %s"
+                % str(img_parameter.channel_nucleus)
             )
             im_nucleus = img[:, :, img_parameter.channel_nucleus]
             params_prep_img.channel_nucleus = 1
@@ -236,7 +241,7 @@ class CellposeSegmenter(Segmenter):
         return segmentation, stem
 
     def _load_or_get_cellpose_segmentation(self, img_seg, filepath, cells=True):
-        get_logger().info("Look up cellpose segmentation...")
+        get_logger().info("Look up cellpose segmentation on disk...")
         segmentation, _ = self._get_segmentation_file_name(filepath, cells)
 
         if segmentation.exists() and self.params.use_given_mask:
@@ -276,6 +281,10 @@ class CellposeSegmenter(Segmenter):
 
         get_logger().info(
             "Detected number of cellpose labels: %s" % len(np.unique(cellpose_mask))
+        )
+
+        get_logger().info(
+            "Cellpose segmentation for %s done." % ("cells" if cells else "nuclei")
         )
 
         return cellpose_mask

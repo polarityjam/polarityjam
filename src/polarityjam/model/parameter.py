@@ -109,6 +109,7 @@ class RuntimeParameter(Parameter):
         self.min_organelle_size = None
         self.dp_epsilon = None
         self.cue_direction = None
+        self.connection_graph = None
 
         super().__init__(**attrs)
 

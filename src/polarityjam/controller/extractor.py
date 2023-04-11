@@ -132,20 +132,6 @@ class Extractor:
                 )
                 islands_to_remove.extend(removed_islands_labels)
 
-            if bio_med_image.has_organelle():
-                # additionally remove the islands from the organelle mask
-                for island_label in removed_islands_labels:
-                    bio_med_image.segmentation.segmentation_mask_organelle = bio_med_image.segmentation.segmentation_mask_organelle.remove_instance(  # noqa: E501
-                        island_label
-                    )
-
-            if bio_med_image.has_nuclei():
-                # additionally remove the islands from the nuclei mask
-                for island_label in removed_islands_labels:
-                    bio_med_image.segmentation.segmentation_mask_nuclei = bio_med_image.segmentation.segmentation_mask_nuclei.remove_instance(  # noqa: E501
-                        island_label
-                    )
-
         return islands_to_remove
 
     def _get_sc_images(self, bio_med_image) -> Tuple[List[SingleCellImage], List[int]]:
@@ -232,6 +218,7 @@ class Extractor:
             PropertiesCollection object containing the extracted features.
 
         """
+        get_logger().info("Extracting features for file %s..." % str(filename_prefix))
         filename_prefix, _ = os.path.splitext(os.path.basename(filename_prefix))
 
         bio_med_segmentation_mask = BioMedicalInstanceSegmentationMask(
@@ -242,12 +229,16 @@ class Extractor:
                 segmentation_mask_nuclei
             )
         bio_med_segmentation = BioMedicalInstanceSegmentation(
-            bio_med_segmentation_mask, segmentation_mask_nuclei
+            bio_med_segmentation_mask,
+            segmentation_mask_nuclei=segmentation_mask_nuclei,
+            connection_graph=self.params.connection_graph,
         )
 
         get_logger().info(
             "Detected islands in the adjacency graph: %s"
             % ", ".join([str(x) for x in sorted(bio_med_segmentation.island_list)])
+            if self.params.connection_graph
+            else "Detected islands in the adjacency graph: Disabled!"
         )
 
         bio_med_image = BioMedicalImage(

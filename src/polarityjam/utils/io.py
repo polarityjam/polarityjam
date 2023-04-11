@@ -3,6 +3,7 @@ import glob
 import os
 import shutil
 import time
+import warnings
 from pathlib import Path
 from typing import List, Optional, Union
 
@@ -58,7 +59,7 @@ def read_image(filename: Union[Path, str]) -> np.ndarray:
         img_ = np.array([img_, img_])
 
     if img_.shape[0] < min(img_.shape[1], img_.shape[2]):
-        print("Warning: channel is on the first dimension of the image.")
+        warnings.warn("Image has channels on first position. Swapping axis.")
         img = np.swapaxes(np.swapaxes(img_, 0, 2), 0, 1)
     else:
         img = img_

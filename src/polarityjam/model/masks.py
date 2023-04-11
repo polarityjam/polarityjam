@@ -189,8 +189,8 @@ class BioMedicalInstanceSegmentationMask(Mask):
         """Return the number of instances in the mask."""
         return len(np.unique(self.data))
 
-    def get_labels(self, exclude_background: bool = True) -> np.ndarray:
-        """Get the labels of the mask.
+    def get_labels(self, exclude_background: bool = True) -> List[int]:
+        """Get all labels of the mask.
 
         Args:
             exclude_background:
@@ -205,7 +205,7 @@ class BioMedicalInstanceSegmentationMask(Mask):
         if exclude_background:
             labels = labels[labels != self.background_label]
 
-        return labels
+        return list(labels)
 
     def to_semantic_mask(self) -> BioMedicalMask:
         """Convert the mask to a semantic (boolean) mask."""
@@ -352,7 +352,9 @@ class BioMedicalInstanceSegmentation:
         )
 
         self.island_list: List[int] = []
-        self.segmentation_mask_connected = copy.deepcopy(self.segmentation_mask)
+        self.segmentation_mask_connected: BioMedicalInstanceSegmentationMask = (
+            copy.deepcopy(self.segmentation_mask)
+        )
         self.neighborhood_graph_connected = copy.deepcopy(self.neighborhood_graph)
 
         if self.connection_graph:
@@ -364,15 +366,14 @@ class BioMedicalInstanceSegmentation:
         return self._segmentation_mask_nuclei
 
     @segmentation_mask_nuclei.setter
-    def segmentation_mask_nuclei(self, value):
+    def segmentation_mask_nuclei(self, value: BioMedicalInstanceSegmentationMask):
+        """Set the nuclei segmentation mask."""
         if value is not None:
             self._segmentation_mask_nuclei = (
                 value.to_semantic_mask().overlay_instance_segmentation(
-                    self.segmentation_mask
+                    self.segmentation_mask_connected
                 )
             )
-        else:
-            self._segmentation_mask_nuclei = value
 
     @property
     def segmentation_mask_organelle(self):
@@ -380,15 +381,14 @@ class BioMedicalInstanceSegmentation:
         return self._segmentation_mask_organelle
 
     @segmentation_mask_organelle.setter
-    def segmentation_mask_organelle(self, value):
+    def segmentation_mask_organelle(self, value: BioMedicalInstanceSegmentationMask):
+        """Set the organelle segmentation mask."""
         if value is not None:
             self._segmentation_mask_organelle = (
                 value.to_semantic_mask().overlay_instance_segmentation(
-                    self.segmentation_mask
+                    self.segmentation_mask_connected
                 )
             )
-        else:
-            self._segmentation_mask_organelle = value
 
     def update_graphs(self) -> List[int]:
         """Update the graphs after a change in the segmentation mask.
@@ -407,7 +407,7 @@ class BioMedicalInstanceSegmentation:
 
         return island_list
 
-    def remove_instance_label(self, instance_label):
+    def remove_instance_label(self, instance_label) -> List[int]:
         """Remove an instance label from the segmentation inplace.
 
         Args:

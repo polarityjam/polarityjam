@@ -36,7 +36,7 @@ class SingleInstanceProps(RegionProperties):
         if intensity is not None:
             _intensity = intensity.data
 
-        objects = ndi.find_objects(single_cell_mask.data)
+        objects = ndi.find_objects(single_cell_mask.data.astype(np.uint8))
 
         assert len(objects) == 1, "Only one object allowed!"
 

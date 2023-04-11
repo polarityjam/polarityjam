@@ -118,10 +118,17 @@ class Extractor:
     def _remove_threshold_cells(bio_med_image, threshold_cells):
         # remove threshold cells from segmentation
         islands_to_remove = []
-        for connected_component_label in threshold_cells:
+        conn_graph = bio_med_image.segmentation.connection_graph
+        bio_med_image.segmentation.connection_graph = False
+        for connected_component_label in threshold_cells[:-1]:
 
+            bio_med_image.segmentation.remove_instance_label(connected_component_label)
+
+        # remove islands after iteration
+        bio_med_image.segmentation.connection_graph = conn_graph
+        if len(threshold_cells) > 0:
             removed_islands_labels = bio_med_image.segmentation.remove_instance_label(
-                connected_component_label
+                threshold_cells[-1]
             )
 
             if removed_islands_labels:

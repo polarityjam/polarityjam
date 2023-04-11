@@ -21,6 +21,9 @@ class Mask:
         """Initialize the mask with the given data."""
         self.data = mask.astype(bool)
 
+        if self.data.sum() == 0:
+            warnings.warn("Mask is empty!")
+
     @classmethod
     def from_threshold_otsu(
         cls: Type[_T],

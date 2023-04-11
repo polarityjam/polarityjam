@@ -33,7 +33,7 @@ min_nucleus_size: 10
 min_organelle_size: 10
 dp_epsilon: 5
 cue_direction: 0
-connection_graph: False
+connection_graph: True
 
 # PlotParameter
 plot_junctions: True

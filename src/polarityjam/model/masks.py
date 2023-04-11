@@ -339,14 +339,6 @@ class BioMedicalInstanceSegmentation:
 
         self.connection_graph = connection_graph
 
-        if segmentation_mask_nuclei is not None:
-            # assure same labels
-            self.segmentation_mask_nuclei = segmentation_mask_nuclei
-
-        if segmentation_mask_organelle is not None:
-            # assure same labels
-            self.segmentation_mask_organelle = segmentation_mask_organelle
-
         self.neighborhood_graph = BioMedicalInstanceSegmentation.get_rag(
             self.segmentation_mask
         )
@@ -356,6 +348,14 @@ class BioMedicalInstanceSegmentation:
             copy.deepcopy(self.segmentation_mask)
         )
         self.neighborhood_graph_connected = copy.deepcopy(self.neighborhood_graph)
+
+        if segmentation_mask_nuclei is not None:
+            # assure same labels
+            self.segmentation_mask_nuclei = segmentation_mask_nuclei
+
+        if segmentation_mask_organelle is not None:
+            # assure same labels
+            self.segmentation_mask_organelle = segmentation_mask_organelle
 
         if self.connection_graph:
             self.update_graphs()

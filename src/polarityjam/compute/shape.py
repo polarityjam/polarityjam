@@ -130,7 +130,7 @@ def partition_single_cell_mask(
         # keep only concave hull parts of the mask
         masks.append((np.logical_and(convex_mask, sc_mask)).astype(np.uint8))
 
-    if len(masks) == num_partitions:
+    if len(masks) != num_partitions:
         warnings.warn(
             "Number of partitions({}) does not match the number of created masks ({}). ".format(  # noqa: P101
                 num_partitions, len(masks)

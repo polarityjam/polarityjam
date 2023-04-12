@@ -54,7 +54,7 @@ the length of the resultant vector R:
 
 .. math::
 
-    PI = \| \vec{R} \| = \sqrt{ \left(\frac{1}{N} \sum_{i=1}^N \cos(\alphai) \right)^2
+    PI = \| \vec{R} \| = \sqrt{ \left(\frac{1}{N} \sum_{i=1}^N \cos(\alpha_i) \right)^2
                                                             + \left(\frac{1}{N} \sum_{i=1}^N \sin(\alpha_i)\right)^2 }
 
 The polarity index takes values between 0 and 1, where 0 indicates no directional polarity and 1 indicates perfect polarity.
@@ -80,7 +80,7 @@ https://en.wikipedia.org/wiki/Atan2 or https://search.r-project.org/CRAN/refmans
 
 Assume that there is an expected direction, for instance, in case of nuclei-Golgi polarity we might expect polarization
 against blood flow, we can derive a measure of the deviation of the observed direction from the expected direction, which is called
-the V-score. The V-score is defined as
+the V-score :cite:t:`jammalamadaka2001topics`. The V-score is defined as
 
 .. math::
 
@@ -91,7 +91,7 @@ against the expected direction and 1 indicates perfect polarization along the ex
 0 indicates no polarization perpendicular to the expected direction. We therefore obtain a signed polarity index (PI).
 
 Angular data describes the orientation of an "axis", as for instance, the long axis of cells or nuclei, rather than a direction.
-These observations of axes orientation are referred to as axial data. The axial data are handled by "doubling the
+These observations of axes orientation are referred to as axial data :cite:t:`jammalamadaka2001topics`. The axial data are handled by "doubling the
 angles", meaning transforming each angle :math:`\alpha_i` to :math:`2\alpha_i` which removes the directional ambiguity.
 Assuming a vector from N axial measurements  :math:`\alpha_i, i=1, \dots, N`,  we first obtain the mean :math:`\bar{\alpha}*`
 and polarity index from the doubled angles :math:`2\alpha_i, i=1, \dots, N` as described above. The axial mean

@@ -54,8 +54,8 @@ the length of the resultant vector R:
 
 .. math::
 
-    PI = \| \vec{R} \| = \sqrt{ \left(\frac{1}{N} \sum_{i=1}^N \cos(\theta_i) \right)^2
-                                                            + \left(\frac{1}{N} \sum_{i=1}^N \sin(\theta_i)\right)^2 }
+    PI = \| \vec{R} \| = \sqrt{ \left(\frac{1}{N} \sum_{i=1}^N \cos(\alphai) \right)^2
+                                                            + \left(\frac{1}{N} \sum_{i=1}^N \sin(\alpha_i)\right)^2 }
 
 The polarity index takes values between 0 and 1, where 0 indicates no directional polarity and 1 indicates perfect polarity.
 
@@ -78,12 +78,24 @@ In the app computation arctan is computed as
 in order to obtain 0 to :math:`2\pi` (0 to 360). The atan2 is the common function defined in
 https://en.wikipedia.org/wiki/Atan2 or https://search.r-project.org/CRAN/refmans/raster/html/atan2.html .
 
-Sometimes the angular data refers to an, as for instance, the long axis of cells or nuclei, rather than a direction.
+Assume that there is an expected direction, for instance, in case of nuclei-Golgi polarity we might expect polarization
+against blood flow, we can derive a measure of the deviation of the observed direction from the expected direction, which is called
+the V-score. The V-score is defined as
+
+.. math::
+
+    V = \| \vec{R} \| cos (\bar{\alpha} - \bar{\mu}),
+
+where :math:`\bar{\mu}` is the expected direction. The V-score takes values between -1 and 1, where -1 indicates polarization
+against the expected direction and 1 indicates perfect polarization along the expected direction.
+0 indicates no polarization perpendicular to the expected direction. We therefore obtain a signed polarity index (PI).
+
+Angular data describes the orientation of an "axis", as for instance, the long axis of cells or nuclei, rather than a direction.
 These observations of axes orientation are referred to as axial data. The axial data are handled by "doubling the
 angles", meaning transforming each angle :math:`\alpha_i` to :math:`2\alpha_i` which removes the directional ambiguity.
 Assuming a vector from N axial measurements  :math:`\alpha_i, i=1, \dots, N`,  we first obtain the mean :math:`\bar{\alpha}*`
 and polarity index from the doubled angles :math:`2\alpha_i, i=1, \dots, N` as described above. The axial mean
-computed from :math:`\bar{\alpha} =  \frac{1}{2} \bar{\alpha}*` and the axial polarity index is the same as the values
+computed from :math:`\bar{\alpha} =  \frac{1}{2} \bar{\alpha}*` and the axial polarity index and V-score is directly
 computed from the doubled values.
 
 For both directional and axial data the variance is computed from

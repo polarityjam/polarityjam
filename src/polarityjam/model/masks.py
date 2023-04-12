@@ -19,10 +19,20 @@ class Mask:
 
     def __init__(self, mask: np.ndarray):
         """Initialize the mask with the given data."""
+        self._warn = False
         self.data = mask.astype(bool)
 
-        if self.data.sum() == 0:
+        if self._warn and self.data.sum() == 0:
             warnings.warn("Mask is empty!")
+
+    def warn(self, warn: bool) -> None:
+        """Set the warning flag.
+
+        Args:
+            warn:
+                The warning flag.
+        """
+        self._warn = warn
 
     @classmethod
     def from_threshold_otsu(

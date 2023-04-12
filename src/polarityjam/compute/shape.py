@@ -1,6 +1,7 @@
 """Collection of functions involving cell shape operations."""
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union
 
 import cv2
@@ -129,12 +130,12 @@ def partition_single_cell_mask(
         # keep only concave hull parts of the mask
         masks.append((np.logical_and(convex_mask, sc_mask)).astype(np.uint8))
 
-    assert (
-        len(masks) == num_partitions
-    ), "Number of partitions({}) does not match the number of masks ({}).".format(  # noqa: P101
-        num_partitions,
-        len(masks),
-    )
+    if len(masks) == num_partitions:
+        warnings.warn(
+            "Number of partitions({}) does not match the number of created masks ({}). ".format(  # noqa: P101
+                num_partitions, len(masks)
+            )
+        )
 
     return masks, polygons, contours
 

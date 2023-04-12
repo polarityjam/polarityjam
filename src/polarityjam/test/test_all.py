@@ -2,7 +2,7 @@ import time
 import unittest
 from pathlib import Path
 
-from integration import test_commandline, test_masks
+from integration import test_commandline, test_masks, test_properties
 from unit import test_feature_extraction
 
 import polarityjam.test.test_config as config
@@ -23,6 +23,7 @@ def start_tests(target_folder=None):
     # integration tests
     suite.addTests(loader.loadTestsFromModule(test_commandline))
     suite.addTests(loader.loadTestsFromModule(test_masks))
+    suite.addTests(loader.loadTestsFromModule(test_properties))
 
     runner = unittest.TextTestRunner(verbosity=3)
     result = runner.run(suite)

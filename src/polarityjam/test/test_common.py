@@ -75,6 +75,9 @@ class TestCommon(unittest.TestCase):
     def get_test_mask(self, name):
         return self.current_path.joinpath("resources", "masks", name)
 
+    def get_test_single_cell(self, name):
+        return self.current_path.joinpath("resources", "single_cell", name)
+
     def get_base_param_file(self):
         return Path(self.current_path).joinpath(
             "..", "utils", "resources", "parameters.yml"

@@ -42,6 +42,22 @@ You can now run the pipeline with the following command:
     album run de.mdc-berlin:polarityjam:0.1.0
 
 
+Manual installation from GitHub
++++++++++++++++++++++++++++++++
+
+Make sure you have `conda <https://anaconda.com/>`_ installed.
+
+Execute the following steps on the commandline:
+
+.. code-block:: console
+
+    conda create -y -n polarityjam python=3.8
+    conda activate polarityjam
+    git clone https://github.com/polarityjam/polarityjam.git # via git or download via browser
+    cd polarityjam
+    pip install -e .
+
+
 Web App
 -------------------
 
@@ -70,7 +86,8 @@ Execute the following steps on the commandline:
     cd polarityjam-app
     conda env create -f polarityjam-app.yml
     conda activate polarityjam-app
-    Rscript app/app.R
+    cd app
+    Rscript app.R
 
 Open the browser in the URL given in the output of the R-shiny call (usually http://127.0.0.1:8888 ).
 

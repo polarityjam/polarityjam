@@ -79,21 +79,24 @@ class Extractor:
             bio_med_image, nuclei_mask_seg, organelle_mask_seg
         )
 
-        (
-            removed_islands,
-            nuclei_mask_seg,
-            organelle_mask_seg,
-        ) = self._remove_threshold_cells(
-            bio_med_image, nuclei_mask_seg, organelle_mask_seg, threshold_cells
-        )
+        removed_islands = []
+        if self.params.extract_group_features:
+            (
+                removed_islands,
+                nuclei_mask_seg,
+                organelle_mask_seg,
+            ) = self._remove_threshold_cells(
+                bio_med_image, nuclei_mask_seg, organelle_mask_seg, threshold_cells
+            )
 
-        get_logger().info(
-            "Number of additionally removed islands: %s" % len(removed_islands)
-        )
+            get_logger().info(
+                "Number of additionally removed islands: %s" % len(removed_islands)
+            )
 
         # remove sc masks that have been excluded
         excluded_components = set(threshold_cells)
-        excluded_components.update(list(bio_med_image.segmentation.island_list))
+        if removed_islands:
+            excluded_components.update(list(removed_islands))
 
         sc_masks_list = [
             i

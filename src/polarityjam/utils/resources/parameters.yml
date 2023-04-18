@@ -8,32 +8,17 @@ channel_organelle: 2
 channel_expression_marker: -1 # -1 means no expression marker
 pixel_to_micron_ratio: 1.0
 
-# SegmentationParameter
-manually_annotated_mask: "" # in case a manually annotated cellpose mask exists specify suffix here
-store_segmentation: False
-use_given_mask: True
-model_type: "cyto" # "cyto", "cyto2", "custom"
-model_type_nucleus: "nuclei" # "custom"
-model_path: ""
-estimated_cell_diameter: 100
-estimated_cell_diameter_nucleus: 30
-flow_threshold: 0.4 # default cellpose value
-cellprob_threshold: 0.0 # default cellpose value
-
-use_gpu: False
-clear_border: True
-remove_small_objects: True
-min_cell_size: 50
-
 # RuntimeParameter
 extract_group_features: True
 membrane_thickness: 5
 feature_of_interest: "cell_area"
+min_cell_size: 50
 min_nucleus_size: 10
 min_organelle_size: 10
 dp_epsilon: 5
 cue_direction: 0
 connection_graph: True
+segmentation_algorithm: "CellposeSegmenter" # "CellposeSegmenter", "SamSegmenter"
 
 # PlotParameter
 plot_junctions: True

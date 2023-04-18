@@ -1,8 +1,36 @@
 """Parameter classes holding the configuration of the feature extraction process."""
 import os
+from importlib import import_module
 from pathlib import Path
 
-from polarityjam.utils.io import read_parameters
+import yaml
+from aenum import Enum, extend_enum
+
+from polarityjam.settings import Settings
+from polarityjam.utils.io import get_dict_from_yml, list_files_recursively
+
+
+def _obj_constructor(cls, *args, **kwargs):
+    """Convert static attributes from class to instance attributes and sets user values."""
+    self = object.__new__(cls)
+
+    # convert static attributes to instance attributes
+    static_attrs = [
+        v for v, m in vars(cls).items() if not (v.startswith("_") or callable(m))
+    ]
+    for attr in static_attrs:
+        setattr(self, attr, getattr(cls, attr))
+
+    if args != ():
+        for dictionary in args:
+            for key in dictionary:
+                self._setattr(key, dictionary[key])
+
+    if kwargs != {}:
+        for key in kwargs:
+            self._setattr(key, kwargs[key])
+
+    return self
 
 
 class Parameter:
@@ -15,7 +43,7 @@ class Parameter:
         param_base_file = Path(current_path).joinpath(
             "..", "utils", "resources", "parameters.yml"
         )
-        args_init = read_parameters(str(param_base_file))
+        args_init = get_dict_from_yml(param_base_file)
 
         for key in args_init:
             self._setattr(key, args_init[key])
@@ -41,7 +69,7 @@ class Parameter:
     @classmethod
     def from_yml(cls, path: str):
         """Create a parameter object from a yml file."""
-        params = read_parameters(path)
+        params = get_dict_from_yml(Path(path))
 
         return cls(params)
 
@@ -51,31 +79,6 @@ class Parameter:
         for attr in self.__dict__:
             s += f"{attr:<30}{str(getattr(self, attr)):<40}\n"
         return s
-
-
-class SegmentationParameter(Parameter):
-    """Parameter class for the parameters necessary for the segmentation of images."""
-
-    def __init__(self, attrs=None):
-        """Initialize the segmentation parameter class."""
-        if attrs is None:
-            attrs = {}
-        self.manually_annotated_mask = None
-        self.store_segmentation = None
-        self.use_given_mask = None
-        self.model_type = None
-        self.model_type_nucleus = None
-        self.model_path = None
-        self.estimated_cell_diameter = None
-        self.estimated_cell_diameter_nucleus = None
-        self.flow_threshold = None
-        self.cellprob_threshold = None
-        self.use_gpu = None
-        self.clear_border = None
-        self.remove_small_objects = None
-        self.min_cell_size = None
-
-        super().__init__(**attrs)
 
 
 class ImageParameter(Parameter):
@@ -94,6 +97,18 @@ class ImageParameter(Parameter):
         super().__init__(**attrs)
 
 
+class SegmentationAlgorithmE(Enum):
+    """Enum for the segmentation algorithm."""
+
+    pass  # constructed at runtime
+
+
+class SegmentationParameterE(Enum):
+    """Enum for the segmentation parameters."""
+
+    pass  # constructed at runtime
+
+
 class RuntimeParameter(Parameter):
     """Parameter class for the parameters necessary for the calculation of the features."""
 
@@ -110,8 +125,46 @@ class RuntimeParameter(Parameter):
         self.dp_epsilon = None
         self.cue_direction = None
         self.connection_graph = None
+        self.segmentation_algorithm = None
 
         super().__init__(**attrs)
+
+
+class SegmentationParameter(Parameter):
+    """Parameter class for the parameters necessary for the segmentation of images."""
+
+    def __new__(cls, segmentation_algorithm: str, attrs=None):
+        """Create a new segmentation parameter object."""
+        segmentation_parameter_type = cls.create_segmentation_parameter(
+            segmentation_algorithm
+        )
+        if attrs is None:
+            attrs = {}
+        return segmentation_parameter_type(**attrs)
+
+    @staticmethod
+    def create_segmentation_parameter(segmentation_algorithm: str) -> type:
+        """Create a segmentation parameter class for the segmentation process."""
+        d = {
+            # constructor
+            "__new__": _obj_constructor,
+        }
+        d.update(get_dict_from_yml(SegmentationParameterE[segmentation_algorithm].value))  # type: ignore
+        segmentation_parameter_type = type("SegmentationParameter", (Parameter,), d)
+        return segmentation_parameter_type
+
+    @classmethod
+    def from_yml(cls, path: str):
+        """Create a parameter object from a yml file."""
+        params = get_dict_from_yml(Path(path))
+
+        if "segmentation_algorithm" in params:
+            segmentation_parameter_type = cls.create_segmentation_parameter(
+                RuntimeParameter(params).segmentation_algorithm
+            )
+            return segmentation_parameter_type(params)
+        else:
+            raise ValueError("No segmentation algorithm specified in the yml file.")
 
 
 class PlotParameter(Parameter):
@@ -147,3 +200,56 @@ class PlotParameter(Parameter):
         self.marker_size = None
 
         super().__init__(**attrs)
+
+
+def read_parameters(parameter_file: str) -> dict:
+    """Read in default parameters and replaces user defined parameters.
+
+    Args:
+        parameter_file:
+            Path to the parameter file.
+    Returns:
+        dictionary where all missing parameter values are replaced with the default values.
+
+    """
+    current_path = Path(os.path.dirname(os.path.realpath(__file__)))
+
+    param_base_file = Path(current_path).parent.joinpath(
+        "utils", "resources", "parameters.yml"
+    )
+
+    with open(param_base_file) as yml_f:
+        parameters = yaml.safe_load(yml_f)
+
+    with open(parameter_file) as file:
+        parameters_local = yaml.safe_load(file)
+
+    # overwrite global parameters with local setting
+    for key in parameters_local:
+        parameters[key] = parameters_local[key]
+
+    # load segmentation parameters
+    sp = SegmentationParameter(
+        parameters[Settings.segmentation_algorithm.value], parameters_local
+    )
+
+    for k in sp.__dict__:
+        parameters[k] = getattr(sp, k)
+
+    return parameters
+
+
+def _load_dynamic_segmenter():
+    m = import_module(Settings.dynamic_loading_prefix.value)
+    path = Path(os.path.abspath(m.__file__)).parent
+    for yml_spec in list_files_recursively(path, endswith=".yml"):
+        spec_dict = get_dict_from_yml(yml_spec)
+        name = spec_dict["path"].split(".")[-1]
+        value = "{}.{}".format(  # noqa: P101
+            Settings.dynamic_loading_prefix.value, spec_dict["path"]
+        )
+        extend_enum(SegmentationAlgorithmE, name, value)
+        extend_enum(SegmentationParameterE, name, path.joinpath(yml_spec))
+
+
+_load_dynamic_segmenter()

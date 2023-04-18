@@ -5,8 +5,9 @@ import numpy as np
 import yaml
 
 from polarityjam.model.moran import run_morans
+from polarityjam.model.parameter import read_parameters
 from polarityjam.test.test_common import TestCommon
-from polarityjam.utils.io import read_image, read_parameters
+from polarityjam.utils.io import read_image
 
 
 class TestFunctions(TestCommon):

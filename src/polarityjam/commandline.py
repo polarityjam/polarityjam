@@ -2,19 +2,20 @@
 import json
 import os
 from pathlib import Path
+from typing import Union
 
 import numpy as np
 import pandas as pd
 
+from polarityjam import load_segmenter
 from polarityjam.controller.extractor import Extractor
 from polarityjam.controller.plotter import Plotter
-from polarityjam.controller.segmenter import CellposeSegmenter
 from polarityjam.model.collection import PropertiesCollection
 from polarityjam.model.parameter import (
     ImageParameter,
     PlotParameter,
     RuntimeParameter,
-    SegmentationParameter,
+    read_parameters,
 )
 from polarityjam.polarityjam_logging import get_logger
 from polarityjam.utils.io import (
@@ -23,7 +24,6 @@ from polarityjam.utils.io import (
     get_tif_list,
     read_image,
     read_key_file,
-    read_parameters,
     write_dict_to_yml,
 )
 
@@ -80,7 +80,12 @@ def _finish(parameters, output_path):
     write_dict_to_yml(out_param, parameters)
 
 
-def _run(infile, param, output_path, fileout_name):
+def _run(
+    infile: Union[Path, str],
+    param: dict,
+    output_path: Union[Path, str],
+    fileout_name: str,
+):
     create_path_recursively(output_path)
 
     # read input
@@ -95,8 +100,7 @@ def _run(infile, param, output_path, fileout_name):
     p = Plotter(params_plot)
 
     # segmenter
-    params_seg = SegmentationParameter(param)
-    s = CellposeSegmenter(params_seg)
+    s, _ = load_segmenter(params_input, param)
 
     # prepare segmentation and plot
     img_seg, img_seg_params = s.prepare(img, params_img)

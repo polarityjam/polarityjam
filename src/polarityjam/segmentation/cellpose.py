@@ -8,7 +8,7 @@ import skimage
 from skimage import morphology
 
 from polarityjam import ImageParameter
-from polarityjam.controller.segmenter import Segmenter
+from polarityjam.controller.segmenter import SegmentationMode, Segmenter
 from polarityjam.polarityjam_logging import get_logger
 
 
@@ -24,7 +24,7 @@ class CellposeSegmenter(Segmenter):
         self,
         img: np.ndarray,
         path: Optional[Union[Path, str]] = None,
-        mode: Optional[str] = None,
+        mode: Optional[SegmentationMode] = SegmentationMode.CELL,
     ) -> np.ndarray:
         """Perform the segmentation of the given image.
 
@@ -42,7 +42,7 @@ class CellposeSegmenter(Segmenter):
             A mask as np.ndarray image.
 
         """
-        cells = False if mode == "nucleus" else True
+        cells = False if mode == SegmentationMode.NUCLEUS else True
         get_logger().info(
             "Start segmentation procedure for %s..." % ("cells" if cells else "nuclei")
         )

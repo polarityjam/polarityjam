@@ -215,10 +215,10 @@ class SingleCellMarkerProps(SingleInstanceProps):
             rolling_ball_radius=self.intensity.data.shape[0] // 100,
         )
         sc_marker_intensity_mask_r = sc_marker_intensity_mask.combine(
-            self.half_masks[0]
+            self.half_masks[0].mask_background()
         )
         sc_marker_intensity_mask_l = sc_marker_intensity_mask.combine(
-            self.half_masks[1]
+            self.half_masks[1].mask_background()
         )
 
         right = sc_marker_intensity_mask_r.data * self.intensity.data
@@ -242,16 +242,16 @@ class SingleCellMarkerProps(SingleInstanceProps):
             rolling_ball_radius=self.intensity.data.shape[0] // 100,
         )
         sc_marker_intensity_mask_r = sc_marker_intensity_mask.combine(
-            self.quadrant_masks[0]
+            self.quadrant_masks[0].mask_background()
         )
         sc_marker_intensity_mask_t = sc_marker_intensity_mask.combine(
-            self.quadrant_masks[1]
+            self.quadrant_masks[1].mask_background()
         )
         sc_marker_intensity_mask_l = sc_marker_intensity_mask.combine(
-            self.quadrant_masks[2]
+            self.quadrant_masks[2].mask_background()
         )
         sc_marker_intensity_mask_b = sc_marker_intensity_mask.combine(
-            self.quadrant_masks[3]
+            self.quadrant_masks[3].mask_background()
         )
 
         top = sc_marker_intensity_mask_t.data * self.intensity.data
@@ -458,10 +458,10 @@ class SingleCellJunctionProps:
     def junction_cue_directional_intensity_ratio(self):
         """Return the ratio of the left vs right cell membrane intensity in cue direction."""
         sc_junction_intensity_mask_r = self.single_cell_junction_intensity_mask.combine(
-            self.half_masks[0]
+            self.half_masks[0].combine(self.single_membrane_mask).mask_background()
         )
         sc_junction_intensity_mask_l = self.single_cell_junction_intensity_mask.combine(
-            self.half_masks[1]
+            self.half_masks[1].combine(self.single_membrane_mask).mask_background()
         )
 
         right = (
@@ -489,16 +489,16 @@ class SingleCellJunctionProps:
     def junction_cue_undirectional_intensity_ratio(self):
         """Return the ratio of the sum of cell membrane quarters in cue direction and the total membrane intensity."""
         sc_junction_intensity_mask_r = self.single_cell_junction_intensity_mask.combine(
-            self.quadrant_masks[0]
+            self.quadrant_masks[0].combine(self.single_membrane_mask).mask_background()
         )
         sc_junction_intensity_mask_t = self.single_cell_junction_intensity_mask.combine(
-            self.quadrant_masks[1]
+            self.quadrant_masks[1].combine(self.single_membrane_mask).mask_background()
         )
         sc_junction_intensity_mask_l = self.single_cell_junction_intensity_mask.combine(
-            self.quadrant_masks[2]
+            self.quadrant_masks[2].combine(self.single_membrane_mask).mask_background()
         )
         sc_junction_intensity_mask_b = self.single_cell_junction_intensity_mask.combine(
-            self.quadrant_masks[3]
+            self.quadrant_masks[3].combine(self.single_membrane_mask).mask_background()
         )
 
         left = (

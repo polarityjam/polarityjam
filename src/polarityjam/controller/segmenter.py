@@ -1,5 +1,6 @@
 """Segmentation class base and CellposeSegmentation class."""
 from abc import ABCMeta, abstractmethod
+from enum import Enum
 from pydoc import locate
 from typing import Optional, Tuple
 
@@ -11,6 +12,14 @@ from polarityjam.model.parameter import (
     SegmentationAlgorithmE,
     SegmentationParameter,
 )
+
+
+class SegmentationMode(Enum):
+    """The segmentation mode."""
+
+    NUCLEUS = "nucleus"
+    CELL = "cell"
+    ORGANELLE = "organelle"
 
 
 class Segmenter:
@@ -25,7 +34,10 @@ class Segmenter:
 
     @abstractmethod
     def segment(
-        self, img: np.ndarray, path: Optional[str] = None, mode: Optional[str] = None
+        self,
+        img: np.ndarray,
+        path: Optional[str] = None,
+        mode: Optional[SegmentationMode] = SegmentationMode.CELL,
     ) -> np.ndarray:
         """Perform segmentation and return a mask image.
 

@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 from segment_anything import SamAutomaticMaskGenerator, sam_model_registry
 
-from polarityjam.controller.segmenter import Segmenter
+from polarityjam.controller.segmenter import SegmentationMode, Segmenter
 from polarityjam.model.parameter import ImageParameter, SegmentationParameter
 from polarityjam.polarityjam_logging import get_logger
 from polarityjam.utils.url import download_resource
@@ -16,19 +16,23 @@ from polarityjam.utils.url import download_resource
 class SamSegmenter(Segmenter):
     """SAM segmentation model."""
 
-    MODEL_URL = "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth"
-    MODEL_URL_L = "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_l_0b3195.pth"
     DOWNLOAD_PATH_REL = Path(os.path.dirname(os.path.realpath(__file__))).joinpath(
-        "SAM", "sam_vit_h_4b8939.pth"
+        "SAM"
     )
 
     def __init__(self, params: SegmentationParameter):
         """Initialize the segmenter with the given parameters."""
         self.params = params
-        self.model_path = None
+        self.model_url = params.model_url  # type: ignore
+        self.model_path = self.DOWNLOAD_PATH_REL.joinpath(
+            os.path.split(self.model_url)[-1]
+        )
 
     def segment(
-        self, img: np.ndarray, path: Optional[str] = None, mode: Optional[str] = None
+        self,
+        img: np.ndarray,
+        path: Optional[str] = None,
+        mode: Optional[SegmentationMode] = SegmentationMode.CELL,
     ) -> np.ndarray:
         """Segment the given image.
 
@@ -44,11 +48,11 @@ class SamSegmenter(Segmenter):
             The segmented image as numpy array.
 
         """
-        if mode == "nucleus":
+        if mode == SegmentationMode.NUCLEUS:
             return self._segment_single_channel(img[:, :, 1])
-        elif mode == "cell":
+        elif mode == SegmentationMode.CELL:
             return self._segment_single_channel(img[:, :, 0])
-        elif mode == "organelle":
+        elif mode == SegmentationMode.ORGANELLE:
             return self._segment_single_channel(img[:, :, 2])
         else:
             raise ValueError("Mode must be either nucleus, organelle or cell.")
@@ -91,8 +95,8 @@ class SamSegmenter(Segmenter):
             Tuple of the prepared image and the image parameter.
 
         """
-        if not self.DOWNLOAD_PATH_REL.exists():
-            download_resource(self.MODEL_URL, self.DOWNLOAD_PATH_REL)
+        if not self.model_path.exists():
+            download_resource(self.model_url, self.model_path)
 
         params_prep_img = ImageParameter()
         px_to_m_r = img_parameter.pixel_to_micron_ratio

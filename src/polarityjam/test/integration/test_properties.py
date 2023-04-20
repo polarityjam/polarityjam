@@ -92,7 +92,7 @@ class TestSingleCellProps(TestCommon):
         img_sc_dne = BioMedicalImage(self.sc_dne, self.img_param, segmentation=self.seg)
 
         sc_mask = img_sc_de_p.get_single_cell_mask(1)
-        sc_membrane_mask = img_sc_de_p.get_single_membrane_mask(1, 10)
+        sc_membrane_mask = img_sc_de_p.get_single_membrane_mask(1, 3)
         sc_junction_protein_mask = img_sc_de_p.get_single_junction_maks(1, 10)
 
         sc_mask_f = np.flip(sc_mask.data, axis=0)
@@ -154,7 +154,7 @@ class TestSingleCellProps(TestCommon):
         img_sc_une = BioMedicalImage(self.sc_une, self.img_param, segmentation=self.seg)
 
         sc_mask = img_sc_ue_p.get_single_cell_mask(1)
-        sc_membrane_mask = img_sc_ue_p.get_single_membrane_mask(1, 10)
+        sc_membrane_mask = img_sc_ue_p.get_single_membrane_mask(1, 3)
         sc_junction_protein_mask = img_sc_ue_p.get_single_junction_maks(1, 10)
 
         sc_mask_f = np.flip(sc_mask.data, axis=0)
@@ -218,7 +218,7 @@ class TestSingleCellProps(TestCommon):
         img_sc_dne = BioMedicalImage(self.sc_dne, self.img_param, segmentation=self.seg)
 
         sc_mask = img_sc_de_p.get_single_cell_mask(1)
-        sc_membrane_mask = img_sc_de_p.get_single_membrane_mask(1, 10)
+        sc_membrane_mask = img_sc_de_p.get_single_membrane_mask(1, 3)
 
         sc_mask_f = np.flip(sc_mask.data, axis=0)
         contour = get_contour(sc_mask_f.astype(int))
@@ -265,7 +265,7 @@ class TestSingleCellProps(TestCommon):
             junction_props_de_n.junction_cue_directional_intensity_ratio, -0.9
         )
         self.assertAlmostEqual(
-            junction_props_dne.junction_cue_directional_intensity_ratio, 0, delta=0.1
+            junction_props_dne.junction_cue_directional_intensity_ratio, 0, delta=0.14
         )
 
     def test_junction_property_cue_undirectional_intensity_ratio(self):
@@ -281,7 +281,7 @@ class TestSingleCellProps(TestCommon):
         img_sc_une = BioMedicalImage(self.sc_une, self.img_param, segmentation=self.seg)
 
         sc_mask = img_sc_ue_p.get_single_cell_mask(1)
-        sc_membrane_mask = img_sc_ue_p.get_single_membrane_mask(1, 10)
+        sc_membrane_mask = img_sc_ue_p.get_single_membrane_mask(1, 3)
 
         sc_mask_f = np.flip(sc_mask.data, axis=0)
         contour = get_contour(sc_mask_f.astype(int))

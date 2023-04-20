@@ -7,7 +7,9 @@ import yaml
 from pyunpack import Archive
 
 import polarityjam.test.test_config as config
+from polarityjam import SegmentationParameter
 from polarityjam.polarityjam_logging import close_logger
+from polarityjam.settings import Settings
 from polarityjam.utils.io import list_files_recursively
 
 
@@ -92,5 +94,10 @@ class TestCommon(unittest.TestCase):
         parameters["channel_junction"] = 3
         parameters["channel_nucleus"] = 2
         parameters["channel_organelle"] = 0
+
+        sp = SegmentationParameter(parameters[Settings.segmentation_algorithm.value])
+
+        for k in sp.__dict__:
+            parameters[k] = getattr(sp, k)
 
         return parameters, param_base_file

@@ -19,6 +19,8 @@ dp_epsilon: 5
 cue_direction: 0
 connection_graph: True
 segmentation_algorithm: "CellposeSegmenter" # "CellposeSegmenter", "SamSegmenter"
+remove_small_objects_size: 10 # in pixels, put to 0 to disable
+clear_border: True
 
 # PlotParameter
 plot_junctions: True

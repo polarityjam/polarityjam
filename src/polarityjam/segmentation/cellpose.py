@@ -4,8 +4,6 @@ from typing import Optional, Tuple, Union
 
 import cellpose.models
 import numpy as np
-import skimage
-from skimage import morphology
 
 from polarityjam import ImageParameter
 from polarityjam.controller.segmenter import SegmentationMode, Segmenter
@@ -195,32 +193,6 @@ class CellposeSegmenter(Segmenter):
             cellpose_mask = cellpose_seg.item()["masks"]
         else:
             cellpose_mask = self._get_cellpose_segmentation(img_seg, filepath, cells)
-
-        if self.params.clear_border:
-            cellpose_mask_clear_border = skimage.segmentation.clear_border(
-                cellpose_mask
-            )
-            number_of_cellpose_borders = len(np.unique(cellpose_mask)) - len(
-                np.unique(cellpose_mask_clear_border)
-            )
-            cellpose_mask = cellpose_mask_clear_border
-
-            get_logger().info(
-                "Removed number of cellpose borders: %s" % number_of_cellpose_borders
-            )
-
-        if self.params.remove_small_objects:
-            cellpose_mask_remove_small_objects = morphology.remove_small_objects(
-                cellpose_mask, self.params.min_cell_size, connectivity=2
-            )
-            number_of_cellpose_small_objects = len(np.unique(cellpose_mask)) - len(
-                np.unique(cellpose_mask_remove_small_objects)
-            )
-            cellpose_mask = cellpose_mask_remove_small_objects
-
-            get_logger().info(
-                "Removed number of small objects: %s" % number_of_cellpose_small_objects
-            )
 
         get_logger().info(
             "Detected number of cellpose labels: %s" % len(np.unique(cellpose_mask))

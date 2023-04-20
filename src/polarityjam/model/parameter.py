@@ -126,6 +126,8 @@ class RuntimeParameter(Parameter):
         self.cue_direction = None
         self.connection_graph = None
         self.segmentation_algorithm = None
+        self.remove_small_objects_size = None
+        self.clear_border = None
 
         super().__init__(**attrs)
 

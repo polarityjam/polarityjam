@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
+import skimage
+from skimage import morphology
 
 from polarityjam import PropertiesCollection
 from polarityjam.controller.collector import (
@@ -228,12 +230,18 @@ class Extractor:
         get_logger().info("Extracting features for file %s..." % str(filename_prefix))
         filename_prefix, _ = os.path.splitext(os.path.basename(filename_prefix))
 
+        get_logger().info("Prepare cell segmentation...")
+        segmentation_mask_prep = self.prepare_segmentation(segmentation_mask)
         bio_med_segmentation_mask = BioMedicalInstanceSegmentationMask(
-            segmentation_mask
+            segmentation_mask_prep
         )
         if isinstance(segmentation_mask_nuclei, np.ndarray):
-            segmentation_mask_nuclei = BioMedicalInstanceSegmentationMask(
+            get_logger().info("Prepare nuclei segmentation...")
+            segmentation_mask_nuclei_prep = self.prepare_segmentation(
                 segmentation_mask_nuclei
+            )
+            segmentation_mask_nuclei = BioMedicalInstanceSegmentationMask(
+                segmentation_mask_nuclei_prep
             )
         bio_med_segmentation = BioMedicalInstanceSegmentation(
             bio_med_segmentation_mask,
@@ -268,6 +276,45 @@ class Extractor:
         get_logger().info("Done feature extraction for file: %s" % str(filename_prefix))
 
         return collection
+
+    def prepare_segmentation(self, cellpose_mask: np.ndarray) -> np.ndarray:
+        """Prepare a segmentation mask for further processing.
+
+        Args:
+            cellpose_mask:
+                np.ndarray of the cellpose segmentation mask.
+
+        Returns:
+            np.ndarray of the prepared segmentation mask.
+
+        """
+        if self.params.clear_border:
+            cellpose_mask_clear_border = skimage.segmentation.clear_border(
+                cellpose_mask
+            )
+            number_of_cellpose_borders = len(np.unique(cellpose_mask)) - len(
+                np.unique(cellpose_mask_clear_border)
+            )
+            cellpose_mask = cellpose_mask_clear_border
+
+            get_logger().info(
+                "Removed number of border cells: %s" % number_of_cellpose_borders
+            )
+
+        if self.params.remove_small_objects_size > 0:
+            cellpose_mask_remove_small_objects = morphology.remove_small_objects(
+                cellpose_mask, self.params.min_cell_size, connectivity=2
+            )
+            number_of_cellpose_small_objects = len(np.unique(cellpose_mask)) - len(
+                np.unique(cellpose_mask_remove_small_objects)
+            )
+            cellpose_mask = cellpose_mask_remove_small_objects
+
+            get_logger().info(
+                "Removed number of small objects: %s" % number_of_cellpose_small_objects
+            )
+        get_logger().info("Preparation done!")
+        return cellpose_mask
 
     def extract_group_features(
         self,

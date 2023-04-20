@@ -183,7 +183,9 @@ class Extractor:
                 )
                 organelle_mask_seg = BioMedicalMask.from_threshold_otsu(
                     bio_med_image.organelle.data
-                )
+                ).overlay_instance_segmentation(
+                    bio_med_image.segmentation.segmentation_mask_connected
+                )  # convert to instance segmentation
         return organelle_mask_seg
 
     @staticmethod
@@ -202,7 +204,9 @@ class Extractor:
                 )
                 nuclei_mask_seg = BioMedicalMask.from_threshold_otsu(
                     bio_med_image.nucleus.data
-                )
+                ).overlay_instance_segmentation(
+                    bio_med_image.segmentation.segmentation_mask_connected
+                )  # convert to instance segmentation
         return nuclei_mask_seg
 
     def extract(

@@ -166,18 +166,28 @@ class Extractor:
         return sc_image_list, threshold_cells
 
     @staticmethod
-    def _get_organelle_mask(bio_med_image):
+    def _get_organelle_mask(bio_med_image: BioMedicalImage) -> Optional[np.ndarray]:
         organelle_mask_seg = None
-        if bio_med_image.has_organelle():
-            organelle_mask_seg = BioMedicalMask.from_threshold_otsu(
-                bio_med_image.organelle.data
-            ).overlay_instance_segmentation(
-                bio_med_image.segmentation.segmentation_mask_connected
-            )
+        if bio_med_image.segmentation is not None:
+            if bio_med_image.segmentation.segmentation_mask_organelle is not None:
+                organelle_mask_seg = (
+                    bio_med_image.segmentation.segmentation_mask_organelle
+                )
+            elif bio_med_image.has_organelle():
+                assert (
+                    bio_med_image.organelle is not None
+                ), "Image has not organelle channel!"
+                get_logger().info(
+                    "Organelle channel found, but organelle mask not provided. "
+                    "Retrieving mask via thresholding..."
+                )
+                organelle_mask_seg = BioMedicalMask.from_threshold_otsu(
+                    bio_med_image.organelle.data
+                )
         return organelle_mask_seg
 
     @staticmethod
-    def _get_nuclei_mask(bio_med_image: BioMedicalImage):
+    def _get_nuclei_mask(bio_med_image: BioMedicalImage) -> Optional[np.ndarray]:
         nuclei_mask_seg = None
         if bio_med_image.segmentation is not None:
             if bio_med_image.segmentation.segmentation_mask_nuclei is not None:
@@ -186,10 +196,12 @@ class Extractor:
                 assert (
                     bio_med_image.nucleus is not None
                 ), "Image has not nucleus channel!"
+                get_logger().info(
+                    "Nuclei channel found, but nuclei mask not provided. "
+                    "Retrieving mask via thresholding..."
+                )
                 nuclei_mask_seg = BioMedicalMask.from_threshold_otsu(
                     bio_med_image.nucleus.data
-                ).overlay_instance_segmentation(
-                    bio_med_image.segmentation.segmentation_mask_connected
                 )
         return nuclei_mask_seg
 
@@ -202,6 +214,9 @@ class Extractor:
         output_path: Union[Path, str],
         collection: PropertiesCollection,
         segmentation_mask_nuclei: Optional[
+            Union[np.ndarray, BioMedicalInstanceSegmentationMask]
+        ] = None,
+        segmentation_mask_organelle: Optional[
             Union[np.ndarray, BioMedicalInstanceSegmentationMask]
         ] = None,
     ) -> PropertiesCollection:
@@ -222,6 +237,8 @@ class Extractor:
                 PropertiesCollection object to which the extracted features will be added.
             segmentation_mask_nuclei:
                 np.ndarray of the nuclei mask. Enhances feature quality. Optional.
+            segmentation_mask_organelle:
+                np.ndarray of the organelle mask. Enhances feature quality. Optional.
 
         Returns:
             PropertiesCollection object containing the extracted features.
@@ -243,9 +260,18 @@ class Extractor:
             segmentation_mask_nuclei = BioMedicalInstanceSegmentationMask(
                 segmentation_mask_nuclei_prep
             )
+        if isinstance(segmentation_mask_organelle, np.ndarray):
+            get_logger().info("Prepare organelle segmentation...")
+            segmentation_mask_organelle_prep = self.prepare_segmentation(
+                segmentation_mask_organelle
+            )
+            segmentation_mask_organelle = BioMedicalInstanceSegmentationMask(
+                segmentation_mask_organelle_prep
+            )
         bio_med_segmentation = BioMedicalInstanceSegmentation(
             bio_med_segmentation_mask,
             segmentation_mask_nuclei=segmentation_mask_nuclei,
+            segmentation_mask_organelle=segmentation_mask_organelle,
             connection_graph=self.params.connection_graph,
         )
 

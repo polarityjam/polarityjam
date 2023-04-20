@@ -38,7 +38,7 @@ class SingleInstanceProps(RegionProperties):
 
         objects = ndi.find_objects(single_cell_mask.data.astype(np.uint8))
 
-        assert len(objects) == 1, "Only one object allowed!"
+        assert len(objects) == 1, "Single cell mask should contain exactly one object!"
 
         sl = objects[0]
 

@@ -10,6 +10,7 @@ import pandas as pd
 from polarityjam import load_segmenter
 from polarityjam.controller.extractor import Extractor
 from polarityjam.controller.plotter import Plotter
+from polarityjam.controller.segmenter import SegmentationMode
 from polarityjam.model.collection import PropertiesCollection
 from polarityjam.model.parameter import (
     ImageParameter,
@@ -112,7 +113,9 @@ def _run(
     mask_nuclei = None
     if img_seg_params.channel_nucleus is not None:
         mask_nuclei = s.segment(
-            img_seg[img_seg_params.channel_nucleus], infile, mode="nucleus"
+            img_seg[img_seg_params.channel_nucleus],
+            infile,
+            mode=SegmentationMode.NUCLEUS,
         )
 
     # plot cellpose mask

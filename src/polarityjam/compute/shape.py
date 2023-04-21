@@ -11,9 +11,9 @@ from shapely.geometry import LineString
 from shapely.geometry.polygon import Polygon
 from shapely.ops import split
 
-from polarityjam import BioMedicalMask
 from polarityjam.compute.compute import compute_ref_x_abs_angle_deg
 from polarityjam.compute.corner import get_contour
+from polarityjam.model.masks import BioMedicalMask
 
 if TYPE_CHECKING:
     from polarityjam.model.image import BioMedicalChannel

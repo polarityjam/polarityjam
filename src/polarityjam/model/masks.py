@@ -6,10 +6,12 @@ import warnings
 from typing import Any, Callable, List, Optional, Tuple, Type, TypeVar, Union
 
 import numpy as np
-import skimage.filters
-import skimage.restoration
 from scipy import ndimage as ndi
+from skimage.filters import threshold_otsu
 from skimage.future.graph import RAG
+from skimage.morphology import remove_small_objects as rmso
+from skimage.restoration import rolling_ball
+from skimage.segmentation import clear_border as clear_border_skimage
 
 _T = TypeVar("_T")
 
@@ -48,12 +50,12 @@ class Mask:
             img_channel_blur = channel
 
         if rolling_ball_radius is not None:
-            img_channel_blur = skimage.restoration.rolling_ball(
+            img_channel_blur = rolling_ball(
                 img_channel_blur, radius=rolling_ball_radius
             )
 
         interior_mask = np.where(
-            img_channel_blur > skimage.filters.threshold_otsu(img_channel_blur),
+            img_channel_blur > threshold_otsu(img_channel_blur),
             True,
             False,
         )
@@ -163,6 +165,18 @@ class BioMedicalInstanceSegmentationMask(Mask):
         return BioMedicalInstanceSegmentationMask(
             np.where(self.data == instance_label, self.background_label, self.data),
             background_label=self.background_label,
+        )
+
+    def clear_border(self) -> BioMedicalInstanceSegmentationMask:
+        """Clear the border of the mask."""
+        return BioMedicalInstanceSegmentationMask(clear_border_skimage(self.data))
+
+    def remove_small_objects(
+        self, min_size: int, connectivity=2
+    ) -> BioMedicalInstanceSegmentationMask:
+        """Remove small objects from the mask."""
+        return BioMedicalInstanceSegmentationMask(
+            rmso(self.data, min_size, connectivity=connectivity)
         )
 
     def mask_background(

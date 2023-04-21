@@ -4,8 +4,6 @@ from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
-import skimage
-from skimage import morphology
 
 from polarityjam import PropertiesCollection
 from polarityjam.controller.collector import (
@@ -252,26 +250,21 @@ class Extractor:
         filename_prefix, _ = os.path.splitext(os.path.basename(filename_prefix))
 
         get_logger().info("Prepare cell segmentation...")
-        segmentation_mask_prep = self.prepare_segmentation(segmentation_mask)
-        bio_med_segmentation_mask = BioMedicalInstanceSegmentationMask(
-            segmentation_mask_prep
+        bio_med_segmentation_mask = self.prepare_segmentation(
+            BioMedicalInstanceSegmentationMask(segmentation_mask)
         )
+
         if isinstance(segmentation_mask_nuclei, np.ndarray):
             get_logger().info("Prepare nuclei segmentation...")
-            segmentation_mask_nuclei_prep = self.prepare_segmentation(
-                segmentation_mask_nuclei
-            )
-            segmentation_mask_nuclei = BioMedicalInstanceSegmentationMask(
-                segmentation_mask_nuclei_prep
+            segmentation_mask_nuclei = self.prepare_segmentation(
+                BioMedicalInstanceSegmentationMask(segmentation_mask_nuclei)
             )
         if isinstance(segmentation_mask_organelle, np.ndarray):
             get_logger().info("Prepare organelle segmentation...")
-            segmentation_mask_organelle_prep = self.prepare_segmentation(
-                segmentation_mask_organelle
+            segmentation_mask_organelle = self.prepare_segmentation(
+                BioMedicalInstanceSegmentationMask(segmentation_mask_organelle)
             )
-            segmentation_mask_organelle = BioMedicalInstanceSegmentationMask(
-                segmentation_mask_organelle_prep
-            )
+
         bio_med_segmentation = BioMedicalInstanceSegmentation(
             bio_med_segmentation_mask,
             segmentation_mask_nuclei=segmentation_mask_nuclei,
@@ -307,11 +300,13 @@ class Extractor:
 
         return collection
 
-    def prepare_segmentation(self, cellpose_mask: np.ndarray) -> np.ndarray:
+    def prepare_segmentation(
+        self, inst_mask: BioMedicalInstanceSegmentationMask
+    ) -> BioMedicalInstanceSegmentationMask:
         """Prepare a segmentation mask for further processing.
 
         Args:
-            cellpose_mask:
+            inst_mask:
                 np.ndarray of the cellpose segmentation mask.
 
         Returns:
@@ -319,32 +314,30 @@ class Extractor:
 
         """
         if self.params.clear_border:
-            cellpose_mask_clear_border = skimage.segmentation.clear_border(
-                cellpose_mask
+            mask_clear_border = inst_mask.clear_border()
+            number_of_cellpose_borders = len(inst_mask.get_labels()) - len(
+                mask_clear_border.get_labels()
             )
-            number_of_cellpose_borders = len(np.unique(cellpose_mask)) - len(
-                np.unique(cellpose_mask_clear_border)
-            )
-            cellpose_mask = cellpose_mask_clear_border
 
             get_logger().info(
                 "Removed number of border cells: %s" % number_of_cellpose_borders
             )
+            inst_mask = mask_clear_border
 
         if self.params.remove_small_objects_size > 0:
-            cellpose_mask_remove_small_objects = morphology.remove_small_objects(
-                cellpose_mask, self.params.min_cell_size, connectivity=2
+            mask_rm_small_objects = inst_mask.remove_small_objects(
+                self.params.remove_small_objects_size
             )
-            number_of_cellpose_small_objects = len(np.unique(cellpose_mask)) - len(
-                np.unique(cellpose_mask_remove_small_objects)
+            number_of_cellpose_small_objects = len(inst_mask.get_labels()) - len(
+                mask_rm_small_objects.get_labels()
             )
-            cellpose_mask = cellpose_mask_remove_small_objects
+            inst_mask = mask_rm_small_objects
 
             get_logger().info(
                 "Removed number of small objects: %s" % number_of_cellpose_small_objects
             )
         get_logger().info("Preparation done!")
-        return cellpose_mask
+        return inst_mask
 
     def extract_group_features(
         self,

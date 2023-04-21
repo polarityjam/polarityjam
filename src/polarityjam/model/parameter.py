@@ -144,6 +144,10 @@ class SegmentationParameter(Parameter):
             attrs = {}
         return segmentation_parameter_type(**attrs)
 
+    def to_dict(self):
+        """Convert the segmentation parameter object to a dictionary."""
+        return self.__dict__
+
     @staticmethod
     def create_segmentation_parameter(segmentation_algorithm: str) -> type:
         """Create a segmentation parameter class for the segmentation process."""
@@ -166,7 +170,10 @@ class SegmentationParameter(Parameter):
             )
             return segmentation_parameter_type(params)
         else:
-            raise ValueError("No segmentation algorithm specified in the yml file.")
+            segmentation_parameter_type = cls.create_segmentation_parameter(
+                Settings.segmentation_algorithm_default.value
+            )
+            return segmentation_parameter_type(params)
 
 
 class PlotParameter(Parameter):

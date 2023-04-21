@@ -8,3 +8,4 @@ class Settings(Enum):
     # model_path
     dynamic_loading_prefix = "polarityjam.segmentation"
     segmentation_algorithm = "segmentation_algorithm"
+    segmentation_algorithm_default = "CellposeSegmenter"

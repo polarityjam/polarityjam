@@ -2,7 +2,7 @@
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 from pydoc import locate
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import numpy as np
 
@@ -82,7 +82,10 @@ class Segmenter:
         raise NotImplementedError
 
 
-def load_segmenter(params_runtime: RuntimeParameter, parameter: Optional[dict] = None):
+def load_segmenter(
+    params_runtime: RuntimeParameter,
+    parameter: Optional[Union[SegmentationParameter, dict]] = None,
+):
     """Load a segmenter based on the given parameters.
 
     Args:
@@ -97,6 +100,11 @@ def load_segmenter(params_runtime: RuntimeParameter, parameter: Optional[dict] =
     """
     m = locate(SegmentationAlgorithmE[params_runtime.segmentation_algorithm].value)  # type: ignore
     assert isinstance(m, type), "Segmentation algorithm not found!"
+
+    # convert to dict if necessary
+    if isinstance(parameter, SegmentationParameter):
+        parameter = parameter.to_dict()
+
     segmentation_parameter = SegmentationParameter(
         params_runtime.segmentation_algorithm, parameter
     )

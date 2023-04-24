@@ -206,26 +206,55 @@ class SingleCellMarkerProps(SingleInstanceProps):
         """Return the sum of the marker expression."""
         return self.mean_intensity * self.area
 
+    def _99_percentile_thresh(self):
+        """Return the 99th percentile of the array."""
+        # single cell intensity
+        sc_marker_intensity = self.intensity.data * self.mask.data
+
+        # 99th percentile of the single cell marker intensity
+        sc_marker_intensity_masked = (
+            self.intensity.data * self.mask.mask_background().data
+        )
+        sc_marker_intensity_masked = np.ma.filled(
+            sc_marker_intensity_masked.astype(float), np.nan
+        )
+        sc_marker_intensity_99 = np.nanpercentile(sc_marker_intensity_masked, 99)
+
+        # threshold the single cell marker intensity
+        sc_marker_intensity = np.where(
+            sc_marker_intensity > sc_marker_intensity_99,
+            sc_marker_intensity_99,
+            sc_marker_intensity,
+        )
+
+        return sc_marker_intensity
+
     @property
     def marker_cue_directional_intensity_ratio(self):
         """Return the ratio of the left vs right cell marker intensity in cue direction."""
+        # single cell intensity
+        sc_marker_intensity = self._99_percentile_thresh()
+
+        # compute an intensity mask
         sc_marker_intensity_mask = BioMedicalMask.from_threshold_otsu(
-            self.intensity.data * self.mask.data,
+            sc_marker_intensity,
             gaussian_filter=None,
-            rolling_ball_radius=self.intensity.data.shape[0] // 100,
+            rolling_ball_radius=None,
         )
         sc_marker_intensity_mask_r = sc_marker_intensity_mask.combine(
-            self.half_masks[0].mask_background()
-        )
+            self.half_masks[0]
+        ).mask_background()
         sc_marker_intensity_mask_l = sc_marker_intensity_mask.combine(
-            self.half_masks[1].mask_background()
-        )
+            self.half_masks[1]
+        ).mask_background()
 
-        right = sc_marker_intensity_mask_r.data * self.intensity.data
-        left = sc_marker_intensity_mask_l.data * self.intensity.data
+        right = (
+            sc_marker_intensity_mask_r.data * sc_marker_intensity
+        )  # masked right half
+        left = sc_marker_intensity_mask_l.data * sc_marker_intensity  # masked left half
 
-        left_m = 0 if np.ma.count_masked(left) == left.size else np.mean(left)
-        right_m = 0 if np.ma.count_masked(right) == right.size else np.mean(right)
+        left_m = 0 if np.ma.count_masked(left) == left.size else np.ma.mean(left)
+        right_m = 0 if np.ma.count_masked(right) == right.size else np.ma.mean(right)
 
         if left_m == 0 and right_m == 0:
             warnings.warn("Warning: entire cell masked.", stacklevel=2)
@@ -236,33 +265,42 @@ class SingleCellMarkerProps(SingleInstanceProps):
     @property
     def marker_cue_undirectional_intensity_ratio(self):
         """The ratio of the sum of cell marker quarters in cue direction and the total marker intensity."""
+        # single cell intensity
+        sc_marker_intensity = self._99_percentile_thresh()
+
         sc_marker_intensity_mask = BioMedicalMask.from_threshold_otsu(
-            self.intensity.data * self.mask.data,
+            sc_marker_intensity,
             gaussian_filter=None,
-            rolling_ball_radius=self.intensity.data.shape[0] // 100,
+            rolling_ball_radius=None,
         )
         sc_marker_intensity_mask_r = sc_marker_intensity_mask.combine(
-            self.quadrant_masks[0].mask_background()
-        )
+            self.quadrant_masks[0]
+        ).mask_background()
         sc_marker_intensity_mask_t = sc_marker_intensity_mask.combine(
-            self.quadrant_masks[1].mask_background()
-        )
+            self.quadrant_masks[1]
+        ).mask_background()
         sc_marker_intensity_mask_l = sc_marker_intensity_mask.combine(
-            self.quadrant_masks[2].mask_background()
-        )
+            self.quadrant_masks[2]
+        ).mask_background()
         sc_marker_intensity_mask_b = sc_marker_intensity_mask.combine(
-            self.quadrant_masks[3].mask_background()
+            self.quadrant_masks[3]
+        ).mask_background()
+
+        top = sc_marker_intensity_mask_t.data * sc_marker_intensity  # masked top half
+        left = sc_marker_intensity_mask_l.data * sc_marker_intensity  # masked left half
+        bottom = (
+            sc_marker_intensity_mask_b.data * sc_marker_intensity
+        )  # masked bottom half
+        right = (
+            sc_marker_intensity_mask_r.data * sc_marker_intensity
+        )  # masked right half
+
+        left_m = 0 if np.ma.count_masked(left) == left.size else np.ma.mean(left)
+        right_m = 0 if np.ma.count_masked(right) == right.size else np.ma.mean(right)
+        top_m = 0 if np.ma.count_masked(top) == top.size else np.ma.mean(top)
+        bottom_m = (
+            0 if np.ma.count_masked(bottom) == bottom.size else np.ma.mean(bottom)
         )
-
-        top = sc_marker_intensity_mask_t.data * self.intensity.data
-        left = sc_marker_intensity_mask_l.data * self.intensity.data
-        bottom = sc_marker_intensity_mask_b.data * self.intensity.data
-        right = sc_marker_intensity_mask_r.data * self.intensity.data
-
-        left_m = 0 if np.ma.count_masked(left) == left.size else np.mean(left)
-        right_m = 0 if np.ma.count_masked(right) == right.size else np.mean(right)
-        top_m = 0 if np.ma.count_masked(top) == top.size else np.mean(top)
-        bottom_m = 0 if np.ma.count_masked(bottom) == bottom.size else np.mean(bottom)
 
         if sum([left_m, right_m, top_m, bottom_m]) == 0:
             warnings.warn("Warning: entire cell masked.", stacklevel=2)
@@ -390,7 +428,7 @@ class SingleCellJunctionProps:
         self.single_cell_mask = single_cell_mask
         self.single_membrane_mask = single_cell_membrane_mask
         self.single_cell_junction_intensity_mask = (
-            single_cell_junction_intensity_mask  # thresholded membrane mask
+            single_cell_junction_intensity_mask  # threshold membrane mask
         )
         self.single_cell_junction_extended_mask = BioMedicalMask(
             np.logical_or(self.single_cell_mask.data, self.single_membrane_mask.data)
@@ -473,8 +511,8 @@ class SingleCellJunctionProps:
             * sc_junction_intensity_mask_l.data
         )
 
-        left_m = 0 if np.ma.count_masked(left) == left.size else np.mean(left)
-        right_m = 0 if np.ma.count_masked(right) == right.size else np.mean(right)
+        left_m = 0 if np.ma.count_masked(left) == left.size else np.ma.mean(left)
+        right_m = 0 if np.ma.count_masked(right) == right.size else np.ma.mean(right)
 
         if left_m == 0 and right_m == 0:
             warnings.warn(
@@ -518,10 +556,12 @@ class SingleCellJunctionProps:
             * sc_junction_intensity_mask_b.data
         )
 
-        left_m = 0 if np.ma.count_masked(left) == left.size else np.mean(left)
-        right_m = 0 if np.ma.count_masked(right) == right.size else np.mean(right)
-        top_m = 0 if np.ma.count_masked(top) == top.size else np.mean(top)
-        bottom_m = 0 if np.ma.count_masked(bottom) == bottom.size else np.mean(bottom)
+        left_m = 0 if np.ma.count_masked(left) == left.size else np.ma.mean(left)
+        right_m = 0 if np.ma.count_masked(right) == right.size else np.ma.mean(right)
+        top_m = 0 if np.ma.count_masked(top) == top.size else np.ma.mean(top)
+        bottom_m = (
+            0 if np.ma.count_masked(bottom) == bottom.size else np.ma.mean(bottom)
+        )
 
         if sum([left_m, right_m, top_m, bottom_m]) == 0:
             warnings.warn("Warning: entire cell masked.", stacklevel=2)

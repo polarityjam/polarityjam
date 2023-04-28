@@ -198,7 +198,7 @@ class BioMedicalInstanceSegmentationMask(Mask):
             background_label=self.background_label,
         )
 
-    def get_single_instance_maks(self, instance_label: int) -> BioMedicalMask:
+    def get_single_instance_mask(self, instance_label: int) -> BioMedicalMask:
         """Get the single cell mask given its label.
 
         Args:

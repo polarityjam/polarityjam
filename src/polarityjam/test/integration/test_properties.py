@@ -93,7 +93,7 @@ class TestSingleCellProps(TestCommon):
 
         sc_mask = img_sc_de_p.get_single_cell_mask(1)
         sc_membrane_mask = img_sc_de_p.get_single_membrane_mask(1, 3)
-        sc_junction_protein_mask = img_sc_de_p.get_single_junction_maks(1, 10)
+        sc_junction_protein_mask = img_sc_de_p.get_single_junction_mask(1, 10)
 
         sc_mask_f = np.flip(sc_mask.data, axis=0)
         contour = get_contour(sc_mask_f.astype(int))
@@ -155,7 +155,7 @@ class TestSingleCellProps(TestCommon):
 
         sc_mask = img_sc_ue_p.get_single_cell_mask(1)
         sc_membrane_mask = img_sc_ue_p.get_single_membrane_mask(1, 3)
-        sc_junction_protein_mask = img_sc_ue_p.get_single_junction_maks(1, 10)
+        sc_junction_protein_mask = img_sc_ue_p.get_single_junction_mask(1, 10)
 
         sc_mask_f = np.flip(sc_mask.data, axis=0)
         contour = get_contour(sc_mask_f.astype(int))
@@ -229,7 +229,7 @@ class TestSingleCellProps(TestCommon):
             connected_component_label=1,
             single_cell_mask=sc_mask,
             single_cell_membrane_mask=sc_membrane_mask,
-            single_junction_mask=img_sc_de_p.get_single_junction_maks(1, 10),
+            single_junction_mask=img_sc_de_p.get_single_junction_mask(1, 10),
         )
 
         sc_img_de_n = SingleCellImage(
@@ -238,7 +238,7 @@ class TestSingleCellProps(TestCommon):
             connected_component_label=1,
             single_cell_mask=sc_mask,
             single_cell_membrane_mask=sc_membrane_mask,
-            single_junction_mask=img_sc_de_n.get_single_junction_maks(1, 10),
+            single_junction_mask=img_sc_de_n.get_single_junction_mask(1, 10),
         )
 
         sc_img_dne = SingleCellImage(
@@ -247,7 +247,7 @@ class TestSingleCellProps(TestCommon):
             connected_component_label=1,
             single_cell_mask=sc_mask,
             single_cell_membrane_mask=sc_membrane_mask,
-            single_junction_mask=img_sc_dne.get_single_junction_maks(1, 10),
+            single_junction_mask=img_sc_dne.get_single_junction_mask(1, 10),
         )
 
         runtime_param = RuntimeParameter()
@@ -292,7 +292,7 @@ class TestSingleCellProps(TestCommon):
             connected_component_label=1,
             single_cell_mask=sc_mask,
             single_cell_membrane_mask=sc_membrane_mask,
-            single_junction_mask=img_sc_ue_p.get_single_junction_maks(1, 10),
+            single_junction_mask=img_sc_ue_p.get_single_junction_mask(1, 10),
         )
 
         sc_img_ue_n = SingleCellImage(
@@ -301,7 +301,7 @@ class TestSingleCellProps(TestCommon):
             connected_component_label=1,
             single_cell_mask=sc_mask,
             single_cell_membrane_mask=sc_membrane_mask,
-            single_junction_mask=img_sc_ue_n.get_single_junction_maks(1, 10),
+            single_junction_mask=img_sc_ue_n.get_single_junction_mask(1, 10),
         )
 
         sc_img_une = SingleCellImage(
@@ -310,7 +310,7 @@ class TestSingleCellProps(TestCommon):
             connected_component_label=1,
             single_cell_mask=sc_mask,
             single_cell_membrane_mask=sc_membrane_mask,
-            single_junction_mask=img_sc_une.get_single_junction_maks(1, 10),
+            single_junction_mask=img_sc_une.get_single_junction_mask(1, 10),
         )
 
         runtime_param = RuntimeParameter()

@@ -68,7 +68,7 @@ class Plotter:
             if nuclei_mask is not None:
                 intensity_nuc = feature_row["marker_mean_expression_nuc"].values[0]
 
-            single_cell_mask = cell_mask.get_single_instance_maks(cell_label)
+            single_cell_mask = cell_mask.get_single_instance_mask(cell_label)
             invert_outline_cell = (
                 single_cell_mask.get_outline_from_mask(self.params.outline_width)
                 .invert()
@@ -94,7 +94,7 @@ class Plotter:
 
             # nuclei marker intensity
             if nuclei_mask is not None:
-                single_nucleus_mask = nuclei_mask.get_single_instance_maks(cell_label)
+                single_nucleus_mask = nuclei_mask.get_single_instance_mask(cell_label)
                 invert_outline_nuc = (
                     single_nucleus_mask.get_outline_from_mask(self.params.outline_width)
                     .invert()
@@ -120,7 +120,7 @@ class Plotter:
         # cell outlines
         outlines_cells = BioMedicalMask.empty(channel.data.shape)
         for cell_label in instance_seg_mask.get_labels():
-            single_cell_mask = instance_seg_mask.get_single_instance_maks(cell_label)
+            single_cell_mask = instance_seg_mask.get_single_instance_mask(cell_label)
             outline_cell = single_cell_mask.get_outline_from_mask(
                 self.params.outline_width
             )

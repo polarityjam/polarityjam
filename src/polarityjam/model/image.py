@@ -292,7 +292,7 @@ class BioMedicalImage(AbstractBioMedicalImage):
             )
 
         if self.has_junction():
-            sc_junction_protein_mask = self.get_single_junction_maks(
+            sc_junction_protein_mask = self.get_single_junction_mask(
                 connected_component_label, membrane_thickness
             )
 
@@ -318,7 +318,7 @@ class BioMedicalImage(AbstractBioMedicalImage):
         """
         assert self.segmentation is not None, "The image has no segmentation."
         sc_mask = (
-            self.segmentation.segmentation_mask_connected.get_single_instance_maks(
+            self.segmentation.segmentation_mask_connected.get_single_instance_mask(
                 connected_component_label
             )
         )
@@ -360,7 +360,7 @@ class BioMedicalImage(AbstractBioMedicalImage):
             self.segmentation.segmentation_mask_nuclei is not None
         ), "The image has no nuclei segmentation."
         sc_nucleus_mask = (
-            self.segmentation.segmentation_mask_nuclei.get_single_instance_maks(
+            self.segmentation.segmentation_mask_nuclei.get_single_instance_mask(
                 connected_component_label
             )
         )
@@ -407,13 +407,13 @@ class BioMedicalImage(AbstractBioMedicalImage):
             self.segmentation.segmentation_mask_organelle is not None
         ), "The image has no organelle segmentation."
         sc_organelle_mask = (
-            self.segmentation.segmentation_mask_organelle.get_single_instance_maks(
+            self.segmentation.segmentation_mask_organelle.get_single_instance_mask(
                 connected_component_label
             )
         )
         return sc_organelle_mask
 
-    def get_single_junction_maks(
+    def get_single_junction_mask(
         self, connected_component_label: int, membrane_thickness: int
     ) -> Optional[BioMedicalMask]:
         """Get the mask of the single cell junction protein.

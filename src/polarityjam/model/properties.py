@@ -263,7 +263,7 @@ class SingleCellMarkerProps(SingleInstanceProps):
         return 1 - 2 * left_m / (left_m + right_m)
 
     @property
-    def marker_cue_undirectional_intensity_ratio(self):
+    def marker_cue_axial_intensity_ratio(self):
         """The ratio of the sum of cell marker quarters in cue direction and the total marker intensity."""
         # single cell intensity
         sc_marker_intensity = self._99_percentile_thresh()
@@ -524,7 +524,7 @@ class SingleCellJunctionProps:
         return 1 - 2 * left_m / (left_m + right_m)
 
     @property
-    def junction_cue_undirectional_intensity_ratio(self):
+    def junction_cue_axial_intensity_ratio(self):
         """Return the ratio of the sum of cell membrane quarters in cue direction and the total membrane intensity."""
         sc_junction_intensity_mask_r = self.single_cell_junction_intensity_mask.combine(
             self.quadrant_masks[0].combine(self.single_membrane_mask).mask_background()

@@ -1149,7 +1149,7 @@ class Plotter:
         mcdir_mask = cell_mask.relabel(mcdir)
 
         mcuir = collection.get_properties_by_img_name(img_name)[
-            "marker_cue_undirectional_intensity_ratio"
+            "marker_cue_axial_intensity_ratio"
         ].values
         mcuir_mask = cell_mask.relabel(mcuir)
 
@@ -1167,7 +1167,7 @@ class Plotter:
         )
         add_title(
             ax[1],
-            "marker cue undirectional intensity ratio",
+            "marker cue axial intensity ratio",
             im_junction.data,
             self.params.show_graphics_axis,
         )
@@ -1213,7 +1213,7 @@ class Plotter:
         jcdir_mask = cell_mask.relabel(jcdir)
 
         jcuir = collection.get_properties_by_img_name(img_name)[
-            "junction_cue_undirectional_intensity_ratio"
+            "junction_cue_axial_intensity_ratio"
         ].values
         jcuir_mask = cell_mask.relabel(jcuir)
 
@@ -1231,7 +1231,7 @@ class Plotter:
         )
         add_title(
             ax[1],
-            "junction cue undirectional intensity ratio",
+            "junction cue axial intensity ratio",
             im_junction.data,
             self.params.show_graphics_axis,
         )
@@ -1255,7 +1255,7 @@ class Plotter:
         im_junction,
         img_name,
         directional_mask,
-        undirectional_mask,
+        axial_mask,
         params,
     ):
         # figure and axes
@@ -1267,7 +1267,7 @@ class Plotter:
         )
         ax[1].imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
         cax2 = ax[1].imshow(
-            undirectional_mask.mask_background().data, cmap=cm.cm.balance, alpha=0.5
+            axial_mask.mask_background().data, cmap=cm.cm.balance, alpha=0.5
         )
         # show cell outlines
         ax[0].imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)

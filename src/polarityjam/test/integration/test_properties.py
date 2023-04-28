@@ -141,7 +141,7 @@ class TestSingleCellProps(TestCommon):
             marker_props_dne.marker_cue_directional_intensity_ratio, 0, delta=0.1
         )
 
-    def test_marker_property_cue_undirectional_intensity(self):
+    def test_marker_property_cue_axial_intensity(self):
         # prepare
         self.setup_marker_img()
 
@@ -196,13 +196,13 @@ class TestSingleCellProps(TestCommon):
 
         # assert
         self.assertGreater(
-            marker_props_ue_p.marker_cue_undirectional_intensity_ratio, 0.65
+            marker_props_ue_p.marker_cue_axial_intensity_ratio, 0.65
         )
         self.assertLess(
-            marker_props_ue_n.marker_cue_undirectional_intensity_ratio, 0.35
+            marker_props_ue_n.marker_cue_axial_intensity_ratio, 0.35
         )
         self.assertAlmostEqual(
-            marker_props_une.marker_cue_undirectional_intensity_ratio, 0.5, delta=0.05
+            marker_props_une.marker_cue_axial_intensity_ratio, 0.5, delta=0.05
         )
 
     def test_junction_property_cue_directional_intensity_ratio(self):
@@ -268,7 +268,7 @@ class TestSingleCellProps(TestCommon):
             junction_props_dne.junction_cue_directional_intensity_ratio, 0, delta=0.14
         )
 
-    def test_junction_property_cue_undirectional_intensity_ratio(self):
+    def test_junction_property_cue_axial_intensity_ratio(self):
         # prepare
         self.setup_junction_img()
 
@@ -322,13 +322,13 @@ class TestSingleCellProps(TestCommon):
 
         # assert
         self.assertGreater(
-            junction_props_ue_p.junction_cue_undirectional_intensity_ratio, 0.65
+            junction_props_ue_p.junction_cue_axial_intensity_ratio, 0.65
         )
         self.assertLess(
-            junction_props_ue_n.junction_cue_undirectional_intensity_ratio, 0.35
+            junction_props_ue_n.junction_cue_axial_intensity_ratio, 0.35
         )
         self.assertAlmostEqual(
-            junction_props_une.junction_cue_undirectional_intensity_ratio,
+            junction_props_une.junction_cue_axial_intensity_ratio,
             0.5,
             delta=0.05,
         )

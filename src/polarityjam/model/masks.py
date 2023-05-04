@@ -1,12 +1,17 @@
 """Classes to represent masks for the image data."""
 from __future__ import annotations
 
+import copy
+import warnings
 from typing import Any, Callable, List, Optional, Tuple, Type, TypeVar, Union
 
 import numpy as np
-import skimage.filters
 from scipy import ndimage as ndi
+from skimage.filters import threshold_otsu
 from skimage.future.graph import RAG
+from skimage.morphology import remove_small_objects as rmso
+from skimage.restoration import rolling_ball
+from skimage.segmentation import clear_border as clear_border_skimage
 
 _T = TypeVar("_T")
 
@@ -16,19 +21,41 @@ class Mask:
 
     def __init__(self, mask: np.ndarray):
         """Initialize the mask with the given data."""
+        self._warn = False
         self.data = mask.astype(bool)
+
+        if self._warn and self.data.sum() == 0:
+            warnings.warn("Mask is empty!")
+
+    def warn(self, warn: bool) -> None:
+        """Set the warning flag.
+
+        Args:
+            warn:
+                The warning flag.
+        """
+        self._warn = warn
 
     @classmethod
     def from_threshold_otsu(
-        cls: Type[_T], channel: np.ndarray, gaussian_filter=3
+        cls: Type[_T],
+        channel: np.ndarray,
+        gaussian_filter=None,
+        rolling_ball_radius=None,
     ) -> _T:
         """Initialize a mask from a channel using Otsu's method."""
         if gaussian_filter is not None:
             img_channel_blur = ndi.gaussian_filter(channel, sigma=3)
         else:
             img_channel_blur = channel
+
+        if rolling_ball_radius is not None:
+            img_channel_blur = rolling_ball(
+                img_channel_blur, radius=rolling_ball_radius
+            )
+
         interior_mask = np.where(
-            img_channel_blur > skimage.filters.threshold_otsu(img_channel_blur),
+            img_channel_blur > threshold_otsu(img_channel_blur),
             True,
             False,
         )
@@ -140,6 +167,18 @@ class BioMedicalInstanceSegmentationMask(Mask):
             background_label=self.background_label,
         )
 
+    def clear_border(self) -> BioMedicalInstanceSegmentationMask:
+        """Clear the border of the mask."""
+        return BioMedicalInstanceSegmentationMask(clear_border_skimage(self.data))
+
+    def remove_small_objects(
+        self, min_size: int, connectivity=2
+    ) -> BioMedicalInstanceSegmentationMask:
+        """Remove small objects from the mask."""
+        return BioMedicalInstanceSegmentationMask(
+            rmso(self.data, min_size, connectivity=connectivity)
+        )
+
     def mask_background(
         self,
         background_label: Union[int, float] = 0,
@@ -159,7 +198,7 @@ class BioMedicalInstanceSegmentationMask(Mask):
             background_label=self.background_label,
         )
 
-    def get_single_instance_maks(self, instance_label: int) -> BioMedicalMask:
+    def get_single_instance_mask(self, instance_label: int) -> BioMedicalMask:
         """Get the single cell mask given its label.
 
         Args:
@@ -177,8 +216,8 @@ class BioMedicalInstanceSegmentationMask(Mask):
         """Return the number of instances in the mask."""
         return len(np.unique(self.data))
 
-    def get_labels(self, exclude_background: bool = True) -> np.ndarray:
-        """Get the labels of the mask.
+    def get_labels(self, exclude_background: bool = True) -> List[int]:
+        """Get all labels of the mask.
 
         Args:
             exclude_background:
@@ -193,7 +232,7 @@ class BioMedicalInstanceSegmentationMask(Mask):
         if exclude_background:
             labels = labels[labels != self.background_label]
 
-        return labels
+        return list(labels)
 
     def to_semantic_mask(self) -> BioMedicalMask:
         """Convert the mask to a semantic (boolean) mask."""
@@ -311,21 +350,72 @@ class BioMedicalInstanceSegmentationMask(Mask):
 class BioMedicalInstanceSegmentation:
     """Class representing an entire instance segmentation."""
 
-    def __init__(self, segmentation_mask: BioMedicalInstanceSegmentationMask):
+    def __init__(
+        self,
+        segmentation_mask: BioMedicalInstanceSegmentationMask,
+        connection_graph: bool = True,
+        segmentation_mask_nuclei: Optional[BioMedicalInstanceSegmentationMask] = None,
+        segmentation_mask_organelle: Optional[
+            BioMedicalInstanceSegmentationMask
+        ] = None,
+    ):
         """Initialize an instance segmentation from a mask."""
         self.segmentation_mask = segmentation_mask
+        self._segmentation_mask_nuclei = None
+        self._segmentation_mask_organelle = None
+
+        self.connection_graph = connection_graph
+
         self.neighborhood_graph = BioMedicalInstanceSegmentation.get_rag(
             self.segmentation_mask
         )
-        self.island_list = set(
-            BioMedicalInstanceSegmentation.get_islands(self.neighborhood_graph)
+
+        self.island_list: List[int] = []
+        self.segmentation_mask_connected: BioMedicalInstanceSegmentationMask = (
+            copy.deepcopy(self.segmentation_mask)
         )
-        self.segmentation_mask_connected = self.init_segmentation_mask(
-            list(self.island_list)
-        )
-        self.neighborhood_graph_connected = BioMedicalInstanceSegmentation.get_rag(
-            self.segmentation_mask_connected
-        )
+        self.neighborhood_graph_connected = copy.deepcopy(self.neighborhood_graph)
+
+        if segmentation_mask_nuclei is not None:
+            # assure same labels
+            self.segmentation_mask_nuclei = segmentation_mask_nuclei
+
+        if segmentation_mask_organelle is not None:
+            # assure same labels
+            self.segmentation_mask_organelle = segmentation_mask_organelle
+
+        if self.connection_graph:
+            self.update_graphs()
+
+    @property
+    def segmentation_mask_nuclei(self):
+        """Get the nuclei segmentation mask."""
+        return self._segmentation_mask_nuclei
+
+    @segmentation_mask_nuclei.setter
+    def segmentation_mask_nuclei(self, value: BioMedicalInstanceSegmentationMask):
+        """Set the nuclei segmentation mask."""
+        if value is not None:
+            self._segmentation_mask_nuclei = (
+                value.to_semantic_mask().overlay_instance_segmentation(
+                    self.segmentation_mask_connected
+                )
+            )
+
+    @property
+    def segmentation_mask_organelle(self):
+        """Get the organelle segmentation mask."""
+        return self._segmentation_mask_organelle
+
+    @segmentation_mask_organelle.setter
+    def segmentation_mask_organelle(self, value: BioMedicalInstanceSegmentationMask):
+        """Set the organelle segmentation mask."""
+        if value is not None:
+            self._segmentation_mask_organelle = (
+                value.to_semantic_mask().overlay_instance_segmentation(
+                    self.segmentation_mask_connected
+                )
+            )
 
     def update_graphs(self) -> List[int]:
         """Update the graphs after a change in the segmentation mask.
@@ -334,46 +424,17 @@ class BioMedicalInstanceSegmentation:
             island_list
 
         """
-        self.neighborhood_graph = BioMedicalInstanceSegmentation.get_rag(
-            self.segmentation_mask
-        )
-        self.neighborhood_graph_connected = BioMedicalInstanceSegmentation.get_rag(
-            self.segmentation_mask_connected
-        )  # could have islands
-        self.segmentation_mask_connected, island_list = self.remove_islands()
+        if not self.connection_graph:
+            warnings.warn("Connection graph is disabled.")
+            return []
 
-        # recursively remove islands until there are no more islands
-        if len(island_list) > 0:
-            island_list.extend(self.update_graphs())
+        island_list = self.remove_islands()
 
-        self.island_list.update(island_list)
+        self.island_list.extend(island_list)
 
         return island_list
 
-    def init_segmentation_mask(
-        self, islands: List[int]
-    ) -> BioMedicalInstanceSegmentationMask:
-        """Initialize the segmentation mask.
-
-        Args:
-            islands:
-                List of islands to remove.
-
-        Returns:
-            The instance segmentation mask without islands.
-
-        """
-        connected_component_mask = BioMedicalInstanceSegmentationMask(
-            np.copy(self.segmentation_mask.data)
-        )
-
-        # remove islands from mask
-        for elemet in islands:
-            connected_component_mask = connected_component_mask.remove_instance(elemet)
-
-        return connected_component_mask
-
-    def remove_instance_label(self, instance_label):
+    def remove_instance_label(self, instance_label) -> List[int]:
         """Remove an instance label from the segmentation inplace.
 
         Args:
@@ -385,12 +446,27 @@ class BioMedicalInstanceSegmentation:
 
         """
         self.neighborhood_graph.remove_node(instance_label)
+        self.neighborhood_graph_connected.remove_node(instance_label)
         self.segmentation_mask = self.segmentation_mask.remove_instance(instance_label)
         self.segmentation_mask_connected = (
             self.segmentation_mask_connected.remove_instance(instance_label)
         )
 
-        return self.update_graphs()
+        # keep optional masks in synchronization
+        if self.segmentation_mask_nuclei is not None:
+            self.segmentation_mask_nuclei = (
+                self.segmentation_mask_nuclei.remove_instance(instance_label)
+            )
+        if self.segmentation_mask_organelle is not None:
+            self.segmentation_mask_organelle = (
+                self.segmentation_mask_organelle.remove_instance(instance_label)
+            )
+
+        # remove all cells that are not connected to the main graph anymore
+        if self.connection_graph:
+            return self.update_graphs()
+
+        return []
 
     def set_feature_of_interest(
         self, feature_of_interest_name: str, feature_of_interest_vec: np.ndarray
@@ -415,31 +491,45 @@ class BioMedicalInstanceSegmentation:
                 feature_of_interest_name
             ] = feature_of_interest_vec[idx]
 
-    def remove_islands(self) -> Tuple[BioMedicalInstanceSegmentationMask, List[int]]:
+    def remove_islands(self) -> List[int]:
         """Remove unconnected cells from the mask (Cells without neighbours).
 
         Returns:
-            A tuple containing the connected mask and a list of unconnected cells (Islands).
+            A list of unconnected cells (Islands) that have been removed.
 
         """
-        # Get list of islands - nodes with no neighbours and remove them
+        if not self.connection_graph:
+            warnings.warn("Connection graph is disabled.")
+            return []
+
+        # Get list of islands - nodes with no neighbours
         list_of_islands = BioMedicalInstanceSegmentation.get_islands(
             self.neighborhood_graph_connected
         )
 
-        connected_component_mask = BioMedicalInstanceSegmentationMask(
-            np.copy(self.segmentation_mask_connected.data)
-        )
+        # remove islands from masks
+        for element in np.unique(list_of_islands):
+            # remove islands from graph
+            self.neighborhood_graph_connected.remove_node(element)
 
-        # remove islands from mask
-        for elemet in list_of_islands:
-            connected_component_mask = connected_component_mask.remove_instance(elemet)
+            # connected segmentation mask
+            self.segmentation_mask_connected = (
+                self.segmentation_mask_connected.remove_instance(element)
+            )
 
-        # remove islands from graph
-        for elem in np.unique(list_of_islands):
-            self.neighborhood_graph_connected.remove_node(elem)
+            # nuclei mask
+            if self.segmentation_mask_nuclei is not None:
+                self.segmentation_mask_nuclei = (
+                    self.segmentation_mask_nuclei.remove_instance(element)
+                )
 
-        return connected_component_mask, list_of_islands
+            # organelle mask
+            if self.segmentation_mask_organelle is not None:
+                self.segmentation_mask_organelle = (
+                    self.segmentation_mask_organelle.remove_instance(element)
+                )
+
+        return list_of_islands
 
     @staticmethod
     def get_rag(
@@ -479,26 +569,3 @@ class BioMedicalInstanceSegmentation:
                 list_of_islands.append(nodes)
 
         return list(np.unique(list_of_islands))
-
-
-class SingleCellMasksCollection:
-    """Collection of single cell masks and the corresponding label."""
-
-    def __init__(
-        self,
-        connected_component_label: int,
-        sc_mask: BioMedicalMask,
-        sc_nucleus_mask: Optional[BioMedicalMask],
-        sc_organelle_mask: Optional[BioMedicalMask],
-        sc_membrane_mask: Optional[BioMedicalMask],
-        sc_cytosol_mask: Optional[BioMedicalMask],
-        sc_junction_protein_mask: Optional[BioMedicalMask],
-    ):
-        """Initialize the SingleCellMasksCollection."""
-        self.connected_component_label = connected_component_label
-        self.sc_mask = sc_mask
-        self.sc_nucleus_mask = sc_nucleus_mask
-        self.sc_organelle_mask = sc_organelle_mask
-        self.sc_membrane_mask = sc_membrane_mask
-        self.sc_cytosol_mask = sc_cytosol_mask
-        self.sc_junction_protein_area_mask = sc_junction_protein_mask

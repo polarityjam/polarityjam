@@ -5,8 +5,9 @@ import numpy as np
 import yaml
 
 from polarityjam.model.moran import run_morans
+from polarityjam.model.parameter import read_parameters
 from polarityjam.test.test_common import TestCommon
-from polarityjam.utils.io import read_parameters, read_image
+from polarityjam.utils.io import read_image
 
 
 class TestFunctions(TestCommon):
@@ -20,9 +21,11 @@ class TestFunctions(TestCommon):
         local_parameter_file = {
             "channel_junction": 0,
             "channel_nucleus": 1,
-            "channel_organelle": 2
+            "channel_organelle": 2,
         }
-        local_parameter_file_path = Path(self.tmp_dir).joinpath("local_parameter_file.yml")
+        local_parameter_file_path = Path(self.tmp_dir).joinpath(
+            "local_parameter_file.yml"
+        )
 
         with open(local_parameter_file_path, "w+") as file:
             file.write(yaml.dump(local_parameter_file, Dumper=yaml.Dumper))
@@ -83,7 +86,7 @@ class TestFunctions(TestCommon):
         for i in range(0, 10):
             for j in range(0, 10):
                 rand_int = np.random.normal(0, 1)
-                if rand_int >= .5:
+                if rand_int >= 0.5:
                     empty_int[i, j] = 1
                 else:
                     empty_int[i, j] = 0

@@ -7,7 +7,9 @@ import yaml
 from pyunpack import Archive
 
 import polarityjam.test.test_config as config
+from polarityjam import SegmentationParameter
 from polarityjam.polarityjam_logging import close_logger
+from polarityjam.settings import Settings
 from polarityjam.utils.io import list_files_recursively
 
 
@@ -72,6 +74,12 @@ class TestCommon(unittest.TestCase):
     def get_test_key_file(self):
         return self.current_path.joinpath("resources", "test_key_file.csv")
 
+    def get_test_mask(self, name):
+        return self.current_path.joinpath("resources", "masks", name)
+
+    def get_test_single_cell(self, name):
+        return self.current_path.joinpath("resources", "single_cell", name)
+
     def get_base_param_file(self):
         return Path(self.current_path).joinpath(
             "..", "utils", "resources", "parameters.yml"
@@ -86,5 +94,10 @@ class TestCommon(unittest.TestCase):
         parameters["channel_junction"] = 3
         parameters["channel_nucleus"] = 2
         parameters["channel_organelle"] = 0
+
+        sp = SegmentationParameter(parameters[Settings.segmentation_algorithm.value])
+
+        for k in sp.__dict__:
+            parameters[k] = getattr(sp, k)
 
         return parameters, param_base_file

@@ -12,7 +12,6 @@ from polarityjam.utils.io import get_doc_file_prefix
 
 
 class TestIntegration(TestCommon):
-
     def setUp(self) -> None:
         super().setUp()
 
@@ -20,12 +19,16 @@ class TestIntegration(TestCommon):
         outputpath = Path(outputpath)
         prefix = get_doc_file_prefix()
 
-        log_file = outputpath.joinpath("%s%s" % (prefix, ".log"))
-        param_file = outputpath.joinpath("%s%s" % (prefix, "_param.yml"))
+        log_file = outputpath.joinpath("{}{}".format(prefix, ".log"))
+        param_file = outputpath.joinpath("{}{}".format(prefix, "_param.yml"))
 
-        self.assertTrue(log_file.exists() and log_file.stat().st_size > 0, "Something is wrong with logging")
         self.assertTrue(
-            param_file.exists() and param_file.stat().st_size > 0, "Something is wrong with copying the param file"
+            log_file.exists() and log_file.stat().st_size > 0,
+            "Something is wrong with logging",
+        )
+        self.assertTrue(
+            param_file.exists() and param_file.stat().st_size > 0,
+            "Something is wrong with copying the param file",
         )
 
     def test_run(self):
@@ -35,7 +38,13 @@ class TestIntegration(TestCommon):
         out_path = str(self.output_path.joinpath("run"))
 
         # build arguments
-        sys.argv = [sys.argv[0]] + ['run', param_file, in_file, out_path, '--filename_prefix=myfile']
+        sys.argv = [sys.argv[0]] + [
+            "run",
+            param_file,
+            in_file,
+            out_path,
+            "--filename_prefix=myfile",
+        ]
 
         # call
         startup()
@@ -55,14 +64,17 @@ class TestIntegration(TestCommon):
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))
         self.assertEqual(1, num_csv)
 
-    @unittest.skipIf(platform.system().lower() == 'windows', "Plotting too memory extensive. Skipping test!")
+    @unittest.skipIf(
+        platform.system().lower() == "windows",
+        "Plotting too memory extensive. Skipping test!",
+    )
     def test_run_stack(self):
         in_path = str(self.get_test_image_folder("gn").joinpath("set_2"))
         param_file = str(self.get_test_parameter_file("parameters_golgi_nuclei.yml"))
         out_path = str(self.output_path.joinpath("run_stack"))
 
         # build arguments
-        sys.argv = [sys.argv[0]] + ['run-stack', param_file, in_path, out_path]
+        sys.argv = [sys.argv[0]] + ["run-stack", param_file, in_path, out_path]
 
         # call
         startup()
@@ -84,14 +96,17 @@ class TestIntegration(TestCommon):
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))
         self.assertEqual(3, num_csv)
 
-    @unittest.skipIf(platform.system().lower() == 'windows', "Plotting too memory extensive. Skipping test!")
+    @unittest.skipIf(
+        platform.system().lower() == "windows",
+        "Plotting too memory extensive. Skipping test!",
+    )
     def test_run_stack_no_golgi(self):
         in_path = str(self.get_test_image_folder("g"))
         param_file = str(self.get_test_parameter_file("parameters_no_golgi.yml"))
         out_path = str(self.output_path.joinpath("run_stack_no_golgi"))
 
         # build arguments
-        sys.argv = [sys.argv[0]] + ['run-stack', param_file, in_path, out_path]
+        sys.argv = [sys.argv[0]] + ["run-stack", param_file, in_path, out_path]
 
         # call
         startup()
@@ -99,9 +114,15 @@ class TestIntegration(TestCommon):
         # assert
         self.check_doc_output(out_path)
 
-        df1 = pd.read_csv(Path(out_path).joinpath("MAX_Flow_IF2_Vecad_Dapi_40X_I2.1.csv"))
-        df2 = pd.read_csv(Path(out_path).joinpath("MAX_Flow_IF2_Vecad_Dapi_40X_I2.2.csv"))
-        df3 = pd.read_csv(Path(out_path).joinpath("MAX_Flow_IF2_Vecad_Dapi_40X_I3.1.csv"))
+        df1 = pd.read_csv(
+            Path(out_path).joinpath("MAX_Flow_IF2_Vecad_Dapi_40X_I2.1.csv")
+        )
+        df2 = pd.read_csv(
+            Path(out_path).joinpath("MAX_Flow_IF2_Vecad_Dapi_40X_I2.2.csv")
+        )
+        df3 = pd.read_csv(
+            Path(out_path).joinpath("MAX_Flow_IF2_Vecad_Dapi_40X_I3.1.csv")
+        )
 
         self.assertAlmostEqual(56, df1.shape[0], delta=5)
         self.assertAlmostEqual(56, df2.shape[0], delta=5)
@@ -115,14 +136,17 @@ class TestIntegration(TestCommon):
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))
         self.assertEqual(4, num_csv)
 
-    @unittest.skipIf(platform.system().lower() == 'windows', "Plotting too memory extensive. Skipping test!")
+    @unittest.skipIf(
+        platform.system().lower() == "windows",
+        "Plotting too memory extensive. Skipping test!",
+    )
     def test_run_stack_no_nuclei(self):
         in_path = str(self.get_test_image_folder("n"))
         param_file = str(self.get_test_parameter_file("parameters_no_nuclei.yml"))
         out_path = str(self.output_path.joinpath("run_stack_no_nuclei"))
 
         # build arguments
-        sys.argv = [sys.argv[0]] + ['run-stack', param_file, in_path, out_path]
+        sys.argv = [sys.argv[0]] + ["run-stack", param_file, in_path, out_path]
 
         # call
         startup()
@@ -131,9 +155,21 @@ class TestIntegration(TestCommon):
         self.check_doc_output(out_path)
 
         # load csv
-        df1 = pd.read_csv(Path(out_path).joinpath("MAX_8h_flow_uslide_new_setup_2021_10_14__21_19_47.csv"))
-        df2 = pd.read_csv(Path(out_path).joinpath("MAX_8h_flow_uslide_new_setup_2021_10_14__21_29_39.csv"))
-        df3 = pd.read_csv(Path(out_path).joinpath("MAX_8h_flow_uslide_new_setup_2021_10_14__21_36_01.csv"))
+        df1 = pd.read_csv(
+            Path(out_path).joinpath(
+                "MAX_8h_flow_uslide_new_setup_2021_10_14__21_19_47.csv"
+            )
+        )
+        df2 = pd.read_csv(
+            Path(out_path).joinpath(
+                "MAX_8h_flow_uslide_new_setup_2021_10_14__21_29_39.csv"
+            )
+        )
+        df3 = pd.read_csv(
+            Path(out_path).joinpath(
+                "MAX_8h_flow_uslide_new_setup_2021_10_14__21_36_01.csv"
+            )
+        )
 
         # assert row count
         self.assertAlmostEqual(33, df1.shape[0], delta=5)
@@ -149,7 +185,10 @@ class TestIntegration(TestCommon):
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))
         self.assertEqual(4, num_csv)
 
-    @unittest.skipIf(platform.system().lower() == 'windows', "Plotting too memory extensive. Skipping test!")
+    @unittest.skipIf(
+        platform.system().lower() == "windows",
+        "Plotting too memory extensive. Skipping test!",
+    )
     def test_run_key(self):
         in_path = str(self.get_test_image_folder("gn"))
         in_key = str(self.get_test_key_file())
@@ -157,7 +196,7 @@ class TestIntegration(TestCommon):
         out_path = str(self.output_path.joinpath("run_key"))
 
         # build arguments
-        sys.argv = [sys.argv[0]] + ['run-key', param_file, in_path, in_key, out_path]
+        sys.argv = [sys.argv[0]] + ["run-key", param_file, in_path, in_key, out_path]
 
         # call
         startup()

@@ -151,7 +151,7 @@ Marker features
 +--------------------------------------+-----------------------------------------------------------------------------------------------------+
 | marker_cue_intensity_ratio           | The ratio of the left vs right cell membrane intensity in cue direction.                            |
 +--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_quadrant_cue_intensity_ratio  | The ratio of the sum of cell membrane quarters in cue direction and the total membrane intensity.   |
+| marker_axial_cue_intensity_ratio     | The ratio of the sum of cell membrane quarters in cue direction and the total membrane intensity.   |
 +--------------------------------------+-----------------------------------------------------------------------------------------------------+
 
 
@@ -185,7 +185,7 @@ Junction features
 +----------------------------------------+---------------------------------------------------------------------------------------------------+
 | junction_cue_intensity_ratio           | The ratio of the left vs right cell membrane intensity in cue direction.                          |
 +----------------------------------------+---------------------------------------------------------------------------------------------------+
-| junction_quadrant_cue_intensity_ratio  | The ratio of the sum of cell membrane quarters in cue direction and the total membrane intensity. |
+| junction_axial_cue_intensity_ratio     | The ratio of the sum of cell membrane quarters in cue direction and the total membrane intensity. |
 +----------------------------------------+---------------------------------------------------------------------------------------------------+
 
 

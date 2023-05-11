@@ -23,6 +23,7 @@ from polarityjam.model.properties import (
     SingleCellProps,
 )
 from polarityjam.polarityjam_logging import get_logger
+from polarityjam.utils.normalization import normalize_arr
 
 
 class BioMedicalChannel:  # todo: make it a PIL image for enhanced compatability?
@@ -58,6 +59,27 @@ class BioMedicalChannel:  # todo: make it a PIL image for enhanced compatability
     ) -> Union[BioMedicalMask, BioMedicalInstanceSegmentation]:
         """Return a mask by its name."""
         return self.masks[name]
+
+    def normalize(
+        self,
+        source_limits: Optional[Tuple[Union[int, float], Union[int, float]]] = None,
+        target_limits: Optional[Tuple[Union[int, float], Union[int, float]]] = None,
+    ) -> BioMedicalChannel:
+        """Normalize the channel data to a given range.
+
+        Args:
+            source_limits:
+                The source limits to normalize from. E.g. (0, 255) for 8-bit (int) images.
+            target_limits:
+                The target limits to normalize to. E.g. (0, 1) for 64-bit (float) images.
+
+        Returns:
+            The normalized channel.
+
+        """
+        return BioMedicalChannel(
+            normalize_arr(self.data, source_limits, target_limits), self.masks
+        )
 
 
 class AbstractBioMedicalImage(ABC):  # noqa: B024

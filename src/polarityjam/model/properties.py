@@ -1,7 +1,8 @@
 """Hold all classes and functions related to the properties of a cell."""
 from __future__ import annotations
 
-from typing import Optional, Union
+import warnings
+from typing import TYPE_CHECKING, List, Optional
 
 import numpy as np
 import skimage.measure
@@ -16,10 +17,10 @@ from polarityjam.compute.compute import (
     straight_line_length,
 )
 from polarityjam.compute.corner import get_contour, get_corner
-from polarityjam.compute.shape import partition_single_cell_mask
-from polarityjam.model.image import BioMedicalChannel
 from polarityjam.model.masks import BioMedicalMask
-from polarityjam.model.parameter import RuntimeParameter
+
+if TYPE_CHECKING:
+    from polarityjam.model.image import BioMedicalChannel
 
 
 class SingleInstanceProps(RegionProperties):
@@ -27,37 +28,34 @@ class SingleInstanceProps(RegionProperties):
 
     def __init__(
         self,
-        single_cell_mask: Union[np.ndarray, BioMedicalMask],
-        intensity: Optional[Union[np.ndarray, BioMedicalChannel]] = None,
+        single_cell_mask: BioMedicalMask,
+        intensity: Optional[BioMedicalChannel] = None,
     ):
         """Initialize the properties with the given mask and intensity."""
-        if isinstance(single_cell_mask, BioMedicalMask):
-            single_cell_mask = single_cell_mask.to_instance_mask(1).data
-        else:
-            if not np.issubdtype(single_cell_mask.dtype, np.integer):
-                raise RuntimeError("Only integer images allowed!")
+        _intensity = None
+        if intensity is not None:
+            _intensity = intensity.data
 
-        if isinstance(intensity, BioMedicalChannel):
-            intensity = intensity.data
+        objects = ndi.find_objects(single_cell_mask.data.astype(np.uint8))
 
-        objects = ndi.find_objects(single_cell_mask)
-
-        assert len(objects) == 1, "Only one object allowed!"
+        assert len(objects) == 1, "Single cell mask should contain exactly one object!"
 
         sl = objects[0]
 
         self.mask = single_cell_mask
         self.intensity = intensity
 
-        super().__init__(sl, 1, single_cell_mask, intensity, True)
+        super().__init__(
+            sl, 1, single_cell_mask.data, intensity_image=_intensity, cache_active=True
+        )
 
 
 class SingleCellProps(SingleInstanceProps):
     """Class representing the properties of a single cell."""
 
-    def __init__(self, single_cell_mask: BioMedicalMask, param: RuntimeParameter):
+    def __init__(self, single_cell_mask: BioMedicalMask, dp_epsilon: int):
         """Initialize the properties with the given mask and intensity."""
-        self.param = param
+        self.dp_epsilon = dp_epsilon
         super().__init__(single_cell_mask)
 
     @property
@@ -80,7 +78,7 @@ class SingleCellProps(SingleInstanceProps):
     @property
     def cell_corner_points(self):
         """Return the corner points of the cell."""
-        return get_corner(self.mask, self.param.dp_epsilon)
+        return get_corner(self.mask.data, self.dp_epsilon)
 
 
 class SingleCellNucleusProps(SingleInstanceProps):
@@ -126,7 +124,7 @@ class SingleCellNucleusProps(SingleInstanceProps):
     @property
     def contour_points(self):
         """Return the contour points of the nucleus."""
-        return get_contour(self.mask)
+        return get_contour(self.mask.data)
 
 
 class SingleCellOrganelleProps(SingleInstanceProps):
@@ -170,7 +168,7 @@ class SingleCellOrganelleProps(SingleInstanceProps):
     @property
     def contour_points(self):
         """Return the contour points of the organelle."""
-        return get_contour(self.mask)
+        return get_contour(self.mask.data)
 
 
 class SingleCellMarkerProps(SingleInstanceProps):
@@ -180,16 +178,13 @@ class SingleCellMarkerProps(SingleInstanceProps):
         self,
         single_cell_mask: BioMedicalMask,
         im_marker: BioMedicalChannel,
-        cue_direction: int,
+        quadrant_cell_masks: List[BioMedicalMask],
+        half_cell_masks: List[BioMedicalMask],
     ):
         """Initialize the properties with the given mask and intensity."""
         super().__init__(single_cell_mask, im_marker)
-        self.quadrant_masks, self._partition_polygons = partition_single_cell_mask(
-            single_cell_mask.data, cue_direction, self.axis_major_length, 4
-        )
-        self.half_masks, self._partition_polygons = partition_single_cell_mask(
-            single_cell_mask.data, cue_direction, self.axis_major_length, 2
-        )
+        self.quadrant_masks = quadrant_cell_masks
+        self.half_masks = half_cell_masks
 
     @property
     def marker_centroid_orientation_rad(self):
@@ -211,28 +206,107 @@ class SingleCellMarkerProps(SingleInstanceProps):
         """Return the sum of the marker expression."""
         return self.mean_intensity * self.area
 
+    def _99_percentile_thresh(self):
+        """Return the 99th percentile of the array."""
+        # single cell intensity
+        sc_marker_intensity = self.intensity.data * self.mask.data
+
+        # 99th percentile of the single cell marker intensity
+        sc_marker_intensity_masked = (
+            self.intensity.data * self.mask.mask_background().data
+        )
+        sc_marker_intensity_masked = np.ma.filled(
+            sc_marker_intensity_masked.astype(float), np.nan
+        )
+        sc_marker_intensity_99 = np.nanpercentile(sc_marker_intensity_masked, 99)
+
+        # threshold the single cell marker intensity
+        sc_marker_intensity = np.where(
+            sc_marker_intensity > sc_marker_intensity_99,
+            sc_marker_intensity_99,
+            sc_marker_intensity,
+        )
+
+        return sc_marker_intensity
+
     @property
     def marker_cue_directional_intensity_ratio(self):
         """Return the ratio of the left vs right cell marker intensity in cue direction."""
-        left = self.intensity * self.half_masks[0] * self.mask
-        right = self.intensity * self.half_masks[1] * self.mask
+        # single cell intensity
+        sc_marker_intensity = self._99_percentile_thresh()
 
-        left_m = np.mean(left)
-        right_m = np.mean(right)
+        # compute an intensity mask
+        sc_marker_intensity_mask = BioMedicalMask.from_threshold_otsu(
+            sc_marker_intensity,
+            gaussian_filter=None,
+            rolling_ball_radius=None,
+        )
+        sc_marker_intensity_mask_r = sc_marker_intensity_mask.combine(
+            self.half_masks[0]
+        ).mask_background()
+        sc_marker_intensity_mask_l = sc_marker_intensity_mask.combine(
+            self.half_masks[1]
+        ).mask_background()
+
+        right = (
+            sc_marker_intensity_mask_r.data * sc_marker_intensity
+        )  # masked right half
+        left = sc_marker_intensity_mask_l.data * sc_marker_intensity  # masked left half
+
+        left_m = 0 if np.ma.count_masked(left) == left.size else np.ma.mean(left)
+        right_m = 0 if np.ma.count_masked(right) == right.size else np.ma.mean(right)
+
+        if left_m == 0 and right_m == 0:
+            warnings.warn("Warning: entire cell masked.", stacklevel=2)
+            return 0
 
         return 1 - 2 * left_m / (left_m + right_m)
 
     @property
-    def marker_cue_undirectional_intensity_ratio(self):
+    def marker_cue_axial_intensity_ratio(self):
         """The ratio of the sum of cell marker quarters in cue direction and the total marker intensity."""
-        top = self.intensity * self.quadrant_masks[0] * self.mask
-        left = self.intensity * self.quadrant_masks[1] * self.mask
-        bottom = self.intensity * self.quadrant_masks[2] * self.mask
-        right = self.intensity * self.quadrant_masks[3] * self.mask
+        # single cell intensity
+        sc_marker_intensity = self._99_percentile_thresh()
 
-        return (np.mean(top) + np.mean(bottom)) / (
-            np.mean(left) + np.mean(right) + np.mean(top) + np.mean(bottom)
+        sc_marker_intensity_mask = BioMedicalMask.from_threshold_otsu(
+            sc_marker_intensity,
+            gaussian_filter=None,
+            rolling_ball_radius=None,
         )
+        sc_marker_intensity_mask_r = sc_marker_intensity_mask.combine(
+            self.quadrant_masks[0]
+        ).mask_background()
+        sc_marker_intensity_mask_t = sc_marker_intensity_mask.combine(
+            self.quadrant_masks[1]
+        ).mask_background()
+        sc_marker_intensity_mask_l = sc_marker_intensity_mask.combine(
+            self.quadrant_masks[2]
+        ).mask_background()
+        sc_marker_intensity_mask_b = sc_marker_intensity_mask.combine(
+            self.quadrant_masks[3]
+        ).mask_background()
+
+        top = sc_marker_intensity_mask_t.data * sc_marker_intensity  # masked top half
+        left = sc_marker_intensity_mask_l.data * sc_marker_intensity  # masked left half
+        bottom = (
+            sc_marker_intensity_mask_b.data * sc_marker_intensity
+        )  # masked bottom half
+        right = (
+            sc_marker_intensity_mask_r.data * sc_marker_intensity
+        )  # masked right half
+
+        left_m = 0 if np.ma.count_masked(left) == left.size else np.ma.mean(left)
+        right_m = 0 if np.ma.count_masked(right) == right.size else np.ma.mean(right)
+        top_m = 0 if np.ma.count_masked(top) == top.size else np.ma.mean(top)
+        bottom_m = (
+            0 if np.ma.count_masked(bottom) == bottom.size else np.ma.mean(bottom)
+        )
+
+        if sum([left_m, right_m, top_m, bottom_m]) == 0:
+            warnings.warn("Warning: entire cell masked.", stacklevel=2)
+            return 0
+
+        return (top_m + bottom_m) / (left_m + right_m + top_m + bottom_m)
 
 
 class SingleCellMarkerMembraneProps(SingleInstanceProps):
@@ -335,12 +409,17 @@ class SingleCellJunctionProps:
             """Initialize the properties with the given mask and intensity."""
             super().__init__(single_junction_intensity_mask, im_junction)
 
+            self.intensity = im_junction
+            self.mask = single_junction_intensity_mask
+
     def __init__(
         self,
         im_junction: BioMedicalChannel,
         single_cell_mask: BioMedicalMask,
         single_cell_membrane_mask: BioMedicalMask,
         single_cell_junction_intensity_mask: BioMedicalMask,
+        quadrant_masks: List[BioMedicalMask],
+        half_masks: List[BioMedicalMask],
         cue_direction: int,
         dp_epsilon: int,
     ):
@@ -348,7 +427,16 @@ class SingleCellJunctionProps:
         self.im_junction = im_junction
         self.single_cell_mask = single_cell_mask
         self.single_membrane_mask = single_cell_membrane_mask
-        self.single_cell_junction_intensity_mask = single_cell_junction_intensity_mask
+        self.single_cell_junction_intensity_mask = (
+            single_cell_junction_intensity_mask  # threshold membrane mask
+        )
+        self.single_cell_junction_extended_mask = BioMedicalMask(
+            np.logical_or(self.single_cell_mask.data, self.single_membrane_mask.data)
+        )  # sc mask + sc membrane mask
+
+        self.quadrant_masks = quadrant_masks
+        self.half_masks = half_masks
+
         self.cue_direction = cue_direction
         self.dp_epsilon = dp_epsilon
 
@@ -356,25 +444,9 @@ class SingleCellJunctionProps:
         self.sc_junction_interface_props = self.SingleCellJunctionInterfaceProps(
             single_cell_membrane_mask, im_junction
         )
+
         self.sc_junction_intensity_props = self.SingleCellJunctionIntensityProps(
             single_cell_junction_intensity_mask, im_junction
-        )
-
-        self.quadrant_masks, self._partition_polygons = partition_single_cell_mask(
-            np.logical_or(
-                self.single_cell_mask.data, self.sc_junction_interface_props.mask.data
-            ),
-            cue_direction,
-            self.sc_junction_interface_props.axis_major_length,
-            4,
-        )
-        self.half_masks, self._partition_polygons = partition_single_cell_mask(
-            np.logical_or(
-                self.single_cell_mask.data, self.sc_junction_interface_props.mask.data
-            ),
-            cue_direction,
-            self.sc_junction_interface_props.axis_major_length,
-            2,
         )
 
     @property
@@ -423,49 +495,79 @@ class SingleCellJunctionProps:
     @property
     def junction_cue_directional_intensity_ratio(self):
         """Return the ratio of the left vs right cell membrane intensity in cue direction."""
-        left = (
-            self.sc_junction_intensity_props.intensity
-            * self.half_masks[0]
-            * self.sc_junction_intensity_props.mask
+        sc_junction_intensity_mask_r = self.single_cell_junction_intensity_mask.combine(
+            self.half_masks[0].combine(self.single_membrane_mask).mask_background()
         )
-        right = (
-            self.sc_junction_intensity_props.intensity
-            * self.half_masks[1]
-            * self.sc_junction_intensity_props.mask
+        sc_junction_intensity_mask_l = self.single_cell_junction_intensity_mask.combine(
+            self.half_masks[1].combine(self.single_membrane_mask).mask_background()
         )
 
-        left_m = np.mean(left)
-        right_m = np.mean(right)
+        right = (
+            self.sc_junction_intensity_props.intensity.data
+            * sc_junction_intensity_mask_r.data
+        )
+        left = (
+            self.sc_junction_intensity_props.intensity.data
+            * sc_junction_intensity_mask_l.data
+        )
+
+        left_m = 0 if np.ma.count_masked(left) == left.size else np.ma.mean(left)
+        right_m = 0 if np.ma.count_masked(right) == right.size else np.ma.mean(right)
+
+        if left_m == 0 and right_m == 0:
+            warnings.warn(
+                "Warning: entire cell masked. Consider using a different thresholding method.",
+                stacklevel=2,
+            )
+            return 0
 
         return 1 - 2 * left_m / (left_m + right_m)
 
     @property
-    def junction_cue_undirectional_intensity_ratio(self):
+    def junction_cue_axial_intensity_ratio(self):
         """Return the ratio of the sum of cell membrane quarters in cue direction and the total membrane intensity."""
-        left = (
-            self.sc_junction_intensity_props.intensity
-            * self.quadrant_masks[1]
-            * self.sc_junction_intensity_props.mask
+        sc_junction_intensity_mask_r = self.single_cell_junction_intensity_mask.combine(
+            self.quadrant_masks[0].combine(self.single_membrane_mask).mask_background()
         )
-        right = (
-            self.sc_junction_intensity_props.intensity
-            * self.quadrant_masks[3]
-            * self.sc_junction_intensity_props.mask
+        sc_junction_intensity_mask_t = self.single_cell_junction_intensity_mask.combine(
+            self.quadrant_masks[1].combine(self.single_membrane_mask).mask_background()
         )
-        top = (
-            self.sc_junction_intensity_props.intensity
-            * self.quadrant_masks[0]
-            * self.sc_junction_intensity_props.mask
+        sc_junction_intensity_mask_l = self.single_cell_junction_intensity_mask.combine(
+            self.quadrant_masks[2].combine(self.single_membrane_mask).mask_background()
         )
-        bottom = (
-            self.sc_junction_intensity_props.intensity
-            * self.quadrant_masks[2]
-            * self.sc_junction_intensity_props.mask
+        sc_junction_intensity_mask_b = self.single_cell_junction_intensity_mask.combine(
+            self.quadrant_masks[3].combine(self.single_membrane_mask).mask_background()
         )
 
-        return (np.mean(top) + np.mean(bottom)) / (
-            np.mean(left) + np.mean(right) + np.mean(top) + np.mean(bottom)
+        left = (
+            self.sc_junction_intensity_props.intensity.data
+            * sc_junction_intensity_mask_l.data
         )
+        right = (
+            self.sc_junction_intensity_props.intensity.data
+            * sc_junction_intensity_mask_r.data
+        )
+        top = (
+            self.sc_junction_intensity_props.intensity.data
+            * sc_junction_intensity_mask_t.data
+        )
+        bottom = (
+            self.sc_junction_intensity_props.intensity.data
+            * sc_junction_intensity_mask_b.data
+        )
+
+        left_m = 0 if np.ma.count_masked(left) == left.size else np.ma.mean(left)
+        right_m = 0 if np.ma.count_masked(right) == right.size else np.ma.mean(right)
+        top_m = 0 if np.ma.count_masked(top) == top.size else np.ma.mean(top)
+        bottom_m = (
+            0 if np.ma.count_masked(bottom) == bottom.size else np.ma.mean(bottom)
+        )
+
+        if sum([left_m, right_m, top_m, bottom_m]) == 0:
+            warnings.warn("Warning: entire cell masked.", stacklevel=2)
+            return 0
+
+        return (top_m + bottom_m) / (left_m + right_m + top_m + bottom_m)
 
 
 class NeighborhoodProps:
@@ -490,13 +592,13 @@ class SingleCellPropertiesCollection:
     def __init__(
         self,
         single_cell_props: SingleCellProps,
-        nucleus_props: Optional[SingleCellNucleusProps],
-        organelle_props: Optional[SingleCellOrganelleProps],
-        marker_props: Optional[SingleCellMarkerProps],
-        marker_membrane_props: Optional[SingleCellMarkerMembraneProps],
-        marker_nuc_props: Optional[SingleCellMarkerNucleiProps],
-        marker_nuc_cyt_props: Optional[SingleCellMarkerCytosolProps],
-        junction_props: Optional[SingleCellJunctionProps],
+        nucleus_props: Optional[SingleCellNucleusProps] = None,
+        organelle_props: Optional[SingleCellOrganelleProps] = None,
+        marker_props: Optional[SingleCellMarkerProps] = None,
+        marker_membrane_props: Optional[SingleCellMarkerMembraneProps] = None,
+        marker_nuc_props: Optional[SingleCellMarkerNucleiProps] = None,
+        marker_nuc_cyt_props: Optional[SingleCellMarkerCytosolProps] = None,
+        junction_props: Optional[SingleCellJunctionProps] = None,
     ):
         """Initialize the properties collection."""
         self.nucleus_props = nucleus_props

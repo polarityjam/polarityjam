@@ -1,5 +1,6 @@
 sphinx==5.1.1
 sphinx_rtd_theme==1.0.0
 nbsphinx==0.8.12
+sphinxcontrib-bibtex==2.4.2
 # note: pandoc must be installed on the system: https://pandoc.org/installing.html
 # on ubuntu: sudo apt install pandoc

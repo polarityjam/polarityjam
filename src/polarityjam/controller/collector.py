@@ -1,31 +1,16 @@
 """Module for collecting features from the single cell images."""
 from pathlib import Path
-from typing import List, Optional, Union
-
-import numpy as np
+from typing import List, Union
 
 from polarityjam import RuntimeParameter
 from polarityjam.compute.neighborhood import k_neighbor_dif
 from polarityjam.model.collection import PropertiesCollection
-from polarityjam.model.image import BioMedicalChannel, BioMedicalImage
-from polarityjam.model.masks import (
-    BioMedicalInstanceSegmentation,
-    BioMedicalInstanceSegmentationMask,
-    BioMedicalMask,
-    SingleCellMasksCollection,
-)
+from polarityjam.model.image import BioMedicalImage, SingleCellImage
+from polarityjam.model.masks import BioMedicalInstanceSegmentation
 from polarityjam.model.moran import Moran, run_morans
 from polarityjam.model.properties import (
     NeighborhoodProps,
-    SingleCellJunctionProps,
-    SingleCellMarkerCytosolProps,
-    SingleCellMarkerMembraneProps,
-    SingleCellMarkerNucleiProps,
-    SingleCellMarkerProps,
-    SingleCellNucleusProps,
-    SingleCellOrganelleProps,
     SingleCellPropertiesCollection,
-    SingleCellProps,
 )
 
 
@@ -172,16 +157,10 @@ class SingleCellPropertyCollector:
 
     @staticmethod
     def calc_sc_props(
-        sc_masks: SingleCellMasksCollection,
-        img: BioMedicalImage,
-        runtime_params: RuntimeParameter,
+        sc_image: SingleCellImage,
+        params: RuntimeParameter,
     ) -> SingleCellPropertiesCollection:
         """Calculate all properties for the single cell."""
-        # properties for single cell
-        sc_cell_props = SingleCellPropertyCollector.calc_sc_cell_props(
-            sc_masks.sc_mask, runtime_params
-        )
-
         # init optional properties
         sc_nuc_props = None
         sc_organelle_props = None
@@ -191,62 +170,23 @@ class SingleCellPropertyCollector:
         sc_marker_cytosol_props = None
         sc_junction_props = None
 
-        # properties for nucleus:
-        if img.has_nuclei():
-            assert sc_masks.sc_nucleus_mask is not None
-            sc_nuc_props = SingleCellPropertyCollector.calc_sc_nucleus_props(
-                sc_masks.sc_nucleus_mask, sc_cell_props
-            )
+        sc_cell_props = sc_image.get_cell_properties(params)
+        if sc_image.has_nuclei():
+            sc_nuc_props = sc_image.get_nucleus_properties(params)
 
-            # properties for organelle
-            if img.has_organelle():
-                assert sc_masks.sc_organelle_mask is not None
-                sc_organelle_props = (
-                    SingleCellPropertyCollector.calc_sc_organelle_props(
-                        sc_masks.sc_organelle_mask, sc_nuc_props
-                    )
-                )
+            if sc_image.has_organelle():
+                sc_organelle_props = sc_image.get_organelle_properties(params)
 
-        # properties for marker
-        if img.has_marker():
-            sc_marker_props = SingleCellPropertyCollector.calc_sc_marker_props(
-                sc_masks.sc_mask, img.marker.data, runtime_params
-            )
-            assert sc_masks.sc_membrane_mask is not None
-            sc_marker_membrane_props = (
-                SingleCellPropertyCollector.calc_sc_marker_membrane_props(
-                    sc_masks.sc_membrane_mask, img.marker.data
-                )
-            )
+        if sc_image.has_marker():
+            sc_marker_props = sc_image.get_marker_properties(params)
+            sc_marker_membrane_props = sc_image.get_marker_membrane_properties(params)
 
-            # properties for marker nuclei
-            if img.has_nuclei():
-                assert sc_masks.sc_nucleus_mask is not None
-                sc_marker_nuclei_props = (
-                    SingleCellPropertyCollector.calc_sc_marker_nuclei_props(
-                        sc_masks.sc_nucleus_mask,
-                        img.marker.data,
-                        sc_nuc_props,  # type: ignore
-                        sc_marker_props,
-                    )
-                )
-                assert sc_masks.sc_cytosol_mask is not None
-                sc_marker_cytosol_props = (
-                    SingleCellPropertyCollector.calc_sc_marker_cytosol_props(
-                        sc_masks.sc_cytosol_mask, img.marker, sc_marker_nuclei_props
-                    )
-                )
+            if sc_image.has_nuclei():
+                sc_marker_nuclei_props = sc_image.get_marker_nucleus_properties(params)
+                sc_marker_cytosol_props = sc_image.get_marker_cytosol_properties(params)
 
-        if img.has_junction():
-            assert sc_masks.sc_membrane_mask is not None
-            assert sc_masks.sc_junction_protein_area_mask is not None
-            sc_junction_props = SingleCellPropertyCollector.calc_sc_junction_props(
-                img.junction,
-                sc_masks.sc_mask,
-                sc_masks.sc_membrane_mask,
-                sc_masks.sc_junction_protein_area_mask,
-                runtime_params,
-            )
+        if sc_image.has_junction():
+            sc_junction_props = sc_image.get_junction_properties(params)
 
         return SingleCellPropertiesCollection(
             sc_cell_props,
@@ -257,138 +197,4 @@ class SingleCellPropertyCollector:
             sc_marker_nuclei_props,
             sc_marker_cytosol_props,
             sc_junction_props,
-        )
-
-    @staticmethod
-    def calc_sc_cell_props(
-        sc_mask: BioMedicalMask, param: RuntimeParameter
-    ) -> SingleCellProps:
-        """Calculate properties for single cell."""
-        return SingleCellProps(sc_mask, param)
-
-    @staticmethod
-    def calc_sc_nucleus_props(
-        sc_nucleus_maks: BioMedicalMask, sc_props: SingleCellProps
-    ) -> SingleCellNucleusProps:
-        """Calculate nucleus properties for single cell."""
-        return SingleCellNucleusProps(sc_nucleus_maks, sc_props)
-
-    @staticmethod
-    def calc_sc_organelle_props(
-        sc_organelle_mask: BioMedicalMask, sc_nucleus_props: SingleCellNucleusProps
-    ) -> SingleCellOrganelleProps:
-        """Calculate organelle properties for single cell."""
-        return SingleCellOrganelleProps(sc_organelle_mask, sc_nucleus_props)
-
-    @staticmethod
-    def calc_sc_marker_props(
-        sc_mask: BioMedicalMask,
-        im_marker: BioMedicalChannel,
-        runtime_parameter: RuntimeParameter,
-    ) -> SingleCellMarkerProps:
-        """Calculate marker properties for single cell."""
-        return SingleCellMarkerProps(
-            sc_mask, im_marker, runtime_parameter.cue_direction
-        )
-
-    @staticmethod
-    def calc_sc_marker_membrane_props(
-        sc_membrane_mask: BioMedicalMask, im_marker: BioMedicalChannel
-    ) -> SingleCellMarkerMembraneProps:
-        """Calculate marker membrane properties for single cell."""
-        return SingleCellMarkerMembraneProps(sc_membrane_mask, im_marker)
-
-    @staticmethod
-    def calc_sc_marker_nuclei_props(
-        sc_nucleus_mask: BioMedicalMask,
-        im_marker: BioMedicalChannel,
-        sc_nucleus_props: SingleCellNucleusProps,
-        sc_marker_props: SingleCellMarkerProps,
-    ) -> SingleCellMarkerNucleiProps:
-        """Calculate marker nuclei properties for single cell."""
-        return SingleCellMarkerNucleiProps(
-            sc_nucleus_mask, im_marker, sc_nucleus_props, sc_marker_props
-        )
-
-    @staticmethod
-    def calc_sc_marker_cytosol_props(
-        sc_cytosol_mask: BioMedicalMask,
-        im_marker: BioMedicalChannel,
-        sc_marker_nuclei_props: SingleCellMarkerNucleiProps,
-    ) -> SingleCellMarkerCytosolProps:
-        """Calculate marker cytosol properties for single cell."""
-        return SingleCellMarkerCytosolProps(
-            sc_cytosol_mask, im_marker, sc_marker_nuclei_props
-        )
-
-    @staticmethod
-    def calc_sc_junction_props(
-        im_junction: BioMedicalChannel,
-        sc_mask: BioMedicalMask,
-        single_cell_membrane_mask: BioMedicalMask,
-        single_cell_junction_intensity_mask: BioMedicalMask,
-        runtime_parameter: RuntimeParameter,
-    ) -> SingleCellJunctionProps:
-        """Calculate junction properties for single cell."""
-        return SingleCellJunctionProps(
-            im_junction,
-            single_cell_membrane_mask,
-            single_cell_junction_intensity_mask,
-            sc_mask,
-            runtime_parameter.cue_direction,
-            runtime_parameter.dp_epsilon,
-        )
-
-
-class SingleCellMaskCollector:
-    """Collect single cell masks."""
-
-    @staticmethod
-    def calc_sc_masks(
-        bio_med_img: BioMedicalImage,
-        connected_component_label: int,
-        membrane_thickness: int,
-        nuclei_mask_seg: Optional[BioMedicalInstanceSegmentationMask],
-        organelle_mask_seg: Optional[BioMedicalInstanceSegmentationMask],
-    ) -> SingleCellMasksCollection:
-        """Calculate masks for single cell."""
-        assert bio_med_img.segmentation is not None
-        sc_mask = bio_med_img.segmentation.segmentation_mask_connected.get_single_instance_maks(
-            connected_component_label
-        )
-        sc_membrane_mask = sc_mask.get_outline_from_mask(membrane_thickness)
-
-        # init optional sc masks
-        sc_nucleus_mask = None
-        sc_organelle_mask = None
-        sc_cytosol_mask = None
-        sc_junction_protein_mask = None
-
-        if bio_med_img.has_nuclei():
-            assert nuclei_mask_seg is not None
-            sc_nucleus_mask = nuclei_mask_seg.get_single_instance_maks(
-                connected_component_label
-            )
-            sc_cytosol_mask = sc_nucleus_mask.operation(sc_mask, np.logical_xor)
-
-        if bio_med_img.has_organelle():
-            assert organelle_mask_seg is not None
-            sc_organelle_mask = organelle_mask_seg.get_single_instance_maks(
-                connected_component_label
-            )
-
-        if bio_med_img.has_junction():
-            masked_sc_junction_channel = bio_med_img.junction.mask(sc_membrane_mask)
-            sc_junction_protein_mask = BioMedicalMask.from_threshold_otsu(
-                masked_sc_junction_channel.data, gaussian_filter=None
-            )
-
-        return SingleCellMasksCollection(
-            connected_component_label,
-            sc_mask,
-            sc_nucleus_mask,
-            sc_organelle_mask,
-            sc_membrane_mask,
-            sc_cytosol_mask,
-            sc_junction_protein_mask,
         )

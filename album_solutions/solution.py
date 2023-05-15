@@ -9,7 +9,7 @@ dependencies:
   - python=3.8.13
   - pip
   - pip:
-     - polarityjam==0.1.4
+     - polarityjam==0.1.5
 """
 
 
@@ -105,7 +105,7 @@ setup(
     license="UNLICENSE",
     documentation=["doc.md"],
     covers=[{"description": "Polarityjam cover image", "source": "cover.png"}],
-    album_api_version="0.5.1",
+    album_api_version="0.5.5",
     args=[
         {
             "name": "run_command",
@@ -113,7 +113,7 @@ setup(
             "default": "run",
             "description": """How do you want to run polarityjam? run for single tiff file,
             run-stack for a directory containing multiple tiff files, run-key for a csv
-            file containing a list of  directorys containing tiff files or test for the test-suit""",
+            file containing a list of  directories containing tiff files or test for the test-suit""",
             "required": True,
         },
         {

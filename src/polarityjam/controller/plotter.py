@@ -3,7 +3,7 @@ import json
 import math
 import os
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 
 import cmocean as cm
 import matplotlib
@@ -68,7 +68,7 @@ class Plotter:
             if nuclei_mask is not None:
                 intensity_nuc = feature_row["marker_mean_expression_nuc"].values[0]
 
-            single_cell_mask = cell_mask.get_single_instance_maks(cell_label)
+            single_cell_mask = cell_mask.get_single_instance_mask(cell_label)
             invert_outline_cell = (
                 single_cell_mask.get_outline_from_mask(self.params.outline_width)
                 .invert()
@@ -94,7 +94,7 @@ class Plotter:
 
             # nuclei marker intensity
             if nuclei_mask is not None:
-                single_nucleus_mask = nuclei_mask.get_single_instance_maks(cell_label)
+                single_nucleus_mask = nuclei_mask.get_single_instance_mask(cell_label)
                 invert_outline_nuc = (
                     single_nucleus_mask.get_outline_from_mask(self.params.outline_width)
                     .invert()
@@ -120,7 +120,7 @@ class Plotter:
         # cell outlines
         outlines_cells = BioMedicalMask.empty(channel.data.shape)
         for cell_label in instance_seg_mask.get_labels():
-            single_cell_mask = instance_seg_mask.get_single_instance_maks(cell_label)
+            single_cell_mask = instance_seg_mask.get_single_instance_mask(cell_label)
             outline_cell = single_cell_mask.get_outline_from_mask(
                 self.params.outline_width
             )
@@ -215,6 +215,7 @@ class Plotter:
         seg_img_params: ImageParameter,
         output_path: Union[str, Path],
         filename: Union[str, Path],
+        mask_nuclei: Optional[np.ndarray] = None,
         close: bool = False,
     ):
         """Plot the segmentation mask, together with the separate channels from the input image.
@@ -230,6 +231,8 @@ class Plotter:
                 path to the output directory where plots are saved
             filename:
                 name of the file to save
+            mask_nuclei:
+                numpy array of the nuclei mask to plot. If None, no nuclei mask is plotted.
             close:
                 whether to close the figure after saving
 
@@ -238,25 +241,24 @@ class Plotter:
 
         filename, _ = os.path.splitext(os.path.basename(filename))
 
-        # color each cell differently
-        cell_idx = np.unique(mask)
-        cell_idx = np.delete(cell_idx, 0)
-        mask_ = np.copy(mask)
-
-        new_col = np.copy(cell_idx)
-        np.random.seed(42)  # set seed for reproducibility
-        np.random.shuffle(new_col)
-        for i in range(len(cell_idx)):
-            mask_[mask == cell_idx[i]] = new_col[i]
+        mask_ = self._rand_labels(mask)
 
         # ignore background
         mask_ = np.where(mask > 0, mask_, np.nan)
+        mask_nuclei_ = None
+
+        if mask_nuclei is not None:
+            mask_nuclei_ = self._rand_labels(mask_nuclei)
+
+            # ignore background
+            mask_nuclei_ = np.where(mask_nuclei > 0, mask_nuclei_, np.nan)
 
         if (
             seg_img_params.channel_junction is not None
             and seg_img_params.channel_nucleus is not None
         ):
-            fig, ax = self._get_figure(3)
+            num_fig = 4 if mask_nuclei is not None else 3
+            fig, ax = self._get_figure(num_fig)
 
             ax[0].imshow(seg_img[0, :, :])
             add_title(
@@ -281,8 +283,22 @@ class Plotter:
             )
 
             axes = [ax[0], ax[1], ax[2]]
+
+            if mask_nuclei is not None:
+                ax[3].imshow(seg_img[1, :, :])
+                ax[3].imshow(mask_nuclei_, cmap=plt.cm.gist_rainbow, alpha=0.5)
+                add_title(
+                    ax[3],
+                    "segmentation_nuclei",
+                    seg_img[0, :, :],
+                    self.params.show_graphics_axis,
+                )
+
+                axes = [ax[0], ax[1], ax[2], ax[3]]
+
         else:
-            fig, ax = self._get_figure(2)
+            num_fig = 3 if mask_nuclei is not None else 2
+            fig, ax = self._get_figure(num_fig)
 
             s_img = seg_img[:, :]
 
@@ -296,6 +312,16 @@ class Plotter:
             add_title(ax[1], "segmentation", s_img, self.params.show_graphics_axis)
 
             axes = [ax[0], ax[1]]
+
+            # ax 3
+            if mask_nuclei is not None:
+                ax[2].imshow(s_img)
+                ax[2].imshow(mask_nuclei_, cmap=plt.cm.gist_rainbow, alpha=0.5)
+                add_title(
+                    ax[2], "segmentation_nuclei", s_img, self.params.show_graphics_axis
+                )
+
+                axes = [ax[0], ax[1], ax[2]]
 
         self._finish_plot(
             fig,
@@ -325,13 +351,13 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junctions channel not available"
-        assert img.has_nuclei(), "Nuclei channel not available"
+        assert img.junction is not None, "Junctions channel not available"
+        assert img.nucleus is not None, "Nuclei channel not available"
 
         im_junction = img.junction.data
         con_inst_seg_mask = img.segmentation.segmentation_mask_connected
-        inst_nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg")
-        inst_organelle_mask = img.organelle.get_mask_by_name("organelle_mask_seg")
+        inst_nuclei_mask = img.segmentation.segmentation_mask_nuclei
+        inst_organelle_mask = img.segmentation.segmentation_mask_organelle
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -405,7 +431,7 @@ class Plotter:
         add_title(
             ax,
             "organelle orientation",
-            im_junction.data,
+            im_junction,
             self.params.show_graphics_axis,
         )
 
@@ -438,8 +464,8 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junctions channel not available"
-        assert img.has_nuclei(), "Nuclei channel not available"
+        assert img.junction is not None, "Junctions channel not available"
+        assert img.nucleus is not None, "Nuclei channel not available"
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -471,7 +497,7 @@ class Plotter:
         color_bar.set_label("polarity angle")
         color_bar.ax.set_yticks([0, 90, 180, 270, 360])
 
-        nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg").to_semantic_mask()
+        nuclei_mask = img.segmentation.segmentation_mask_nuclei.to_semantic_mask()
 
         # plot nuclei (blue)
         zero = np.zeros((img.junction.data.shape[0], img.junction.data.shape[1]))
@@ -535,9 +561,9 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_marker(), "Marker channel not available"
+        assert img.marker is not None, "Marker channel not available"
 
-        im_marker = img.marker.data
+        im_marker = img.marker
         cell_mask = img.segmentation.segmentation_mask_connected
         single_cell_dataset = collection.dataset.loc[
             collection.dataset["filename"] == img_name
@@ -545,7 +571,7 @@ class Plotter:
 
         nuclei_mask = None
         if img.has_nuclei():
-            nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg")
+            nuclei_mask = img.segmentation.segmentation_mask_nuclei
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -559,7 +585,7 @@ class Plotter:
 
         # plot marker intensity for all subplots
         for i in range(number_sub_figs):
-            ax[i].imshow(im_marker, cmap=plt.cm.gray, alpha=1.0)
+            ax[i].imshow(im_marker.data, cmap=plt.cm.gray, alpha=1.0)
 
         outlines_cell, outlines_mem, outlines_nuc = self._get_inlines(
             im_marker, cell_mask, nuclei_mask, single_cell_dataset
@@ -677,7 +703,7 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_marker(), "Marker channel not available"
+        assert img.marker is not None, "Marker channel not available"
 
         im_marker = img.marker
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -737,13 +763,16 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junction channel not available"
-        assert img.has_nuclei(), "Nuclei channel not available"
-        assert img.has_marker(), "Marker channel not available"
+        assert (
+            img.segmentation.segmentation_mask_nuclei is not None
+        ), "Nuclei segmentation not available"
+        assert img.junction is not None, "Junction channel not available"
+        assert img.nucleus is not None, "Nuclei channel not available"
+        assert img.marker is not None, "Marker channel not available"
 
         im_junction = img.junction.data
         segmentation_mask = img.segmentation.segmentation_mask_connected
-        inst_nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg")
+        inst_nuclei_mask = img.segmentation.segmentation_mask_nuclei
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -811,7 +840,7 @@ class Plotter:
         add_title(
             ax,
             "marker nucleus orientation",
-            im_junction.data,
+            im_junction,
             self.params.show_graphics_axis,
         )
 
@@ -844,7 +873,7 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junction channel not available"
+        assert img.junction is not None, "Junction channel not available"
 
         im_junction = img.junction
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -908,7 +937,7 @@ class Plotter:
 
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junction channel not available"
+        assert img.junction is not None, "Junction channel not available"
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -959,13 +988,16 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junction channel not available"
+        assert img.junction is not None, "Junction channel not available"
 
         im_junction = img.junction
         segmentation_mask = img.segmentation.segmentation_mask_connected
         inst_nuclei_mask = None
         if img.has_nuclei():
-            inst_nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg")
+            assert (
+                img.segmentation.segmentation_mask_nuclei is not None
+            ), "Nuclei segmentation not available"
+            inst_nuclei_mask = img.segmentation.segmentation_mask_nuclei
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -1103,8 +1135,8 @@ class Plotter:
 
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junction channel not available"
-        assert img.has_marker(), "Marker channel not available"
+        assert img.junction is not None, "Junction channel not available"
+        assert img.marker is not None, "Marker channel not available"
 
         params = collection.get_runtime_params_by_img_name(img_name)
 
@@ -1117,7 +1149,7 @@ class Plotter:
         mcdir_mask = cell_mask.relabel(mcdir)
 
         mcuir = collection.get_properties_by_img_name(img_name)[
-            "marker_cue_undirectional_intensity_ratio"
+            "marker_cue_axial_intensity_ratio"
         ].values
         mcuir_mask = cell_mask.relabel(mcuir)
 
@@ -1135,7 +1167,7 @@ class Plotter:
         )
         add_title(
             ax[1],
-            "marker cue undirectional intensity ratio",
+            "marker cue axial intensity ratio",
             im_junction.data,
             self.params.show_graphics_axis,
         )
@@ -1168,7 +1200,7 @@ class Plotter:
 
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
-        assert img.has_junction(), "Junction channel not available"
+        assert img.junction is not None, "Junction channel not available"
 
         params = collection.get_runtime_params_by_img_name(img_name)
 
@@ -1181,7 +1213,7 @@ class Plotter:
         jcdir_mask = cell_mask.relabel(jcdir)
 
         jcuir = collection.get_properties_by_img_name(img_name)[
-            "junction_cue_undirectional_intensity_ratio"
+            "junction_cue_axial_intensity_ratio"
         ].values
         jcuir_mask = cell_mask.relabel(jcuir)
 
@@ -1199,7 +1231,7 @@ class Plotter:
         )
         add_title(
             ax[1],
-            "junction cue undirectional intensity ratio",
+            "junction cue axial intensity ratio",
             im_junction.data,
             self.params.show_graphics_axis,
         )
@@ -1223,7 +1255,7 @@ class Plotter:
         im_junction,
         img_name,
         directional_mask,
-        undirectional_mask,
+        axial_mask,
         params,
     ):
         # figure and axes
@@ -1235,7 +1267,7 @@ class Plotter:
         )
         ax[1].imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
         cax2 = ax[1].imshow(
-            undirectional_mask.mask_background().data, cmap=cm.cm.balance, alpha=0.5
+            axial_mask.mask_background().data, cmap=cm.cm.balance, alpha=0.5
         )
         # show cell outlines
         ax[0].imshow(self._masked_cell_outlines(im_junction, cell_mask), alpha=0.5)
@@ -1285,6 +1317,7 @@ class Plotter:
 
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
+        assert img.junction is not None, "Junction channel not available"
 
         im_junction = img.junction
         mask = img.segmentation.segmentation_mask_connected
@@ -1358,13 +1391,17 @@ class Plotter:
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
+        assert img.junction is not None, "Junction channel not available"
 
         im_junction = img.junction
         instance_segmentation_con = img.segmentation.segmentation_mask_connected
 
         inst_nuclei_mask = None
         if img.has_nuclei():
-            inst_nuclei_mask = img.nucleus.get_mask_by_name("nuclei_mask_seg")
+            assert (
+                img.segmentation.segmentation_mask_nuclei is not None
+            ), "Nuclei segmentation is not available"
+            inst_nuclei_mask = img.segmentation.segmentation_mask_nuclei
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -1629,6 +1666,20 @@ class Plotter:
 
         # colorbar
         add_colorbar(fig, cax_1, ax, yticks, "shape orientation (degree)")
+
+    @staticmethod
+    def _rand_labels(mask):
+        """Randomly assign labels to the mask."""
+        # color each cell randomly
+        cell_idx = np.unique(mask)
+        cell_idx = np.delete(cell_idx, 0)
+        mask_ = np.copy(mask)
+        new_col = np.copy(cell_idx)
+        np.random.seed(42)  # set seed for reproducibility
+        np.random.shuffle(new_col)
+        for i in range(len(cell_idx)):
+            mask_[mask == cell_idx[i]] = new_col[i]
+        return mask_
 
     @staticmethod
     def _add_cell_orientation(

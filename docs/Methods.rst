@@ -11,7 +11,9 @@ of the methodology is provided.
 Segmentation
 ++++++++++++
 
-Segmentation of input image(s) are currently done with `cellpose <https://github.com/MouseLand/cellpose>`_.
+Segmentation can currently be performed using the following methods:
+- Cellpose `cellpose <https://github.com/MouseLand/cellpose>`_.
+- Segment Anything `segmentanything <https://segment-anything.com/>`_
 
 Cellpose is a generalist algorithm for cell and nucleus segmentation.
 Cellpose uses a neural network that was trained to predict horizontal and vertical gradients of
@@ -22,6 +24,8 @@ pixel that converge to the same point and combining results with the information
 precise cell shapes can be recovered.
 
 
+Segment Anything Model (SAM) is a new AI model from Meta AI that can "cut out" any object, in any image,
+with a single click. For more information, please visit `segmentanything <https://segment-anything.com/>`_.
 
 Cell properties
 +++++++++++++++

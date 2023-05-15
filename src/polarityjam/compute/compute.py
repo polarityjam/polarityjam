@@ -1,13 +1,17 @@
+"""Module for support computing cell properties."""
 import math
 from typing import List, Tuple
 
+import cv2
 import numpy as np
 
 from polarityjam.utils.decorators import experimental
 
 
-def compute_reference_target_orientation_rad(ref_x: float, ref_y: float, target_x: float, target_y: float) -> float:
-    """Computes the 2D orientation in rad between reference and target.
+def compute_reference_target_orientation_rad(
+    ref_x: float, ref_y: float, target_x: float, target_y: float
+) -> float:
+    """Compute the 2D orientation in rad between reference and target.
 
     Args:
         ref_x:
@@ -30,8 +34,10 @@ def compute_reference_target_orientation_rad(ref_x: float, ref_y: float, target_
     return organelle_orientation_rad
 
 
-def compute_ref_x_abs_angle_deg(ref_x: float, ref_y: float, x: float, y: float) -> float:
-    """Computes the angle between the x-axis and the vector (x,y).
+def compute_ref_x_abs_angle_deg(
+    ref_x: float, ref_y: float, x: float, y: float
+) -> float:
+    """Compute the angle between the x-axis and the vector (x,y).
 
     Args:
         ref_y:
@@ -59,7 +65,7 @@ def compute_ref_x_abs_angle_deg(ref_x: float, ref_y: float, x: float, y: float) 
 
 
 def compute_angle_deg(angle_rad: float) -> float:
-    """Computes the angle given in rad in degrees.
+    """Compute the angle given in rad in degrees.
 
     Args:
         angle_rad:
@@ -73,7 +79,7 @@ def compute_angle_deg(angle_rad: float) -> float:
 
 
 def compute_shape_orientation_rad(orientation: float) -> float:
-    """Computes the shape orientation (zero based) on x-axis.
+    """Compute the shape orientation (zero based) on x-axis.
 
     Args:
         orientation:
@@ -87,9 +93,10 @@ def compute_shape_orientation_rad(orientation: float) -> float:
     return np.pi / 2.0 + orientation
 
 
-def compute_marker_vector_norm(cell_x: float, cell_y: float, marker_centroid_x: float,
-                               marker_centroid_y: float) -> float:
-    """Computes the marker vector norm.
+def compute_marker_vector_norm(
+    cell_x: float, cell_y: float, marker_centroid_x: float, marker_centroid_y: float
+) -> float:
+    """Compute the marker vector norm.
 
     Args:
         cell_x:
@@ -113,8 +120,7 @@ def compute_marker_vector_norm(cell_x: float, cell_y: float, marker_centroid_x: 
 
 @experimental
 def map_single_cell_to_circle(sc_protein_area, x_centroid, y_centroid, r):
-    """Maps a single cell to a circle. NOTE: EXPERIMENTAL"""
-
+    """Map a single cell to a circle."""
     circular_img = np.zeros([sc_protein_area.shape[0], sc_protein_area.shape[1]])
     circular_img_count = {}
 
@@ -135,7 +141,9 @@ def map_single_cell_to_circle(sc_protein_area, x_centroid, y_centroid, r):
         new_y = int(new_y)
 
         # count, TODO: check why new_x and new_y are sometimes out of the image boundaries
-        if (new_x in range(0, circular_img.shape[0])) and (new_y in range(0, circular_img.shape[1])):
+        if (new_x in range(0, circular_img.shape[0])) and (
+            new_y in range(0, circular_img.shape[1])
+        ):
             circular_img[int(new_x), int(new_y)] += sc_protein_area[x, y]
             if (int(new_x), int(new_y)) not in circular_img_count.keys():
                 circular_img_count[int(new_x), int(new_y)] = 1
@@ -159,7 +167,7 @@ def map_single_cell_to_circle(sc_protein_area, x_centroid, y_centroid, r):
 
 
 def straight_line_length(corners: List[Tuple[int, int]]) -> float:
-    """Computes length between corners. Corner point assumed to be in the correct order.
+    """Compute length between corners. Corner point assumed to be in the correct order.
 
     Args:
         corners:
@@ -177,3 +185,24 @@ def straight_line_length(corners: List[Tuple[int, int]]) -> float:
         dist.append(math.sqrt((x[0] - y[0]) ** 2 + (x[1] - y[1]) ** 2))
 
     return sum(dist)
+
+
+def contour_width(contour: np.ndarray) -> float:
+    """Compute the width of the contour.
+
+    Args:
+        contour:
+            The contour
+
+    Returns:
+        The width of the contour
+    """
+    # Find the convex hull
+    hull = cv2.convexHull(contour)
+
+    min_x, max_x = np.min(hull[:, :, 0]), np.max(hull[:, :, 0])
+    min_y, max_y = np.min(hull[:, :, 1]), np.max(hull[:, :, 1])
+
+    width = max(max_x - min_x, max_y - min_y)
+
+    return width

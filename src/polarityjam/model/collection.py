@@ -142,8 +142,8 @@ class PropertiesCollection:
             self._index, "marker_cue_directional_intensity_ratio"
         ] = sc_marker_props.marker_cue_directional_intensity_ratio
         self.dataset.at[
-            self._index, "marker_cue_undirectional_intensity_ratio"
-        ] = sc_marker_props.marker_cue_undirectional_intensity_ratio
+            self._index, "marker_cue_axial_intensity_ratio"
+        ] = sc_marker_props.marker_cue_axial_intensity_ratio
 
     def add_sc_nucleus_props(self, nucleus_props: SingleCellNucleusProps):
         """Add specific single cell nucleus properties to the dataset.
@@ -356,8 +356,8 @@ class PropertiesCollection:
             self._index, "junction_cue_directional_intensity_ratio"
         ] = sc_junction_props.junction_cue_directional_intensity_ratio
         self.dataset.at[
-            self._index, "junction_cue_undirectional_intensity_ratio"
-        ] = sc_junction_props.junction_cue_undirectional_intensity_ratio
+            self._index, "junction_cue_axial_intensity_ratio"
+        ] = sc_junction_props.junction_cue_axial_intensity_ratio
 
     def add_morans_i_props(self, morans_i: Moran):
         """Add Moran's I value to the dataset.

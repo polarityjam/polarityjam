@@ -1,11 +1,10 @@
 from unittest.mock import patch
 
-from test_common import TestCommon
-
 from polarityjam import (
     BioMedicalInstanceSegmentation,
     BioMedicalInstanceSegmentationMask,
 )
+from polarityjam.test.test_common import TestCommon
 from polarityjam.utils.io import read_image
 
 

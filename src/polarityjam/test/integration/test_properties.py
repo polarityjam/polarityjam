@@ -1,5 +1,4 @@
 import numpy as np
-from test_common import TestCommon
 
 from polarityjam import (
     BioMedicalImage,
@@ -10,6 +9,7 @@ from polarityjam import (
 )
 from polarityjam.compute.corner import get_contour
 from polarityjam.model.image import SingleCellImage
+from polarityjam.test.test_common import TestCommon
 
 
 class TestSingleCellProps(TestCommon):
@@ -195,12 +195,8 @@ class TestSingleCellProps(TestCommon):
         marker_props_une = sc_img_une.get_marker_properties(runtime_param)
 
         # assert
-        self.assertGreater(
-            marker_props_ue_p.marker_cue_axial_intensity_ratio, 0.65
-        )
-        self.assertLess(
-            marker_props_ue_n.marker_cue_axial_intensity_ratio, 0.35
-        )
+        self.assertGreater(marker_props_ue_p.marker_cue_axial_intensity_ratio, 0.65)
+        self.assertLess(marker_props_ue_n.marker_cue_axial_intensity_ratio, 0.35)
         self.assertAlmostEqual(
             marker_props_une.marker_cue_axial_intensity_ratio, 0.5, delta=0.05
         )
@@ -321,12 +317,8 @@ class TestSingleCellProps(TestCommon):
         junction_props_une = sc_img_une.get_junction_properties(runtime_param)
 
         # assert
-        self.assertGreater(
-            junction_props_ue_p.junction_cue_axial_intensity_ratio, 0.65
-        )
-        self.assertLess(
-            junction_props_ue_n.junction_cue_axial_intensity_ratio, 0.35
-        )
+        self.assertGreater(junction_props_ue_p.junction_cue_axial_intensity_ratio, 0.65)
+        self.assertLess(junction_props_ue_n.junction_cue_axial_intensity_ratio, 0.35)
         self.assertAlmostEqual(
             junction_props_une.junction_cue_axial_intensity_ratio,
             0.5,

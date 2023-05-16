@@ -2,11 +2,10 @@ import time
 import unittest
 from pathlib import Path
 
-from integration import test_commandline, test_masks, test_properties
-from unit import test_feature_extraction
-
 import polarityjam.test.test_config as config
 from polarityjam.polarityjam_logging import get_logger
+from polarityjam.test.integration import test_commandline, test_masks, test_properties
+from polarityjam.test.unit import test_feature_extraction
 from polarityjam.utils.io import create_path_recursively
 
 

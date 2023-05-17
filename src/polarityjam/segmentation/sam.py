@@ -61,7 +61,7 @@ class SamSegmenter(Segmenter):
         img_e = np.expand_dims(img, axis=-1)
         img_3d = np.repeat(img_e, 3, axis=-1).astype(np.uint8)
 
-        sam = sam_model_registry["vit_h"](checkpoint=str(self.DOWNLOAD_PATH_REL))
+        sam = sam_model_registry["vit_h"](checkpoint=str(self.model_path))
         mask_generator = SamAutomaticMaskGenerator(sam)
         masks = mask_generator.generate(img_3d)
         return self._to_instance_segmentation(masks)

@@ -21,6 +21,8 @@ connection_graph: True
 segmentation_algorithm: "CellposeSegmenter" # "CellposeSegmenter", "SamSegmenter"
 remove_small_objects_size: 10 # in pixels, put to 0 to disable
 clear_border: True
+keyfile_condition_cols: ["short_name"] # only needed if run_key option is used
+
 
 # PlotParameter
 plot_junctions: True

@@ -1,8 +1,16 @@
-channel_expression_marker: 3
-channel_organelle: 0
+# ImageParameters
 channel_junction: 3
 channel_nucleus: 2
+channel_expression_marker: 3
+channel_organelle: 0
+pixel_to_micron_ratio: 2.4089
+
+# RuntimeParameter
+extract_group_features: true
 clear_border: true
+
+
+# PlotParameter
 dpi: 300
 estimated_cell_diameter: 100
 feature_of_interest: cell_area
@@ -27,4 +35,4 @@ plot_cyclic_orientation: true
 show_polarity_angles: true
 use_given_mask: false
 use_gpu: false
-pixel_to_micron_ratio: 2.4089
+

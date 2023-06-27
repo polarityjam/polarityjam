@@ -9,18 +9,22 @@ channel_expression_marker: -1 # -1 means no expression marker
 pixel_to_micron_ratio: 1.0
 
 # RuntimeParameter
-extract_group_features: True
+estimated_cell_diameter : 100 # estimated cell diameter in pixels
+estimated_cell_diameter_nucleus: 30 # estimated nuclei diameter in pixels
+min_cell_size: 50  # minimum area of cell in pixel^2, will be removed otherwise
+min_nucleus_size: 10 # minimum area of nucleus in pixel^2, will be removed otherwise
+min_organelle_size: 10 # minimum area of organelle in pixel^2, will be removed otherwise
+extract_group_features: False
 membrane_thickness: 5
 feature_of_interest: "cell_area"
-min_cell_size: 50
-min_nucleus_size: 10
-min_organelle_size: 10
 dp_epsilon: 5
 cue_direction: 0
 connection_graph: True
 segmentation_algorithm: "CellposeSegmenter" # "CellposeSegmenter", "SamSegmenter"
 remove_small_objects_size: 10 # in pixels, put to 0 to disable
 clear_border: True
+keyfile_condition_cols: ["short_name"] # only needed if run_key option is used
+
 
 # PlotParameter
 plot_junctions: True

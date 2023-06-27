@@ -495,12 +495,17 @@ class SingleCellJunctionProps:
     @property
     def junction_cue_directional_intensity_ratio(self):
         """Return the ratio of the left vs right cell membrane intensity in cue direction."""
-        sc_junction_intensity_mask_r = self.single_cell_junction_intensity_mask.combine(
-            self.half_masks[0].combine(self.single_membrane_mask).mask_background()
-        )
-        sc_junction_intensity_mask_l = self.single_cell_junction_intensity_mask.combine(
-            self.half_masks[1].combine(self.single_membrane_mask).mask_background()
-        )
+        # TODO: revise this part of the code
+        if len(self.quadrant_masks) == 4:
+            sc_junction_intensity_mask_r = self.single_cell_junction_intensity_mask.combine(
+                self.half_masks[0].combine(self.single_membrane_mask).mask_background()
+            )
+            sc_junction_intensity_mask_l = self.single_cell_junction_intensity_mask.combine(
+                self.half_masks[1].combine(self.single_membrane_mask).mask_background()
+            )
+        else:
+            warnings.warn("Warning: Number of partitions(2) does not match the number of created masks (1):")
+            return np.nan
 
         right = (
             self.sc_junction_intensity_props.intensity.data
@@ -526,18 +531,23 @@ class SingleCellJunctionProps:
     @property
     def junction_cue_axial_intensity_ratio(self):
         """Return the ratio of the sum of cell membrane quarters in cue direction and the total membrane intensity."""
-        sc_junction_intensity_mask_r = self.single_cell_junction_intensity_mask.combine(
-            self.quadrant_masks[0].combine(self.single_membrane_mask).mask_background()
-        )
-        sc_junction_intensity_mask_t = self.single_cell_junction_intensity_mask.combine(
-            self.quadrant_masks[1].combine(self.single_membrane_mask).mask_background()
-        )
-        sc_junction_intensity_mask_l = self.single_cell_junction_intensity_mask.combine(
-            self.quadrant_masks[2].combine(self.single_membrane_mask).mask_background()
-        )
-        sc_junction_intensity_mask_b = self.single_cell_junction_intensity_mask.combine(
-            self.quadrant_masks[3].combine(self.single_membrane_mask).mask_background()
-        )
+        # TODO: revise this part of the code
+        if len(self.quadrant_masks) == 4:
+            sc_junction_intensity_mask_r = self.single_cell_junction_intensity_mask.combine(
+                self.quadrant_masks[0].combine(self.single_membrane_mask).mask_background()
+            )
+            sc_junction_intensity_mask_t = self.single_cell_junction_intensity_mask.combine(
+                self.quadrant_masks[1].combine(self.single_membrane_mask).mask_background()
+            )
+            sc_junction_intensity_mask_l = self.single_cell_junction_intensity_mask.combine(
+                self.quadrant_masks[2].combine(self.single_membrane_mask).mask_background()
+            )
+            sc_junction_intensity_mask_b = self.single_cell_junction_intensity_mask.combine(
+                self.quadrant_masks[3].combine(self.single_membrane_mask).mask_background()
+            )
+        else:
+            warnings.warn("Warning: Number of partitions(4) does not match the number of created masks (3):")
+            return np.nan
 
         left = (
             self.sc_junction_intensity_props.intensity.data

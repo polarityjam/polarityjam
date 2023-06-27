@@ -1,19 +1,19 @@
-## plot options
-
-plot_polarity: True
-plot_marker: True
-plot_orientation: True
-plot_cyclic_orientation: True
-
-outline_width : 2
-show_polarity_angles: True
-
 # segmentation parameters
 channel_junction: 3
 channel_nucleus : 2
 channel_organelle : 0
 channel_expression_marker : 1
-estimated_cell_diameter : 100
-
-membrane_thickness : 4
 pixel_to_micron_ratio: 2.4089
+
+# RuntimeParameter
+extract_group_features: True
+estimated_cell_diameter : 100
+membrane_thickness : 4
+
+# PlotParameter
+plot_polarity: True
+plot_marker: True
+plot_orientation: True
+plot_cyclic_orientation: True
+outline_width : 2
+show_polarity_angles: True

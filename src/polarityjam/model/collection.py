@@ -182,6 +182,8 @@ class PropertiesCollection:
         self.dataset.at[
             self._index, "nuc_major_to_minor_ratio"
         ] = nucleus_props.nuc_major_to_minor_ratio
+        self.dataset.at[self._index, "nuc_circularity"] = 4.0*np.pi*nucleus_props.area / (nucleus_props.perimeter**2)
+        self.dataset.at[self._index, "nuc_shape_index"] = nucleus_props.perimeter / np.sqrt(nucleus_props.area)
 
     def add_sc_general_props(
         self,

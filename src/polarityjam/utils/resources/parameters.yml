@@ -24,7 +24,7 @@ segmentation_algorithm: "CellposeSegmenter" # "CellposeSegmenter", "SamSegmenter
 remove_small_objects_size: 10 # in pixels, put to 0 to disable
 clear_border: True
 keyfile_condition_cols: ["short_name"] # only needed if run_key option is used
-
+save_sc_image: False
 
 # PlotParameter
 plot_junctions: True
@@ -35,6 +35,7 @@ plot_marker: True
 plot_ratio_method: True
 plot_shape_orientation: True
 plot_foi: True
+plot_sc_image: False
 show_statistics: False
 show_polarity_angles: True
 show_graphics_axis: False

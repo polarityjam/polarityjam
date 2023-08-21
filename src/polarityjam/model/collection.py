@@ -28,6 +28,7 @@ class PropertiesCollection:
         self.dataset = pd.DataFrame()
         self.out_path_dict = {}
         self.img_dict = {}
+        self.sc_img_dict = {}
         self.runtime_params_dict = {}
         self._index = 1
         self._reset_index = 1

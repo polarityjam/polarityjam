@@ -1,0 +1,3 @@
+path: deepcell.DeepCellSegmenter
+segmentation_mode: whole-cell # whole-cell or nuclear
+save_mask: False

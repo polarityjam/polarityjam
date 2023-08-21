@@ -128,6 +128,15 @@ class PropertyCollector:
         """Add the image to the property collection."""
         props_collection.img_dict[filename] = img
 
+    @staticmethod
+    def add_sc_imgs(
+        props_collection: PropertiesCollection,
+        filename: str,
+        sc_img_list: List[SingleCellImage],
+    ):
+        """Add the single cell images to the property collection."""
+        props_collection.sc_img_dict[filename] = sc_img_list
+
 
 class GroupPropertyCollector:
     """Static class, collects group features "as they come" in a large dataset."""
@@ -154,7 +163,7 @@ class GroupPropertyCollector:
 
 
 class SingleCellPropertyCollector:
-    """Static class, collects single cell features "as they come" in a large dataset."""
+    """Static class, responsible for collecting single cell properties."""
 
     @staticmethod
     def calc_sc_props(

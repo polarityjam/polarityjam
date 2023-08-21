@@ -1946,6 +1946,89 @@ class Plotter:
 
         return fig, ax
 
+    def plot_single_cell_centered_masks(
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
+    ):
+        """Plot single cell centered masks.
+
+         This will produce for each single cell in an image a figure with 4 subplots:
+            - centered_junction_mask
+            - centered_nuc_mask
+            - centered_organelle_mask
+            - centered_cytosol_mask
+
+        Args:
+            collection:
+                The collection containing the features
+            img_name:
+                The name of the image to plot
+            close:
+                whether to close the figure after saving
+
+        """
+        assert (
+            collection.sc_img_dict is not None or collection.sc_img_dict != {}
+        ), "Single cell images are not available!"
+
+        get_logger().info("Plotting: single cell centered masks")
+
+        single_cells_list = collection.sc_img_dict[img_name]
+
+        plt_scalebar = self.params.plot_scalebar
+        self.params.plot_scalebar = False
+
+        # loop
+        for idx, single_cell in enumerate(single_cells_list):
+            centered_masks = {
+                "centered_cell_mask": single_cell.center_mask(single_cell.cell_mask),
+                "centered_membrane_mask": single_cell.center_mask(
+                    single_cell.cell_membrane_mask
+                ),
+            }
+
+            # junction mask
+            if single_cell.has_junction():
+                centered_masks["centered_junction_mask"] = single_cell.center_mask(
+                    single_cell.junction_mask
+                )
+
+            # nuclei mask
+            if single_cell.has_nuclei():
+                centered_masks["centered_nuc_mask"] = single_cell.center_mask(
+                    single_cell.nucleus_mask
+                )
+
+            # organelle mask
+            if single_cell.has_organelle():
+                centered_masks["centered_organelle_mask"] = single_cell.center_mask(
+                    single_cell.organelle_mask
+                )
+
+            # marker mask
+            if single_cell.has_marker():
+                centered_masks["centered_cytosol_mask"] = single_cell.center_mask(
+                    single_cell.cytosol_mask
+                )
+
+            # plot
+            fig, ax = self._get_figure(len(centered_masks))
+
+            for i, (mask_name, mask) in enumerate(centered_masks.items()):
+                ax[i].imshow(mask.data, cmap="gray")
+                add_title(ax[i], mask_name, mask.data, self.params.show_graphics_axis)
+
+            self._finish_plot(
+                fig,
+                collection.get_out_path_by_name(img_name),
+                img_name,
+                "_single_cell_centered_masks_%s" % idx,
+                ax,
+                1,
+                close,
+            )
+
+        self.params.plot_scalebar = plt_scalebar
+
     def _finish_plot(
         self,
         fig,
@@ -2029,6 +2112,9 @@ class Plotter:
             if self.params.plot_foi:
                 if r_params.extract_group_features:
                     self.plot_foi(collection, key, close)
+
+            if self.params.plot_sc_image:
+                self.plot_single_cell_centered_masks(collection, key, close)
 
     @staticmethod
     def _add_single_cell_orientation_degree_axis(

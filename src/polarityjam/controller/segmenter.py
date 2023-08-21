@@ -20,6 +20,7 @@ class SegmentationMode(Enum):
     NUCLEUS = "nucleus"
     CELL = "cell"
     ORGANELLE = "organelle"
+    JUNCTION = "junction"
 
 
 class Segmenter:
@@ -51,7 +52,7 @@ class Segmenter:
                 Path to a model to load/state index/parameter file or smth. else needed to load a checkpoint needed
                 to perform the segmentation.
             mode:
-                The mode of the segmentation. Could point to different models or something else.
+                The mode of the segmentation. Could be used to run segmentation with different models.
 
         Returns:
             A mask as np.ndarray image.
@@ -96,14 +97,17 @@ def load_segmenter(
             Unnecessary parameters are ignored.
 
     Returns:
-        A tuple of the Segmeter object and its parameters as SegmentationParameter object.
+        A tuple of the Segmenter object and its parameters as SegmentationParameter object.
+
     """
     m = locate(SegmentationAlgorithmE[params_runtime.segmentation_algorithm].value)  # type: ignore
     assert isinstance(m, type), "Segmentation algorithm not found!"
 
     # convert to dict if necessary
-    if isinstance(parameter, SegmentationParameter):
-        parameter = parameter.to_dict()
+    if str(parameter.__class__) == str(
+        SegmentationParameter
+    ):  # class dynamically created - no other way to compare
+        parameter = parameter.to_dict()  # type: ignore
 
     segmentation_parameter = SegmentationParameter(
         params_runtime.segmentation_algorithm, parameter

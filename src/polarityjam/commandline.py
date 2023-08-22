@@ -275,6 +275,12 @@ def run_key(args):
         merged_properties_df = pd.DataFrame()
 
         file_list = get_tif_list(input_path)
+        get_logger().info(
+            "Search for images in folder: %s" % (str(input_path))
+        )
+        get_logger().info(
+            "Image list: %s" % file_list
+        )
         for file_index, filepath in enumerate(file_list):
             filepath = Path(filepath)
             filename = filepath.stem + filepath.suffix
@@ -293,7 +299,8 @@ def run_key(args):
             )
 
             # append condition
-            properties_df["condition"] = row["short_name"]
+            for condition_col in parameters["keyfile_condition_cols"]:
+                properties_df[condition_col] = row[condition_col]
 
             if merged_properties_df.empty:
                 merged_properties_df = properties_df.copy()
@@ -309,7 +316,8 @@ def run_key(args):
             merged_properties_df.to_csv(merged_file, index=False)
 
             summary_df.at[offset + file_index, "folder_name"] = row["folder_name"]
-            summary_df.at[offset + file_index, "short_name"] = row["short_name"]
+            for condition_col in parameters["keyfile_condition_cols"]:
+                summary_df.at[offset + file_index, condition_col] = row[condition_col]
             summary_df.at[offset + file_index, "filepath"] = filepath
             summary_df.at[offset + file_index, "cell_number"] = len(
                 np.unique(cellpose_mask)

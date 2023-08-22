@@ -1,6 +1,7 @@
 """Module for the property collection."""
 import json
 
+import numpy as np
 import pandas as pd
 
 from polarityjam import RuntimeParameter
@@ -181,6 +182,8 @@ class PropertiesCollection:
         self.dataset.at[
             self._index, "nuc_major_to_minor_ratio"
         ] = nucleus_props.nuc_major_to_minor_ratio
+        self.dataset.at[self._index, "nuc_circularity"] = 4.0*np.pi*nucleus_props.area / (nucleus_props.perimeter**2)
+        self.dataset.at[self._index, "nuc_shape_index"] = nucleus_props.perimeter / np.sqrt(nucleus_props.area)
 
     def add_sc_general_props(
         self,
@@ -229,6 +232,8 @@ class PropertiesCollection:
         ] = sc_props.cell_major_to_minor_ratio
         self.dataset.at[self._index, "cell_area"] = sc_props.area
         self.dataset.at[self._index, "cell_perimeter"] = sc_props.perimeter
+        self.dataset.at[self._index, "cell_circularity"] = 4.0*np.pi*sc_props.area / (sc_props.perimeter**2)
+        self.dataset.at[self._index, "cell_shape_index"] = sc_props.perimeter / np.sqrt(sc_props.area)
         self.dataset.at[self._index, "cell_corner_points"] = json.dumps(
             sc_props.cell_corner_points.tolist()
         )

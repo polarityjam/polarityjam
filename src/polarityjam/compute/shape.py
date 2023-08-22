@@ -119,7 +119,14 @@ def partition_single_cell_mask(
     )
 
     masks = []
+    # TODO: check if this is sufficient to catch all cases
     for s in polygons:
+        if s.geom_type != "Polygon":
+            warnings.warn(
+                "Partition of the cell i not a Polygon."
+                )
+            continue
+
         c = s.exterior.coords.xy
         x = np.asarray(c[0].tolist()).astype(np.uint)
         y = np.asarray(c[1].tolist()).astype(np.uint)

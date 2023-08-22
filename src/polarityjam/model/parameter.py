@@ -128,6 +128,7 @@ class RuntimeParameter(Parameter):
         self.segmentation_algorithm = None
         self.remove_small_objects_size = None
         self.clear_border = None
+        self.keyfile_condition_cols = None
 
         super().__init__(**attrs)
 

@@ -162,42 +162,31 @@ class Plotter:
 
         filename, _ = os.path.splitext(os.path.basename(filename))
 
-        if (
-            seg_img_params.channel_junction is not None
-            and seg_img_params.channel_nucleus is not None
-        ):
-            fig, ax = self._get_figure(2)
+        # swap channels if channel last
+        if seg_img.shape[0] > seg_img.shape[-1]:
+            seg_img = np.einsum("ijk->kij", seg_img)
 
-            # junction channel
-            c_junction = seg_img_params.channel_junction
-            ax[0].imshow(seg_img[c_junction, :, :])
-            add_title(
-                ax[0],
-                "junction channel",
-                seg_img[c_junction, :, :],
-                self.params.show_graphics_axis,
-            )
+        channel_names, channels = self._get_available_channels(seg_img_params)
 
-            # nucleus channel
-            c_nucleus = seg_img_params.channel_nucleus
-            ax[1].imshow(seg_img[c_nucleus, :, :])
-            add_title(
-                ax[1],
-                "nuclei channel",
-                seg_img[c_nucleus, :, :],
-                self.params.show_graphics_axis,
-            )
+        fig, ax = self._get_figure(len(channels))
 
-            axes = [ax[0], ax[1]]
-        else:
-            fig, ax = self._get_figure(1)
-
+        if len(channels) == 1:
             # first channel
             ax.imshow(seg_img[:, :])
             add_title(
-                ax, "first channel", seg_img[:, :], self.params.show_graphics_axis
+                ax, channel_names[0], seg_img[:, :], self.params.show_graphics_axis
             )
             axes = [ax]
+        else:
+            for i, c in enumerate(channels):
+                ax[i].imshow(seg_img[c, :, :])
+                add_title(
+                    ax[i],
+                    channel_names[i],
+                    seg_img[c, :, :],
+                    self.params.show_graphics_axis,
+                )
+            axes = ax
 
         self._finish_plot(
             fig,
@@ -210,6 +199,23 @@ class Plotter:
         )
 
         return fig, axes
+
+    def _get_available_channels(self, seg_img_params):
+        channels = []
+        channel_names = []
+        if seg_img_params.channel_junction is not None:
+            channels.append(seg_img_params.channel_junction)
+            channel_names.append("junction channel")
+        if seg_img_params.channel_nucleus is not None:
+            channels.append(seg_img_params.channel_nucleus)
+            channel_names.append("nucleus channel")
+        if seg_img_params.channel_organelle is not None:
+            channels.append(seg_img_params.channel_organelle)
+            channel_names.append("organelle channel")
+        if seg_img_params.channel_expression_marker is not None:
+            channels.append(seg_img_params.channel_expression_marker)
+            channel_names.append("expression marker channel")
+        return channel_names, channels
 
     def plot_mask(
         self,
@@ -256,87 +262,59 @@ class Plotter:
             # ignore background
             mask_nuclei_ = np.where(mask_nuclei > 0, mask_nuclei_, np.nan)
 
-        if (
-            seg_img_params.channel_junction is not None
-            and seg_img_params.channel_nucleus is not None
-        ):
-            num_fig = 4 if mask_nuclei is not None else 3
-            fig, ax = self._get_figure(num_fig)
+        # swap channels if channel last
+        if seg_img.shape[0] > seg_img.shape[-1]:
+            seg_img = np.einsum("ijc->cij", seg_img)
 
-            ax[0].imshow(seg_img[0, :, :])
+        channel_names, channels = self._get_available_channels(seg_img_params)
+
+        num_fig = len(channels)
+        num_fig = num_fig + 2 if mask_nuclei is not None else num_fig + 1
+
+        fig, ax = self._get_figure(num_fig)
+
+        # show channels
+        for i, c in enumerate(channels):
+            ax[i].imshow(seg_img[c, :, :])
             add_title(
-                ax[0],
-                "junction channel",
-                seg_img[0, :, :],
+                ax[i],
+                channel_names[i],
+                seg_img[c, :, :],
                 self.params.show_graphics_axis,
             )
 
-            ax[1].imshow(seg_img[1, :, :])
+        # show mask
+        ax[len(channels)].imshow(seg_img[seg_img_params.channel_junction, :, :])
+        ax[len(channels)].imshow(mask_, cmap=plt.cm.gist_rainbow, alpha=0.5)
+        add_title(
+            ax[len(channels)],
+            "segmentation",
+            seg_img[seg_img_params.channel_junction, :, :],
+            self.params.show_graphics_axis,
+        )
+
+        # show nuclei mask
+        if mask_nuclei is not None and seg_img_params.channel_nucleus != -1:
+            ax[-1].imshow(seg_img[seg_img_params.channel_nucleus, :, :])
+            ax[-1].imshow(mask_nuclei_, cmap=plt.cm.gist_rainbow, alpha=0.5)
             add_title(
-                ax[1],
-                "nuclei channel",
-                seg_img[1, :, :],
+                ax[-1],
+                "segmentation_nuclei",
+                seg_img[seg_img_params.channel_nucleus, :, :],
                 self.params.show_graphics_axis,
             )
-
-            ax[2].imshow(seg_img[0, :, :])
-            ax[2].imshow(mask_, cmap=plt.cm.gist_rainbow, alpha=0.5)
-            add_title(
-                ax[2], "segmentation", seg_img[0, :, :], self.params.show_graphics_axis
-            )
-
-            axes = [ax[0], ax[1], ax[2]]
-
-            if mask_nuclei is not None:
-                ax[3].imshow(seg_img[1, :, :])
-                ax[3].imshow(mask_nuclei_, cmap=plt.cm.gist_rainbow, alpha=0.5)
-                add_title(
-                    ax[3],
-                    "segmentation_nuclei",
-                    seg_img[0, :, :],
-                    self.params.show_graphics_axis,
-                )
-
-                axes = [ax[0], ax[1], ax[2], ax[3]]
-
-        else:
-            num_fig = 3 if mask_nuclei is not None else 2
-            fig, ax = self._get_figure(num_fig)
-
-            s_img = seg_img[:, :]
-
-            # ax 1
-            ax[0].imshow(s_img)
-            add_title(ax[0], "junction channel", s_img, self.params.show_graphics_axis)
-
-            # ax 2
-            ax[1].imshow(s_img)
-            ax[1].imshow(mask_, cmap=plt.cm.gist_rainbow, alpha=0.5)
-            add_title(ax[1], "segmentation", s_img, self.params.show_graphics_axis)
-
-            axes = [ax[0], ax[1]]
-
-            # ax 3
-            if mask_nuclei is not None:
-                ax[2].imshow(s_img)
-                ax[2].imshow(mask_nuclei_, cmap=plt.cm.gist_rainbow, alpha=0.5)
-                add_title(
-                    ax[2], "segmentation_nuclei", s_img, self.params.show_graphics_axis
-                )
-
-                axes = [ax[0], ax[1], ax[2]]
 
         self._finish_plot(
             fig,
             output_path,
             filename,
             "_segmentation",
-            axes,
+            ax,
             seg_img_params.pixel_to_micron_ratio,
             close,
         )
 
-        return fig, axes
+        return fig, ax
 
     def plot_organelle_polarity(
         self, collection: PropertiesCollection, img_name: str, close: bool = False

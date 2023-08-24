@@ -126,7 +126,7 @@ def run():
             % (args.image_nuclear, args.image_membrane)
         )
 
-    print("Segmentation saved to:", output_name.resolve())
+    print("Segmentation saved to:", str(Path(output_name).resolve()))
 
 
 setup(
@@ -231,9 +231,7 @@ class DeepCellSegmenter:
         """Initialize the segmenter with the given parameters."""
         self.params = params
         self.img_path = None
-        self.ptm = 1
-        self.ch_nuc = 0
-        self.ch_mem = 0
+        self.mpp = 1
         self.tmp_dir = None
 
     def segment(
@@ -266,12 +264,12 @@ class DeepCellSegmenter:
         # build arguments
         argv = [
             os.path.dirname(os.path.realpath(__file__)),
-            "--channel_nuclear=%s" % self.ch_nuc,
-            "--channel_membrane=%s" % self.ch_mem,
+            "--channel_nuclear=%s" % 0,
+            "--channel_membrane=%s" % 1,
             "--save_npy=%s" % "True",
             "--segmentation_mode=%s" % self.params.segmentation_mode,
             "--save_mask=%s" % self.params.save_mask,
-            "--image_mpp=%s" % self.ptm,
+            "--image_mpp=%s" % self.mpp,
             "--output_path=%s" % self.tmp_dir.name,
             "--folder_path=%s" % self.tmp_dir.name,
         ]
@@ -295,14 +293,8 @@ class DeepCellSegmenter:
         self.tmp_dir = tempfile.TemporaryDirectory(dir=tempfile.gettempdir())
         self.img_path = os.path.join(self.tmp_dir.name, "segmentation.tif")
 
-        img_s = np.einsum("kij->jik", img)
-
-        img_s = np.dstack((img_s[0], img_s[1], np.zeros(img_s[0].shape)))
-
-        tifffile.imwrite(self.img_path, img_s)
-
         # store parameters
-        self.ptm = input_parameter.pixel_to_micron_ratio
+        self.mpp = 1 / input_parameter.pixel_to_micron_ratio
 
         if input_parameter.channel_nucleus == -1:
             raise ValueError("Segmentation without nucleus channel is not supported!")
@@ -310,8 +302,19 @@ class DeepCellSegmenter:
         if input_parameter.channel_junction == -1:
             raise ValueError("Segmentation without nucleus channel is not supported!")
 
-        self.ch_nuc = input_parameter.channel_nucleus
-        self.ch_mem = input_parameter.channel_junction
+        img_s = img
+        if img.shape[0] < img.shape[-1]:
+            img_s = np.einsum("kij->ijk", img)  # channel last
+
+        img_s = np.dstack(
+            (
+                img_s[:, :, input_parameter.channel_nucleus],
+                img_s[:, :, input_parameter.channel_junction],
+                np.zeros((img_s.shape[0], img_s.shape[1])),
+            )
+        )
+
+        tifffile.imwrite(self.img_path, img_s)
 
         return img, input_parameter
 

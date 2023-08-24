@@ -148,7 +148,7 @@ Runtime Parameter
 +----------------------------+---------------+-------------------------+---------------------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | remove_small_objects_size  | runtime       | integer                 | 10                  | 0 - inf     | Minimal expected object size in pixel. Segmentation objects with a smaller value will be removed before the analysis starts.                                     |
 +----------------------------+---------------+-------------------------+---------------------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| keyfile_condition_cols     | runtime       | list                    | ["short_name"]      |             | OOnly required if the run_key option is used. List of columns transferred to the result table to identify conditions in the subsequent data analysis.            |
+| keyfile_condition_cols     | runtime       | list                    | ["short_name"]      |             | Only required if the run_key option is used. List of columns transferred to the result table, first entry serves as unique identifier of conditions.             |
 +----------------------------+---------------+-------------------------+---------------------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 Plot Parameter

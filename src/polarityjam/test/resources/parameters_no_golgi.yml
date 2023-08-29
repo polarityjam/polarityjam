@@ -8,7 +8,7 @@ pixel_to_micron_ratio: 4.8177
 
 # RuntimeParameter
 estimated_cell_diameter: 250
-estimated_cell_diameter_nucleus: 80
+estimated_nucleus_diameter: 80
 extract_group_features: True
 membrane_thickness: 4
 

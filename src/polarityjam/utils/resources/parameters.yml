@@ -10,7 +10,7 @@ pixel_to_micron_ratio: 1.0
 
 # RuntimeParameter
 estimated_cell_diameter : 100 # estimated cell diameter in pixels
-estimated_cell_diameter_nucleus: 30 # estimated nuclei diameter in pixels
+estimated_nucleus_diameter: 30 # estimated nuclei diameter in pixels
 min_cell_size: 50  # minimum area of cell in pixel^2, will be removed otherwise
 min_nucleus_size: 10 # minimum area of nucleus in pixel^2, will be removed otherwise
 min_organelle_size: 10 # minimum area of organelle in pixel^2, will be removed otherwise

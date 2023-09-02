@@ -255,6 +255,11 @@ def run_key(args):
     )
     key_file = read_key_file(inkey)
 
+    condition_cols = parameters["keyfile_condition_cols"]
+    if len(condition_cols) == 0:
+        raise ValueError("No condition columns specified in parameter file! Please set 'keyfile_condition_cols' in the parameter file.")
+    unique_condition_identifier = condition_cols[0]
+
     # empty DF summarizing overall results
     summary_df = pd.DataFrame()
     summary_properties_df = pd.DataFrame()
@@ -268,7 +273,7 @@ def run_key(args):
         input_path = in_path.joinpath(cur_sub_path)
 
         # current stack output sub-folder
-        cur_sub_out_path = str(row["short_name"])
+        cur_sub_out_path = str(row[unique_condition_identifier])
         output_path = output_path_base.joinpath(cur_sub_out_path)
 
         # empty results dataset for each condition
@@ -310,7 +315,7 @@ def run_key(args):
                 )
 
             merged_file = str(
-                output_path.joinpath("merged_table_%s" % row["short_name"] + ".csv")
+                output_path.joinpath("merged_table_%s" % row[unique_condition_identifier] + ".csv")
             )
             get_logger().info("Writing merged features to disk: %s" % merged_file)
             merged_properties_df.to_csv(merged_file, index=False)

@@ -123,7 +123,7 @@ class CellposeSegmenter(Segmenter):
         estimated_cell_diameter = (
             self.params.estimated_cell_diameter
             if cells
-            else self.params.estimated_cell_diameter_nucleus
+            else self.params.estimated_nucleus_diameter
         )
         get_logger().info(
             "Calculate cellpose %s segmentation. This might take some time..."

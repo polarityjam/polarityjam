@@ -1,6 +1,12 @@
 # Default parameters file
 # This files contains all parameters and their default values.
 
+############ Please read carefully ############
+# Does NOT contain segmentation parameters.
+# These can be found  in the corresponding yml file of the segmentation algorithm under /src/polarityjam/segmentation/
+#
+############ Please read carefully ############
+
 # ImageParameters
 channel_junction: 0
 channel_nucleus: 1

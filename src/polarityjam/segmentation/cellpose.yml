@@ -6,8 +6,8 @@ use_given_mask: True
 model_type: "cyto" # "cyto", "cyto2", "custom"
 model_type_nucleus: "nuclei" # "custom"
 model_path: ""
-estimated_cell_diameter: 100
-estimated_nucleus_diameter: 30
+estimated_cell_diameter: 100 # estimated cell diameter in pixels
+estimated_nucleus_diameter: 30 # estimated nuclei diameter in pixels
 flow_threshold: 0.4 # default cellpose value
 cellprob_threshold: 0.0 # default cellpose value
 

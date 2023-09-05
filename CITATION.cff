@@ -6,10 +6,11 @@ authors:
     orcid: https://orcid.org/0000-0002-3792-9695
   - family-names: Giese
     given-names: Wolfgang
+    orcid: https://orcid.org/0000-0003-0872-0929
 title: "PolarityJaM"
 abstract: A software package that lets you study cell polarity, junctions and morphology.
 license: MIT
-version: 0.1.0
-date-released: 2023-01-15
+version: 0.1.6
+date-released: 2023-09-04
 repository: "https://github.com/polarityjam/polarityjam.git"
 type: software

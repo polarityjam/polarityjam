@@ -1,9 +1,13 @@
 Citation
 ========
 
-We are working on a publication.
+Please cite our software if you use PolarityJam in your research:
 
-In the meantime got to our `repository <https://github.com/polarityjam/polarityjam>`_.
-Here we provide citation instructions on the landing page!
+Albrecht, Jan Philipp, & Giese, Wolfgang. (2023). PolarityJaM (v0.1.6). Zenodo. https://doi.org/10.5281/zenodo.8317234.
+
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.8317234.svg
+   :target: https://doi.org/10.5281/zenodo.8317234
+   :width: 250px
+   :align: center
 
 Thank you.

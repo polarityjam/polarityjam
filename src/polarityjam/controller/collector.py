@@ -48,14 +48,14 @@ class PropertyCollector:
         if sc_prop_collection.organelle_props:
             props_collection.add_sc_organelle_props(sc_prop_collection.organelle_props)
 
-        if sc_prop_collection.marker_nuc_props:
-            props_collection.add_sc_marker_nuclei_props(
-                sc_prop_collection.marker_nuc_props
-            )
+        #if sc_prop_collection.marker_nuc_props:
+        #    props_collection.add_sc_marker_nuclei_props(
+        #        sc_prop_collection.marker_nuc_props
+        #    )
 
         if sc_prop_collection.marker_nuc_cyt_props:
             props_collection.add_sc_marker_nuclei_cytosol_props(
-                sc_prop_collection.marker_nuc_cyt_props
+                sc_prop_collection.marker_nuc_cyt_props, sc_prop_collection.marker_nuc_props
             )
 
         if sc_prop_collection.marker_membrane_props:

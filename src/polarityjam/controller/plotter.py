@@ -275,6 +275,10 @@ class Plotter:
 
         # show channels
         for i, c in enumerate(channels):
+            # expand dim
+            seg_img = (
+                np.expand_dims(seg_img, axis=0) if len(seg_img.shape) == 2 else seg_img
+            )
             ax[i].imshow(seg_img[c, :, :])
             add_title(
                 ax[i],

@@ -48,6 +48,7 @@ class PropertyCollector:
         if sc_prop_collection.organelle_props:
             props_collection.add_sc_organelle_props(sc_prop_collection.organelle_props)
 
+        #TODO: add marker_nuc_props in case only in case only nuclei staining is present
         #if sc_prop_collection.marker_nuc_props:
         #    props_collection.add_sc_marker_nuclei_props(
         #        sc_prop_collection.marker_nuc_props

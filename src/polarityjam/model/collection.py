@@ -260,6 +260,7 @@ class PropertiesCollection:
             self._index, "organelle_orientation_deg"
         ] = organelle_props.organelle_orientation_deg
 
+    # TODO: currently unused add marker_nuc_props in case only nuclei staining is present
     #def add_sc_marker_nuclei_props(self, marker_nuc_props: SingleCellMarkerNucleiProps):
     #    """Add specific single cell marker-nuclei properties to the dataset.
 

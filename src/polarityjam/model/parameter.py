@@ -198,6 +198,7 @@ class PlotParameter(Parameter):
         self.pixel_to_micron_ratio = None
         self.plot_scalebar = None
         self.length_scalebar_microns = None
+        self.plot_statistics = None
 
         self.graphics_output_format = None
         self.dpi = None

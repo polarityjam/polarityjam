@@ -13,6 +13,7 @@ from matplotlib import pyplot as plt
 from shapely.geometry import LineString
 
 from polarityjam.compute.shape import get_divisor_lines
+from polarityjam.compute.statistics import compute_polarity_index
 from polarityjam.model.collection import PropertiesCollection
 from polarityjam.model.image import BioMedicalChannel
 from polarityjam.model.masks import BioMedicalInstanceSegmentationMask, BioMedicalMask
@@ -25,6 +26,7 @@ from polarityjam.vizualization.plot import (
     add_vector,
     save_current_fig,
 )
+
 
 
 class Plotter:
@@ -336,7 +338,7 @@ class Plotter:
         return fig, axes
 
     def plot_organelle_polarity(
-        self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, r_params: dict(), close: bool = False
     ):
         """Plot the organelle polarity of a specific image in the collection.
 
@@ -427,10 +429,19 @@ class Plotter:
                     fontsize=self.params.fontsize_text_annotations,
                 )
 
+        plot_title = "organelle polarity"
+        if self.params.plot_statistics:
+            angles = np.array(collection.get_properties_by_img_name(img_name)["organelle_orientation_rad"])
+            alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='directional')
+            plot_title += "\n mean direction: " + str(np.round(alpha_m, 2)) + "°"
+            plot_title += " R: " + str(np.round(R, 2))
+            plot_title += "\n c: " + str(np.round(c, 2))
+            plot_title += " V0: " + str(np.round(R * c, 2))
+
         # set title and ax limits
         add_title(
             ax,
-            "organelle orientation",
+            plot_title,
             im_junction,
             self.params.show_graphics_axis,
         )
@@ -1574,7 +1585,7 @@ class Plotter:
             r_params = collection.get_runtime_params_by_img_name(key)
 
             if self.params.plot_polarity and img.has_nuclei() and img.has_organelle():
-                self.plot_organelle_polarity(collection, key, close)
+                self.plot_organelle_polarity(collection, key, r_params, close)
                 if img.has_nuclei():
                     self.plot_nuc_displacement_orientation(collection, key, close)
 

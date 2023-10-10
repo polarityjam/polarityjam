@@ -433,10 +433,10 @@ class Plotter:
         if self.params.plot_statistics:
             angles = np.array(collection.get_properties_by_img_name(img_name)["organelle_orientation_rad"])
             alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='directional')
-            plot_title += "\n mean direction: " + str(np.round(alpha_m, 2)) + "°"
-            plot_title += " R: " + str(np.round(R, 2))
+            plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
+            plot_title += "PI: " + str(np.round(R, 2)) + ","
             plot_title += "\n c: " + str(np.round(c, 2))
-            plot_title += " V0: " + str(np.round(R * c, 2))
+            plot_title += ", V: " + str(np.round(R * c, 2))
 
         # set title and ax limits
         add_title(

@@ -460,7 +460,7 @@ class Plotter:
         return fig, [ax]
 
     def plot_nuc_displacement_orientation(
-        self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, r_params: dict(), close: bool = False
     ):
         """Plot the nucleus displacement orientation of a specific image in the collection.
 
@@ -534,6 +534,15 @@ class Plotter:
                     color=self.params.font_color,
                     fontsize=self.params.fontsize_text_annotations,
                 )
+
+        plot_title = "nucleus displacement orientation"
+        if self.params.plot_statistics:
+            angles = np.array(collection.get_properties_by_img_name(img_name)["nuc_displacement_orientation_rad"])
+            alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='directional')
+            plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
+            plot_title += "PI: " + str(np.round(R, 2)) + ","
+            plot_title += "\n c: " + str(np.round(c, 2))
+            plot_title += ", V: " + str(np.round(R * c, 2))
 
         # set title and ax limits
         add_title(
@@ -1587,19 +1596,19 @@ class Plotter:
             if self.params.plot_polarity and img.has_nuclei() and img.has_organelle():
                 self.plot_organelle_polarity(collection, key, r_params, close)
                 if img.has_nuclei():
-                    self.plot_nuc_displacement_orientation(collection, key, close)
+                    self.plot_nuc_displacement_orientation(collection, key, r_params, close)
 
             if self.params.plot_marker and img.has_marker():
                 self.plot_marker_expression(collection, key, close)
-                self.plot_marker_polarity(collection, key, close)
+                self.plot_marker_polarity(collection, key, r_params, close)
                 if img.has_nuclei():
-                    self.plot_marker_nucleus_orientation(collection, key, close)
+                    self.plot_marker_nucleus_orientation(collection, key, r_params, close)
 
                 if self.params.plot_ratio_method:
                     self.plot_marker_cue_intensity_ratio(collection, key, close)
 
             if self.params.plot_junctions and img.has_junction():
-                self.plot_junction_polarity(collection, key, close)
+                self.plot_junction_polarity(collection, key, r_params, close)
                 self.plot_corners(collection, key, close)
 
             if self.params.plot_orientation:
@@ -1609,7 +1618,7 @@ class Plotter:
                 self.plot_junction_cue_intensity_ratio(collection, key, close)
 
             if self.params.plot_cyclic_orientation:
-                self.plot_orientation(collection, key, close)
+                self.plot_orientation(collection, key, r_params, close)
 
             if self.params.plot_foi:
                 if r_params.extract_group_features:

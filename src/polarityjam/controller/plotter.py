@@ -8,6 +8,7 @@ from typing import List, Optional, Union
 import cmocean as cm
 import matplotlib
 import numpy as np
+import scipy.ndimage as ndi
 import pandas
 from matplotlib import pyplot as plt
 from shapely.geometry import LineString
@@ -736,7 +737,16 @@ class Plotter:
         fig, ax = self._get_figure(1)
 
         # plot marker intensity
-        ax.imshow(im_marker.data, cmap=plt.cm.gray, alpha=1.0)
+        im_marker_ = ndi.gaussian_filter(im_marker.data, sigma=1)
+        cax = ax.imshow(im_marker_, cmap=plt.cm.seismic, alpha=1.0)
+
+        nanmin = np.nanpercentile(im_marker_,10)
+        nanmax = np.nanpercentile(im_marker_,90)
+
+        #nanmin = np.nanmin(im_marker_)
+        #nanmax = np.nanmax(im_marker_)
+        yticks = [nanmin, np.round(nanmin + (nanmax - nanmin) / 2, 1), nanmax]
+        add_colorbar(fig, cax, ax, yticks, "marker intensity")
 
         # show cell outlines
         ax.imshow(self._masked_cell_outlines(im_marker, cell_mask), alpha=0.5)
@@ -1223,18 +1233,18 @@ class Plotter:
 
                 m = np.where(segmentation_mask.data == label, LWR_val, m)
 
-                ax[0].text(
-                    row["cell_X"],
-                    row["cell_Y"],
-                    str(np.round(LWR_val, 1)),
-                    color=self.params.font_color,
-                    fontsize=self.params.fontsize_text_annotations,
-                )
+                #ax[0].text(
+                #    row["cell_X"],
+                #    row["cell_Y"],
+                #    str(np.round(LWR_val, 1)),
+                #    color=self.params.font_color,
+                #    fontsize=self.params.fontsize_text_annotations,
+                #)
 
             cax_0 = ax[0].imshow(np.ma.masked_where(m == 0, m), cmap=plt.cm.bwr, alpha=0.8)
 
-            nanmin = np.nanmin(LWR_values)
-            nanmax = np.nanmax(LWR_values)
+            nanmin = np.round(np.nanmin(LWR_values))
+            nanmax = np.round(np.nanmax(LWR_values))
             yticks = [nanmin, np.round(nanmin + (nanmax - nanmin) / 2, 1), nanmax]
             add_colorbar(fig, cax_0, ax[0], yticks, "length to width ratio")
 
@@ -1247,7 +1257,7 @@ class Plotter:
                 LWR_val = row[("nuc_major_to_minor_ratio")]
                 label = row["label"]
 
-                m = np.where(inst_nuclei_mask .data == label, LWR_val, m)
+                m = np.where(inst_nuclei_mask.data == label, LWR_val, m)
 
                 #ax[1].text(
                 #    row["nuc_X"],
@@ -1259,8 +1269,8 @@ class Plotter:
 
             cax_1 = ax[1].imshow(np.ma.masked_where(m == 0, m), cmap=plt.cm.bwr, alpha=0.8)
 
-            nanmin = np.nanmin(nuc_LWR_values)
-            nanmax = np.nanmax(nuc_LWR_values)
+            nanmin = np.round(np.nanmin(nuc_LWR_values),1)
+            nanmax = np.round(np.nanmax(nuc_LWR_values),1)
             yticks = [nanmin, np.round(nanmin + (nanmax - nanmin) / 2, 1), nanmax]
             add_colorbar(fig, cax_1, ax[1], yticks, "length to width ratio")
 
@@ -1289,8 +1299,8 @@ class Plotter:
 
             cax = ax.imshow(np.ma.masked_where(m == 0, m), cmap=plt.cm.bwr, alpha=0.8)
 
-            nanmin = np.nanmin(LWR_values)
-            nanmax = np.nanmax(LWR_values)
+            nanmin = np.round(np.nanmin(LWR_values),1)
+            nanmax = np.round(np.nanmax(LWR_values),1)
             yticks = [nanmin, np.round(nanmin + (nanmax - nanmin) / 2, 1), nanmax]
             add_colorbar(fig, cax, ax, yticks, "length to width ratio")
 
@@ -1309,6 +1319,7 @@ class Plotter:
                     self.params.fontsize_text_annotations,
                     self.params.font_color,
                     self.params.marker_size,
+                    decimals=1
                 )
 
                 # plot orientation degree nucleus
@@ -1323,6 +1334,7 @@ class Plotter:
                     self.params.fontsize_text_annotations,
                     self.params.font_color,
                     self.params.marker_size,
+                    decimals=1
                 )
             else:
                 Plotter._add_single_cell_major_minor_axis(
@@ -1336,6 +1348,7 @@ class Plotter:
                     self.params.fontsize_text_annotations,
                     self.params.font_color,
                     self.params.marker_size,
+                    decimals=1
                 )
 
         # set title and ax limits
@@ -2211,10 +2224,11 @@ class Plotter:
         orientation,
         major_axis_length,
         minor_axis_length,
-        eccentricity,
+        feature_value,
         fontsize=3,
         font_color="w",
         markersize=2,
+        decimals=2,
     ):
         (
             x1_ma,
@@ -2233,5 +2247,5 @@ class Plotter:
         ax.plot((y1_mi, y2_mi), (x1_mi, x2_mi), "--w", linewidth=0.5)
         ax.plot(y0, x0, ".b", markersize=markersize)
         ax.text(
-            y0, x0, str(np.round(eccentricity, 2)), color=font_color, fontsize=fontsize
+            y0, x0, str(np.round(feature_value, decimals)), color=font_color, fontsize=fontsize
         )

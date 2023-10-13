@@ -1243,8 +1243,8 @@ class Plotter:
 
             cax_0 = ax[0].imshow(np.ma.masked_where(m == 0, m), cmap=plt.cm.bwr, alpha=0.8)
 
-            nanmin = np.round(np.nanmin(LWR_values))
-            nanmax = np.round(np.nanmax(LWR_values))
+            nanmin = np.round(np.nanmin(LWR_values),1)
+            nanmax = np.round(np.nanmax(LWR_values),1)
             yticks = [nanmin, np.round(nanmin + (nanmax - nanmin) / 2, 1), nanmax]
             add_colorbar(fig, cax_0, ax[0], yticks, "length to width ratio")
 

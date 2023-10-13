@@ -161,13 +161,13 @@ Plot Parameter
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | plot_polarity            | plot      | bool     | True          | True, False           | Indicates whether to perform the organelle polarity plot.                                 |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
-| plot_orientation         | plot      | bool     | True          | True, False           | Indicates whether to perform the orientation plot.                                        |
+| plot_elongation          | plot      | bool     | True          | True, False           | Indicates whether to perform the elongation plot.                                         |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | plot_marker              | plot      | bool     | True          | True, False           | Indicates whether to perform the marker polarity plot.                                    |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | plot_ratio_method        | plot      | bool     | False         | currently disabled    | Indicates whether to perform the ratio plot.                                              |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
-| plot_cyclic_orientation  | plot      | bool     | True          | True, False           | Indicates whether to perform the cyclic orientation plot.                                 |
+| plot_shape_orientation   | plot      | bool     | True          | True, False           | Indicates whether to perform the shape orientation plot.                                  |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | plot_foi                 | plot      | bool     | True          | True, False           | Indicates whether to perform the feature of interest plot.                                |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+

@@ -30,6 +30,7 @@ keyfile_condition_cols: ["short_name"] # only needed if run_key option is used
 plot_junctions: True
 plot_polarity: True
 plot_elongation: True
+plot_circularity: True
 plot_marker: True
 plot_ratio_method: True
 plot_shape_orientation: True

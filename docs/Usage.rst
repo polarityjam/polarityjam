@@ -163,6 +163,8 @@ Plot Parameter
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | plot_elongation          | plot      | bool     | True          | True, False           | Indicates whether to perform the elongation plot.                                         |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
+| plot_circularity         | plot      | bool     | True          | True, False           | Indicates whether to perform plot of cell (and nuclei) circularity.                       |
++--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | plot_marker              | plot      | bool     | True          | True, False           | Indicates whether to perform the marker polarity plot.                                    |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | plot_ratio_method        | plot      | bool     | False         | currently disabled    | Indicates whether to perform the ratio plot.                                              |

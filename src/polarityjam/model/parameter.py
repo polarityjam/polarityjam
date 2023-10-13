@@ -187,6 +187,7 @@ class PlotParameter(Parameter):
         self.plot_junctions = None
         self.plot_polarity = None
         self.plot_elongation = None
+        self.plot_circularity = None
         self.plot_marker = None
         self.plot_ratio_method = None
         self.plot_shape_orientation = None

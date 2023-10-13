@@ -18,7 +18,7 @@ extract_group_features: False
 membrane_thickness: 5
 feature_of_interest: "cell_area"
 dp_epsilon: 5
-cue_direction: 0
+cue_direction: 0   # should be provided in degrees and take values between 0 and 360
 connection_graph: True
 segmentation_algorithm: "CellposeSegmenter" # "CellposeSegmenter", "SamSegmenter"
 remove_small_objects_size: 10 # in pixels, put to 0 to disable

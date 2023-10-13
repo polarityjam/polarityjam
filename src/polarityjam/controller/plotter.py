@@ -547,7 +547,7 @@ class Plotter:
         # set title and ax limits
         add_title(
             ax,
-            "nucleus displacement orientation",
+            plot_title,
             img.junction.data,
             self.params.show_graphics_axis,
         )
@@ -708,7 +708,7 @@ class Plotter:
         return fig, axes
 
     def plot_marker_polarity(
-        self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, r_params: dict(), close: bool = False
     ):
         """Plot the marker polarity of a specific image in the collection.
 
@@ -753,7 +753,16 @@ class Plotter:
                 self.params.font_color,
             )
 
-        add_title(ax, "marker polarity", im_marker.data, self.params.show_graphics_axis)
+        plot_title = "marker polarity"
+        if self.params.plot_statistics:
+            angles = np.array(collection.get_properties_by_img_name(img_name)["marker_centroid_orientation_rad"])
+            alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='directional')
+            plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
+            plot_title += "PI: " + str(np.round(R, 2)) + ","
+            plot_title += "\n c: " + str(np.round(c, 2))
+            plot_title += ", V: " + str(np.round(R * c, 2))
+
+        add_title(ax, plot_title, im_marker.data, self.params.show_graphics_axis)
 
         self._finish_plot(
             fig,
@@ -768,7 +777,7 @@ class Plotter:
         return fig, [ax]
 
     def plot_marker_nucleus_orientation(
-        self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, r_params: dict(), close: bool = False
     ):
         """Plot the marker polarity of a specific image in the collection.
 
@@ -856,10 +865,19 @@ class Plotter:
                     fontsize=self.params.fontsize_text_annotations,
                 )
 
+        plot_title = "marker nucleus orientation"
+        if self.params.plot_statistics:
+            angles = np.array(collection.get_properties_by_img_name(img_name)["marker_nucleus_orientation_rad"])
+            alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='directional')
+            plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
+            plot_title += "PI: " + str(np.round(R, 2)) + ","
+            plot_title += "\n c: " + str(np.round(c, 2))
+            plot_title += ", V: " + str(np.round(R * c, 2))
+
         # set title and ax limits
         add_title(
             ax,
-            "marker nucleus orientation",
+            plot_title,
             im_junction,
             self.params.show_graphics_axis,
         )
@@ -878,7 +896,7 @@ class Plotter:
         return fig, [ax]
 
     def plot_junction_polarity(
-        self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, r_params: dict(), close: bool = False
     ):
         """Plot the junction polarity of a specific image in the collection.
 
@@ -923,8 +941,17 @@ class Plotter:
                 self.params.font_color,
             )
 
+        plot_title = "junction polarity"
+        #if self.params.plot_statistics:
+        #    angles = np.array(collection.get_properties_by_img_name(img_name)["junction_polarity_rad"])
+        #    alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='directional')
+        #    plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
+        #    plot_title += "PI: " + str(np.round(R, 2)) + ","
+        #    plot_title += "\n c: " + str(np.round(c, 2))
+        #    plot_title += ", V: " + str(np.round(R * c, 2))
+
         add_title(
-            ax, "junction polarity", im_junction.data, self.params.show_graphics_axis
+            ax, plot_title, im_junction.data, self.params.show_graphics_axis
         )
 
         self._finish_plot(
@@ -1396,7 +1423,7 @@ class Plotter:
         return fig, ax
 
     def plot_orientation(
-        self, collection: PropertiesCollection, img_name: str, close: bool = False
+        self, collection: PropertiesCollection, img_name: str, r_params: dict(), close: bool = False
     ):
         """Plot the orientation of a specific image in the collection.
 
@@ -1508,11 +1535,20 @@ class Plotter:
                     self.params.marker_size,
                 )
 
+        plot_title = "cell orientation"
+        if self.params.plot_statistics:
+            angles = np.array(collection.get_properties_by_img_name(img_name)["cell_shape_orientation_rad"])
+            alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='axial')
+            plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
+            plot_title += "PI: " + str(np.round(R, 2)) + ","
+            plot_title += "\n c: " + str(np.round(c, 2))
+            plot_title += ", V: " + str(np.round(R * c, 2))
+
         # set title and ax limits
         if inst_nuclei_mask is not None:
             add_title(
                 ax[0],
-                "cell shape orientation",
+                plot_title,
                 im_junction.data,
                 self.params.show_graphics_axis,
             )
@@ -1526,7 +1562,7 @@ class Plotter:
         else:
             add_title(
                 ax,
-                "cell shape orientation",
+                plot_title,
                 im_junction.data,
                 self.params.show_graphics_axis,
             )

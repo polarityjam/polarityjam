@@ -1535,7 +1535,7 @@ class Plotter:
                     self.params.marker_size,
                 )
 
-        plot_title = "cell orientation"
+        plot_title = "cell shape orientation"
         if self.params.plot_statistics:
             angles = np.array(collection.get_properties_by_img_name(img_name)["cell_shape_orientation_rad"])
             alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='axial')
@@ -1552,9 +1552,18 @@ class Plotter:
                 im_junction.data,
                 self.params.show_graphics_axis,
             )
+            plot_title_nuc = "nuclei shape orientation"
+            if self.params.plot_statistics:
+                angles = np.array(collection.get_properties_by_img_name(img_name)["nuc_shape_orientation_rad"])
+                alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='axial')
+                plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
+                plot_title += "PI: " + str(np.round(R, 2)) + ","
+                plot_title += "\n c: " + str(np.round(c, 2))
+                plot_title += ", V: " + str(np.round(R * c, 2))
+
             add_title(
                 ax[1],
-                "nuclei shape orientation",
+                plot_title_nuc,
                 im_junction.data,
                 self.params.show_graphics_axis,
             )
@@ -1647,13 +1656,13 @@ class Plotter:
                 self.plot_junction_polarity(collection, key, r_params, close)
                 self.plot_corners(collection, key, close)
 
-            if self.params.plot_orientation:
+            if self.params.plot_elongation:
                 self.plot_eccentricity(collection, key, close)
 
             if self.params.plot_ratio_method:
                 self.plot_junction_cue_intensity_ratio(collection, key, close)
 
-            if self.params.plot_cyclic_orientation:
+            if self.params.plot_shape_orientation:
                 self.plot_orientation(collection, key, r_params, close)
 
             if self.params.plot_foi:

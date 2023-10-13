@@ -29,10 +29,10 @@ keyfile_condition_cols: ["short_name"] # only needed if run_key option is used
 # PlotParameter
 plot_junctions: True
 plot_polarity: True
-plot_orientation: True
+plot_elongation: True
 plot_marker: True
 plot_ratio_method: True
-plot_cyclic_orientation: True
+plot_shape_orientation: True
 plot_foi: True
 outline_width: 2
 show_polarity_angles: True

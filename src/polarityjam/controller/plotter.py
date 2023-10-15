@@ -350,6 +350,8 @@ class Plotter:
                 The name of the image to plot
             close:
                 whether to close the figure after saving
+            cue_direction:
+                the direction of the cue in degrees, only necessary if params.plot_statistics is True
 
         """
         img = collection.get_image_by_img_name(img_name)
@@ -472,7 +474,8 @@ class Plotter:
                 The name of the image to plot
             close:
                 whether to close the figure after saving
-
+            cue_direction:
+                the direction of the cue in degrees, only necessary if params.plot_statistics = True
         """
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
@@ -709,7 +712,7 @@ class Plotter:
         return fig, axes
 
     def plot_marker_polarity(
-        self, collection: PropertiesCollection, img_name: str, r_params: dict(), close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False, cue_direction: float = 0.0
     ):
         """Plot the marker polarity of a specific image in the collection.
 
@@ -720,6 +723,8 @@ class Plotter:
                 The name of the image to plot
             close:
                 whether to close the figure after saving
+            cue_direction:
+                the direction of the cue in degrees, only necessary if params.plot_statistics = True
 
         """
         img = collection.get_image_by_img_name(img_name)
@@ -766,7 +771,7 @@ class Plotter:
         plot_title = "marker polarity"
         if self.params.plot_statistics:
             angles = np.array(collection.get_properties_by_img_name(img_name)["marker_centroid_orientation_rad"])
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='directional')
+            alpha_m, R, c = compute_polarity_index(angles, cue_direction=cue_direction, stats_mode='directional')
             plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
             plot_title += "\n c: " + str(np.round(c, 2))
@@ -793,11 +798,13 @@ class Plotter:
 
         Args:
             collection:
-                The collection containing the features
+                the collection containing the features
             img_name:
-                The name of the image to plot
+                the name of the image to plot
             close:
                 whether to close the figure after saving
+            cue_direction:
+                the direction of the cue in degrees, only necessary if params.plot_statistics = True
 
         """
         img = collection.get_image_by_img_name(img_name)
@@ -917,6 +924,8 @@ class Plotter:
                 The name of the image to plot
             close:
                 whether to close the figure after saving
+            cue_direction:
+                the direction of the cue in degrees, only necessary if params.plot_statistics = True
 
         """
         img = collection.get_image_by_img_name(img_name)
@@ -1986,7 +1995,7 @@ class Plotter:
 
             if self.params.plot_marker and img.has_marker():
                 self.plot_marker_expression(collection, key, close)
-                self.plot_marker_polarity(collection, key, r_params, close)
+                self.plot_marker_polarity(collection, key, close, r_params.cue_direction)
                 if img.has_nuclei():
                     self.plot_marker_nucleus_orientation(collection, key, close, r_params.cue_direction)
 

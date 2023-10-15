@@ -339,7 +339,7 @@ class Plotter:
         return fig, axes
 
     def plot_organelle_polarity(
-        self, collection: PropertiesCollection, img_name: str, r_params: dict(), close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False, cue_direction: float = 0.0
     ):
         """Plot the organelle polarity of a specific image in the collection.
 
@@ -433,7 +433,7 @@ class Plotter:
         plot_title = "organelle polarity"
         if self.params.plot_statistics:
             angles = np.array(collection.get_properties_by_img_name(img_name)["organelle_orientation_rad"])
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='directional')
+            alpha_m, R, c = compute_polarity_index(angles, cue_direction=cue_direction, stats_mode='directional')
             plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
             plot_title += "\n c: " + str(np.round(c, 2))
@@ -461,7 +461,7 @@ class Plotter:
         return fig, [ax]
 
     def plot_nuc_displacement_orientation(
-        self, collection: PropertiesCollection, img_name: str, r_params: dict(), close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False, cue_direction: float = 0.0
     ):
         """Plot the nucleus displacement orientation of a specific image in the collection.
 
@@ -539,7 +539,7 @@ class Plotter:
         plot_title = "nucleus displacement orientation"
         if self.params.plot_statistics:
             angles = np.array(collection.get_properties_by_img_name(img_name)["nuc_displacement_orientation_rad"])
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='directional')
+            alpha_m, R, c = compute_polarity_index(angles, cue_direction=cue_direction, stats_mode='directional')
             plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
             plot_title += "\n c: " + str(np.round(c, 2))
@@ -787,7 +787,7 @@ class Plotter:
         return fig, [ax]
 
     def plot_marker_nucleus_orientation(
-        self, collection: PropertiesCollection, img_name: str, r_params: dict(), close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False, cue_direction: float = 0.0
     ):
         """Plot the marker polarity of a specific image in the collection.
 
@@ -878,7 +878,7 @@ class Plotter:
         plot_title = "marker nucleus orientation"
         if self.params.plot_statistics:
             angles = np.array(collection.get_properties_by_img_name(img_name)["marker_nucleus_orientation_rad"])
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='directional')
+            alpha_m, R, c = compute_polarity_index(angles, cue_direction = cue_direction, stats_mode='directional')
             plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
             plot_title += "\n c: " + str(np.round(c, 2))
@@ -906,7 +906,7 @@ class Plotter:
         return fig, [ax]
 
     def plot_junction_polarity(
-        self, collection: PropertiesCollection, img_name: str, r_params: dict(), close: bool = False
+        self, collection: PropertiesCollection, img_name: str, close: bool = False, cue_direction: float = 0.0
     ):
         """Plot the junction polarity of a specific image in the collection.
 
@@ -1233,14 +1233,6 @@ class Plotter:
 
                 m = np.where(segmentation_mask.data == label, LWR_val, m)
 
-                #ax[0].text(
-                #    row["cell_X"],
-                #    row["cell_Y"],
-                #    str(np.round(LWR_val, 1)),
-                #    color=self.params.font_color,
-                #    fontsize=self.params.fontsize_text_annotations,
-                #)
-
             cax_0 = ax[0].imshow(np.ma.masked_where(m == 0, m), cmap=plt.cm.bwr, alpha=0.8)
 
             nanmin = np.round(np.nanmin(LWR_values),1)
@@ -1259,14 +1251,6 @@ class Plotter:
 
                 m = np.where(inst_nuclei_mask.data == label, LWR_val, m)
 
-                #ax[1].text(
-                #    row["nuc_X"],
-                #    row["nuc_Y"],
-                #    str(np.round(LWR_val, 1)),
-                #    color=self.params.font_color,
-                #    fontsize=self.params.fontsize_text_annotations,
-                #)
-
             cax_1 = ax[1].imshow(np.ma.masked_where(m == 0, m), cmap=plt.cm.bwr, alpha=0.8)
 
             nanmin = np.round(np.nanmin(nuc_LWR_values),1)
@@ -1274,9 +1258,6 @@ class Plotter:
             yticks = [nanmin, np.round(nanmin + (nanmax - nanmin) / 2, 1), nanmax]
             add_colorbar(fig, cax_1, ax[1], yticks, "length to width ratio")
 
-            #Plotter._add_nuclei_circularity(
-            #    fig, ax[1], im_junction, nuclei_eccentricity
-            #)
         else:
             ax.imshow(im_junction.data, cmap=plt.cm.gray, alpha=1)
 
@@ -1288,14 +1269,6 @@ class Plotter:
                 label = row["label"]
 
                 m = np.where(segmentation_mask.data == label, LWR_val, m)
-
-                #ax.text(
-                #    row["cell_X"],
-                #    row["cell_Y"],
-                #    str(np.round(row["cell_major_to_minor_ratio"], 1)),
-                #    color=self.params.font_color,
-                #    fontsize=self.params.fontsize_text_annotations,
-                #)
 
             cax = ax.imshow(np.ma.masked_where(m == 0, m), cmap=plt.cm.bwr, alpha=0.8)
 
@@ -1789,7 +1762,7 @@ class Plotter:
         return fig, ax
 
     def plot_shape_orientation(
-        self, collection: PropertiesCollection, img_name: str, r_params: dict(), close: bool = False
+        self, collection: PropertiesCollection, img_name: str,  close: bool = False, cue_direction: float = 0.0
     ):
         """Plot the orientation of a specific image in the collection.
 
@@ -1800,6 +1773,8 @@ class Plotter:
                 The name of the image to plot
             close:
                 whether to close the figure after saving
+            cue_direction:
+                the direction of the cue in degrees, only necessary if params.plot_statistics = True
 
         """
         img = collection.get_image_by_img_name(img_name)
@@ -1904,7 +1879,7 @@ class Plotter:
         plot_title = "cell shape orientation"
         if self.params.plot_statistics:
             angles = np.array(collection.get_properties_by_img_name(img_name)["cell_shape_orientation_rad"])
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='axial')
+            alpha_m, R, c = compute_polarity_index(angles, cue_direction= cue_direction, stats_mode='axial')
             plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
             plot_title += "\n c: " + str(np.round(c, 2))
@@ -1921,11 +1896,11 @@ class Plotter:
             plot_title_nuc = "nuclei shape orientation"
             if self.params.plot_statistics:
                 angles = np.array(collection.get_properties_by_img_name(img_name)["nuc_shape_orientation_rad"])
-                alpha_m, R, c = compute_polarity_index(angles, cue_direction=r_params.cue_direction, stats_mode='axial')
-                plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
-                plot_title += "PI: " + str(np.round(R, 2)) + ","
-                plot_title += "\n c: " + str(np.round(c, 2))
-                plot_title += ", V: " + str(np.round(R * c, 2))
+                alpha_m, R, c = compute_polarity_index(angles, cue_direction = cue_direction, stats_mode='axial')
+                plot_title_nuc += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
+                plot_title_nuc += "PI: " + str(np.round(R, 2)) + ","
+                plot_title_nuc += "\n c: " + str(np.round(c, 2))
+                plot_title_nuc += ", V: " + str(np.round(R * c, 2))
 
             add_title(
                 ax[1],
@@ -2005,21 +1980,21 @@ class Plotter:
             r_params = collection.get_runtime_params_by_img_name(key)
 
             if self.params.plot_polarity and img.has_nuclei() and img.has_organelle():
-                self.plot_organelle_polarity(collection, key, r_params, close)
+                self.plot_organelle_polarity(collection, key, close, r_params.cue_direction)
                 if img.has_nuclei():
-                    self.plot_nuc_displacement_orientation(collection, key, r_params, close)
+                    self.plot_nuc_displacement_orientation(collection, key, close, r_params.cue_direction)
 
             if self.params.plot_marker and img.has_marker():
                 self.plot_marker_expression(collection, key, close)
                 self.plot_marker_polarity(collection, key, r_params, close)
                 if img.has_nuclei():
-                    self.plot_marker_nucleus_orientation(collection, key, r_params, close)
+                    self.plot_marker_nucleus_orientation(collection, key, close, r_params.cue_direction)
 
                 if self.params.plot_ratio_method:
                     self.plot_marker_cue_intensity_ratio(collection, key, close)
 
             if self.params.plot_junctions and img.has_junction():
-                self.plot_junction_polarity(collection, key, r_params, close)
+                self.plot_junction_polarity(collection, key, close, r_params.cue_direction)
                 self.plot_corners(collection, key, close)
 
             if self.params.plot_elongation:
@@ -2033,7 +2008,7 @@ class Plotter:
                 self.plot_junction_cue_intensity_ratio(collection, key, close)
 
             if self.params.plot_shape_orientation:
-                self.plot_shape_orientation(collection, key, r_params, close)
+                self.plot_shape_orientation(collection, key, close, r_params.cue_direction)
 
             if self.params.plot_foi:
                 if r_params.extract_group_features:

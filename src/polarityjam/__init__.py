@@ -18,3 +18,4 @@ from polarityjam.model.collection import PropertiesCollection
 from polarityjam.model.image import BioMedicalImage
 from polarityjam.controller.extractor import Extractor
 from polarityjam.controller.plotter import Plotter
+from polarityjam.polarityjam_logging import PolarityJamLogger

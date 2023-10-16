@@ -143,9 +143,13 @@ class BioMedicalMask(Mask):
             np.ma.masked_where(self.data == False, self.data)  # noqa: E712
         )
 
-    def combine(self, other_mask: BioMedicalMask):
-        """Combine the mask with another mask."""
+    def combine(self, other_mask: BioMedicalMask) -> BioMedicalMask:
+        """Combine (AND) the mask with another mask."""
         return BioMedicalMask(np.logical_and(self.data, other_mask.data))
+
+    def disjoin(self, other_mask: BioMedicalMask) -> BioMedicalMask:
+        """Logical disjunction (XOR) from the other mask and this mask."""
+        return BioMedicalMask(np.logical_xor(self.data, other_mask.data))
 
 
 class BioMedicalInstanceSegmentationMask(Mask):

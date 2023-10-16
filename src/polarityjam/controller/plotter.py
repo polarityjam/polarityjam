@@ -1272,7 +1272,7 @@ class Plotter:
 
             LWR_values = single_cell_dataset["cell_major_to_minor_ratio"]
             # plot the figure of interest
-            m = np.copy(mask.data)
+            m = np.copy(segmentation_mask.data)
             for _, row in single_cell_dataset.iterrows():
                 LWR_val = row["cell_major_to_minor_ratio"]
                 label = row["label"]

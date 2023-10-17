@@ -1,6 +1,20 @@
+"""Module for support computing statistics."""
+
+
 import numpy as np
 
 def compute_polarity_index(angles: np.ndarray, cue_direction:  float = 0.0, stats_mode: str = 'directional'):
+    """Compute the polarity index of a list of angles.
+
+    Args:
+        angles:
+        cue_direction:
+        stats_mode:
+
+    Returns:
+        [alpha_m, R, c]
+
+    """
 
     sum_cos = 0.0
     sum_sin = 0.0

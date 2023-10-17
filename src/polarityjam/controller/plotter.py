@@ -743,13 +743,13 @@ class Plotter:
 
         # plot marker intensity
         im_marker_ = ndi.gaussian_filter(im_marker.data, sigma=1)
-        cax = ax.imshow(im_marker_, cmap=plt.cm.seismic, alpha=1.0)
+        cax = ax.imshow(im_marker_, cmap=plt.cm.gray, alpha=1.0)
 
-        nanmin = np.nanpercentile(im_marker_,10)
-        nanmax = np.nanpercentile(im_marker_,90)
+        #nanmin = np.nanpercentile(im_marker_,10)
+        #nanmax = np.nanpercentile(im_marker_,90)
 
-        #nanmin = np.nanmin(im_marker_)
-        #nanmax = np.nanmax(im_marker_)
+        nanmin = np.nanmin(im_marker_)
+        nanmax = np.nanmax(im_marker_)
         yticks = [nanmin, np.round(nanmin + (nanmax - nanmin) / 2, 1), nanmax]
         add_colorbar(fig, cax, ax, yticks, "marker intensity")
 

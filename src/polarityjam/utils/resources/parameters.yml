@@ -35,12 +35,12 @@ plot_marker: True
 plot_ratio_method: True
 plot_shape_orientation: True
 plot_foi: True
-plot_statistics: False
-outline_width: 2
+show_statistics: False
 show_polarity_angles: True
 show_graphics_axis: False
 plot_scalebar: True
 length_scalebar_microns: 20.0
+outline_width: 2
 graphics_output_format: ["png"] # 'png', 'pdf', 'svg'
 dpi: 300
 graphics_width: 5 # figure width in inches

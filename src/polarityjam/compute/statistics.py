@@ -8,19 +8,25 @@ def compute_polarity_index(angles: np.ndarray, cue_direction:  float = 0.0, stat
 
     Args:
         angles:
+            array with directional or axial data
         cue_direction:
+            direction of the imposed cue, used for V-score computation
         stats_mode:
+            'directional' or 'axial'
 
     Returns:
-        [alpha_m, R, c]
+        list of values [alpha_m, R, c], alpha_m is the mean direction, R is the resultant vector length, c is a measure
+        of deviation from the mean angle, used to calculate the V-score: V=cR
 
     """
+
+    get_logger().info("Compute circular statistics")
 
     sum_cos = 0.0
     sum_sin = 0.0
 
     if cue_direction > 360.0:
-        print("Warning invalid cue direction, must be between 0 and 360 degrees")
+        get_logger().warn("Warning invalid cue direction, must be between 0 and 360 degrees")
 
     p = 1.0
     if stats_mode == 'axial':

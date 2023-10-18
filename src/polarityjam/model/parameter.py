@@ -186,10 +186,11 @@ class PlotParameter(Parameter):
             attrs = {}
         self.plot_junctions = None
         self.plot_polarity = None
-        self.plot_orientation = None
+        self.plot_elongation = None
+        self.plot_circularity = None
         self.plot_marker = None
         self.plot_ratio_method = None
-        self.plot_cyclic_orientation = None
+        self.plot_shape_orientation = None
         self.plot_foi = None
 
         self.outline_width = None
@@ -198,6 +199,7 @@ class PlotParameter(Parameter):
         self.pixel_to_micron_ratio = None
         self.plot_scalebar = None
         self.length_scalebar_microns = None
+        self.plot_statistics = None
 
         self.graphics_output_format = None
         self.dpi = None

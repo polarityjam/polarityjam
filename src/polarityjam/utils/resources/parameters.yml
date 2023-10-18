@@ -18,7 +18,7 @@ extract_group_features: False
 membrane_thickness: 5
 feature_of_interest: "cell_area"
 dp_epsilon: 5
-cue_direction: 0
+cue_direction: 0   # should be provided in degrees and take values between 0 and 360
 connection_graph: True
 segmentation_algorithm: "CellposeSegmenter" # "CellposeSegmenter", "SamSegmenter"
 remove_small_objects_size: 10 # in pixels, put to 0 to disable
@@ -29,16 +29,18 @@ keyfile_condition_cols: ["short_name"] # only needed if run_key option is used
 # PlotParameter
 plot_junctions: True
 plot_polarity: True
-plot_orientation: True
+plot_elongation: True
+plot_circularity: True
 plot_marker: True
 plot_ratio_method: True
-plot_cyclic_orientation: True
+plot_shape_orientation: True
 plot_foi: True
-outline_width: 2
+show_statistics: False
 show_polarity_angles: True
 show_graphics_axis: False
 plot_scalebar: True
 length_scalebar_microns: 20.0
+outline_width: 2
 graphics_output_format: ["png"] # 'png', 'pdf', 'svg'
 dpi: 300
 graphics_width: 5 # figure width in inches

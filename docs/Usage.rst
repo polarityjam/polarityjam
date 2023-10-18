@@ -161,25 +161,29 @@ Plot Parameter
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | plot_polarity            | plot      | bool     | True          | True, False           | Indicates whether to perform the organelle polarity plot.                                 |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
-| plot_orientation         | plot      | bool     | True          | True, False           | Indicates whether to perform the orientation plot.                                        |
+| plot_elongation          | plot      | bool     | True          | True, False           | Indicates whether to perform the elongation plot.                                         |
++--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
+| plot_circularity         | plot      | bool     | True          | True, False           | Indicates whether to perform plot of cell (and nuclei) circularity.                       |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | plot_marker              | plot      | bool     | True          | True, False           | Indicates whether to perform the marker polarity plot.                                    |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | plot_ratio_method        | plot      | bool     | False         | currently disabled    | Indicates whether to perform the ratio plot.                                              |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
-| plot_cyclic_orientation  | plot      | bool     | True          | True, False           | Indicates whether to perform the cyclic orientation plot.                                 |
+| plot_shape_orientation   | plot      | bool     | True          | True, False           | Indicates whether to perform the shape orientation plot.                                  |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | plot_foi                 | plot      | bool     | True          | True, False           | Indicates whether to perform the feature of interest plot.                                |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
-| outline_width            | plot      | integer  | 2             | 0 - inf               | Outline width of a cell.                                                                  |
+| plot_scalebar            | plot      | bool     | True          | True, False           | Shows the scalebar with the pixel to micron ratio specified with the image.               |
++--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
+| show_statistics          | plot      | bool     | True          | True, False           | Add circular statistics to plot title.                                                    |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | show_polarity_angles     | plot      | bool     | True          | True, False           | Indicates whether to additionally add the polarity angles to the polarity plots.          |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | show_graphics_axis       | plot      | bool     | False         | True, False           | Additionally shows the axes of the image.                                                 |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
-| plot_scalebar            | plot      | bool     | True          | True, False           | Shows the scalebar with the pixel to micron ratio specified with the image.               |
-+--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | length_scalebar_microns  | plot      | float    | 10            | 0 - inf               | Length of the scalebar in microns.                                                        |
++--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
+| outline_width            | plot      | integer  | 2             | 0 - inf               | Outline width of a cell.                                                                  |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | graphics_output_format   | plot      | string   | “png”, “pdf”  | “png”, “pdf” , “svg"  | The output format of the plot figures. Several can be specified. Default is png and pdf.  |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+

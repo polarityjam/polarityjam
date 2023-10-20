@@ -121,9 +121,8 @@ class SamSegmenter:
             os.path.dirname(os.path.realpath(__file__))
         ).joinpath("SAM")
         self.model_url = params.model_url  # type: ignore
-        self.model_path = self.DOWNLOAD_PATH_REL.joinpath(
-            os.path.split(self.model_url)[-1]
-        )
+        self.model_name = params.model_name  # type: ignore
+        self.model_path = self.DOWNLOAD_PATH_REL.joinpath(self.model_name)
         self.tmp_dir = None
 
     def segment(
@@ -140,7 +139,7 @@ class SamSegmenter:
             path:
                 The path to the image.
             mode:
-                The mode to use for segmentation.
+                The mode to use for segmentation. Either nucleus, organelle or cell.
 
         Returns:
             The segmented image as numpy array.
@@ -153,9 +152,23 @@ class SamSegmenter:
         import tifffile
 
         from polarityjam.controller.segmenter import SegmentationMode
+        from polarityjam.polarityjam_logging import get_logger
+
+        if path is not None:
+            get_logger().warning(
+                "This segmentation algorithm does not support loading segmentations from disk!"
+            )
 
         if mode is None:
             mode = SegmentationMode.CELL
+
+        if isinstance(mode, str):
+            try:
+                mode = SegmentationMode(mode)
+            except ValueError:
+                raise ValueError(
+                    'Mode must be either "nucleus", "organelle", "cell" or "junction".'
+                )
 
         if mode == SegmentationMode.NUCLEUS:
             img = img[:, :, 1]
@@ -163,8 +176,12 @@ class SamSegmenter:
             img = img[:, :, 0]
         elif mode == SegmentationMode.ORGANELLE:
             img = img[:, :, 2]
+        elif mode == SegmentationMode.JUNCTION:
+            raise ValueError("This segmentation algorithm does not support this mode!")
         else:
-            raise ValueError("Mode must be either nucleus, organelle or cell.")
+            raise ValueError(
+                'Mode must be either "nucleus", "organelle", "cell" or "junction".'
+            )
 
         def _install():
             # installs this file (the solution)
@@ -180,13 +197,6 @@ class SamSegmenter:
                 _install()
         except LookupError:
             _install()
-
-        # build arguments
-        argv = [
-            os.path.dirname(
-                os.path.realpath(__file__)
-            ),  # first argument always script name
-        ]
 
         # prepare image for SAM
         img_e = np.expand_dims(img, axis=-1)
@@ -234,7 +244,7 @@ class SamSegmenter:
 
         Args:
             img:
-                The image to prepare.
+                The image to prepare. Assumes channel last!
             img_parameter:
                 The image parameter.
 
@@ -249,7 +259,11 @@ class SamSegmenter:
         from polarityjam.utils.url import download_resource
 
         if not self.model_path.exists():
-            download_resource(self.model_url, self.model_path)
+            if not self.model_url:
+                raise ValueError(
+                    "Model does not exist and no model url is given. Please specify a model url in the parameters."
+                )
+            download_resource(self.model_url, self.DOWNLOAD_PATH_REL)
 
         params_prep_img = ImageParameter()
         px_to_m_r = img_parameter.pixel_to_micron_ratio

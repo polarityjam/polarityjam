@@ -183,8 +183,12 @@ class PropertiesCollection:
         self.dataset.at[
             self._index, "nuc_major_to_minor_ratio"
         ] = nucleus_props.nuc_major_to_minor_ratio
-        self.dataset.at[self._index, "nuc_circularity"] = 4.0*np.pi*nucleus_props.area / (nucleus_props.perimeter**2)
-        self.dataset.at[self._index, "nuc_shape_index"] = nucleus_props.perimeter / np.sqrt(nucleus_props.area)
+        self.dataset.at[self._index, "nuc_circularity"] = (
+            4.0 * np.pi * nucleus_props.area / (nucleus_props.perimeter**2)
+        )
+        self.dataset.at[
+            self._index, "nuc_shape_index"
+        ] = nucleus_props.perimeter / np.sqrt(nucleus_props.area)
 
     def add_sc_general_props(
         self,
@@ -233,8 +237,12 @@ class PropertiesCollection:
         ] = sc_props.cell_major_to_minor_ratio
         self.dataset.at[self._index, "cell_area"] = sc_props.area
         self.dataset.at[self._index, "cell_perimeter"] = sc_props.perimeter
-        self.dataset.at[self._index, "cell_circularity"] = 4.0*np.pi*sc_props.area / (sc_props.perimeter**2)
-        self.dataset.at[self._index, "cell_shape_index"] = sc_props.perimeter / np.sqrt(sc_props.area)
+        self.dataset.at[self._index, "cell_circularity"] = (
+            4.0 * np.pi * sc_props.area / (sc_props.perimeter**2)
+        )
+        self.dataset.at[self._index, "cell_shape_index"] = sc_props.perimeter / np.sqrt(
+            sc_props.area
+        )
         self.dataset.at[self._index, "cell_corner_points"] = json.dumps(
             sc_props.cell_corner_points.tolist()
         )
@@ -262,7 +270,7 @@ class PropertiesCollection:
         ] = organelle_props.organelle_orientation_deg
 
     # TODO: currently unused add marker_nuc_props in case only nuclei staining is present
-    #def add_sc_marker_nuclei_props(self, marker_nuc_props: SingleCellMarkerNucleiProps):
+    # def add_sc_marker_nuclei_props(self, marker_nuc_props: SingleCellMarkerNucleiProps):
     #    """Add specific single cell marker-nuclei properties to the dataset.
 
     #    Args:
@@ -284,7 +292,9 @@ class PropertiesCollection:
     #    ] = marker_nuc_props.marker_nucleus_orientation_deg
 
     def add_sc_marker_nuclei_cytosol_props(
-        self, marker_nuc_cyt_props: SingleCellMarkerCytosolProps, marker_nuc_props: SingleCellMarkerNucleiProps
+        self,
+        marker_nuc_cyt_props: SingleCellMarkerCytosolProps,
+        marker_nuc_props: SingleCellMarkerNucleiProps,
     ):
         """Add specific single cell marker-nuclei-cytosol properties to the dataset.
 
@@ -303,14 +313,14 @@ class PropertiesCollection:
         ] = marker_nuc_cyt_props.marker_sum_expression_cyt
 
         self.dataset.at[
-           self._index, "marker_mean_expression_nuc"
+            self._index, "marker_mean_expression_nuc"
         ] = marker_nuc_props.mean_intensity
         self.dataset.at[
             self._index, "marker_sum_expression_nuc"
         ] = marker_nuc_props.marker_sum_expression_nuc
-        self.dataset.at[
-            self._index, "marker_mean_expression_nuc_cyt_ratio"
-        ] = marker_nuc_props.mean_intensity/marker_nuc_cyt_props.mean_intensity
+        self.dataset.at[self._index, "marker_mean_expression_nuc_cyt_ratio"] = (
+            marker_nuc_props.mean_intensity / marker_nuc_cyt_props.mean_intensity
+        )
 
         self.dataset.at[
             self._index, "marker_nucleus_orientation_rad"
@@ -318,8 +328,6 @@ class PropertiesCollection:
         self.dataset.at[
             self._index, "marker_nucleus_orientation_deg"
         ] = marker_nuc_props.marker_nucleus_orientation_deg
-
-
 
     def add_sc_marker_membrane_props(
         self, marker_membrane_props: SingleCellMarkerMembraneProps

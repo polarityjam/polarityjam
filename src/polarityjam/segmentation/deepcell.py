@@ -241,15 +241,54 @@ class DeepCellSegmenter:
         mode=None,
     ):
         """Segment the given image."""
+        import os
+
+        import numpy as np
+
+        from polarityjam.controller.segmenter import SegmentationMode
+        from polarityjam.polarityjam_logging import get_logger
 
         def _install():
             # path to this file
             path = os.path.abspath(__file__)
             album.install(path)
 
-        import os
+        if path is not None:
+            get_logger().warning(
+                "This segmentation algorithm does not support loading segmentations from disk!"
+            )
 
-        import numpy as np
+        if mode is None:
+            mode = SegmentationMode.CELL
+
+        if isinstance(mode, str):
+            try:
+                mode = SegmentationMode(mode)
+            except ValueError:
+                raise ValueError(
+                    'Mode must be either "nucleus", "organelle", "cell" or "junction".'
+                )
+
+        if mode == SegmentationMode.JUNCTION:
+            raise ValueError("This segmentation algorithm does not support this mode!")
+        elif mode == SegmentationMode.ORGANELLE:
+            get_logger().info(
+                "This model is probably not trained for organelles segmentation. Please handle results with care."
+            )
+        elif mode == SegmentationMode.CELL:
+            get_logger().info("Start segmentation procedure for cells...")
+            assert (
+                self.params.segmentation_mode == "whole-cell"
+            ), 'Segmentation parameter "segmentation_mode" must be "whole-cell"!'
+        elif mode == SegmentationMode.NUCLEUS:
+            get_logger().info("Start segmentation procedure for nuclei...")
+            assert (
+                self.params.segmentation_mode == "nuclear"
+            ), 'Segmentation parameter "segmentation_mode" must be "nuclear"!'
+        else:
+            raise ValueError(
+                'Mode must be either "nucleus", "organelle", "cell" or "junction".'
+            )
 
         solution_id = "polarityjam:DeepCell-predict:0.1.0"
         album = setup_album()
@@ -296,10 +335,16 @@ class DeepCellSegmenter:
         # store parameters
         self.mpp = 1 / input_parameter.pixel_to_micron_ratio
 
-        if input_parameter.channel_nucleus == -1:
+        if (
+            input_parameter.channel_nucleus == -1
+            or input_parameter.channel_nucleus is None
+        ):
             raise ValueError("Segmentation without nucleus channel is not supported!")
 
-        if input_parameter.channel_junction == -1:
+        if (
+            input_parameter.channel_junction == -1
+            or input_parameter.channel_junction is None
+        ):
             raise ValueError("Segmentation without nucleus channel is not supported!")
 
         img_s = img

@@ -49,8 +49,7 @@ class Segmenter:
             img:
                 The image prepared for segmentation.
             path:
-                Path to a model to load/state index/parameter file or smth. else needed to load a checkpoint needed
-                to perform the segmentation.
+                When given, segmentation is loaded from disk instead of calculated.
             mode:
                 The mode of the segmentation. Could be used to run segmentation with different models.
 

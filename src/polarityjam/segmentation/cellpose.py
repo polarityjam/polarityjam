@@ -40,11 +40,34 @@ class CellposeSegmenter(Segmenter):
             A mask as np.ndarray image.
 
         """
-        cells = False if mode == SegmentationMode.NUCLEUS else True
-        get_logger().info(
-            "Start segmentation procedure for %s..." % ("cells" if cells else "nuclei")
-        )
-        return self._load_or_get_cellpose_segmentation(img, path, cells)
+        if mode is None:
+            mode = SegmentationMode.CELL
+
+        if isinstance(mode, str):
+            try:
+                mode = SegmentationMode(mode)
+            except ValueError:
+                raise ValueError(
+                    'Mode must be either "nucleus", "organelle", "cell" or "junction".'
+                )
+
+        if mode == SegmentationMode.JUNCTION:
+            raise ValueError("This segmentation algorithm does not support this mode!")
+        elif mode == SegmentationMode.ORGANELLE:
+            get_logger().info(
+                "This model is probably not trained for organelles segmentation. Please handle results with care."
+            )
+            return self._load_or_get_cellpose_segmentation(img, path, True)
+        elif mode == SegmentationMode.CELL:
+            get_logger().info("Start segmentation procedure for cells...")
+            return self._load_or_get_cellpose_segmentation(img, path, True)
+        elif mode == SegmentationMode.NUCLEUS:
+            get_logger().info("Start segmentation procedure for nuclei...")
+            return self._load_or_get_cellpose_segmentation(img, path, False)
+        else:
+            raise ValueError(
+                'Mode must be either "nucleus", "organelle", "cell" or "junction".'
+            )
 
     def prepare(
         self, img: np.ndarray, img_parameter: ImageParameter

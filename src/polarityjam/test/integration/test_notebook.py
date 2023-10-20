@@ -196,6 +196,8 @@ class TestIntegration(TestCommon):
                         print("")
                 elif line.startswith(replace_cell_pattern3):
                     print("mask_deepcell=None")
+                    print("img_prepared_deepcell=img_prepared")
+                    print("img_prepared_deepcell_params=img_prepared_params")
                     while not next(myiter, "None").startswith(replace_cell_pattern3):
                         print("")
                 else:

@@ -54,7 +54,7 @@ def compute_polarity_index(angles: np.ndarray, cue_direction:  float = 0.0, stat
     if stats_mode == 'axial':
         if cue_direction >= np.pi:
             cue_direction -= np.pi
-    c = np.cos(alpha_m - cue_direction)
+    c = np.cos(p*(alpha_m - cue_direction))
 
     alpha_m = np.rad2deg(alpha_m)
 
@@ -62,4 +62,30 @@ def compute_polarity_index(angles: np.ndarray, cue_direction:  float = 0.0, stat
         alpha_m += 360.0/p
 
     return [alpha_m, R, c]
+
+
+def compute_polarity_index_per_image(feature_df, feature_name):
+    '''Compute the polarity index for each image in the feature_df.
+    
+    '''
+
+    cols = ["filename", "alpha_m", "R", "c", "V"]
+
+    polarity_index_df = pd.DataFrame(columns=cols)
+
+    counter = 0
+    for filename in feature_df["filename"].unique():
+        # print(filename)
+        single_image_properties_df = feature_df[feature_df["filename"] == filename]
+        # compute_polarity_index(angles: np.ndarray, cue_direction:  float = 0.0, stats_mode: str = 'directional')
+        angles = np.array(single_image_properties_df[feature_name])
+        alpha_m, R, c = compute_polarity_index(angles, cue_direction=0.0, stats_mode='directional', unit='radians')
+        polarity_index_df.at[counter, "filename"] = filename
+        polarity_index_df.at[counter, "alpha_m"] = alpha_m
+        polarity_index_df.at[counter, "R"] = R
+        polarity_index_df.at[counter, "c"] = c
+        polarity_index_df.at[counter, "V"] = c * R
+        counter += 1
+
+    return polarity_index_df
 

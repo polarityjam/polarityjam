@@ -99,7 +99,10 @@ def load_segmenter(
         A tuple of the Segmenter object and its parameters as SegmentationParameter object.
 
     """
-    m = locate(SegmentationAlgorithmE[params_runtime.segmentation_algorithm].value)  # type: ignore
+    try:
+        m = locate(SegmentationAlgorithmE[params_runtime.segmentation_algorithm].value)  # type: ignore
+    except KeyError:
+        raise ValueError("Segmentation algorithm not found!")
     assert isinstance(m, type), "Segmentation algorithm not found!"
 
     # convert to dict if necessary

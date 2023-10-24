@@ -12,11 +12,11 @@ channels:
 dependencies:
   - python=3.9
   - tifffile>=2023.7.18
-  - cudatoolkit=11.2
-  - cudnn=8.1
+  - cudatoolkit
+  - cudnn
   - pip
   - pip:
-    - deepcell
+    - deepcell==0.12.7
 """
 
 
@@ -74,6 +74,7 @@ def run():
         image_prepped = np.expand_dims(image_prepped, 0)
 
         # model loading
+        # see https://github.com/vanvalenlab/deepcell-tf/blob/master/deepcell/applications/mesmer.py
         app = Mesmer()
         print(
             "Image resolution the network was trained on:",
@@ -242,8 +243,10 @@ class DeepCellSegmenter:
     ):
         """Segment the given image."""
         import os
+        import tempfile
 
         import numpy as np
+        from tifffile import tifffile
 
         from polarityjam.controller.segmenter import SegmentationMode
         from polarityjam.polarityjam_logging import get_logger
@@ -300,11 +303,16 @@ class DeepCellSegmenter:
         except LookupError:
             _install()
 
+        # save img to temporary folder
+        self.tmp_dir = tempfile.TemporaryDirectory(dir=tempfile.gettempdir())
+        self.img_path = os.path.join(self.tmp_dir.name, "segmentation.tif")
+        tifffile.imwrite(self.img_path, img)
+
         # build arguments
         argv = [
             os.path.dirname(os.path.realpath(__file__)),
-            "--channel_nuclear=%s" % 0,
-            "--channel_membrane=%s" % 1,
+            "--channel_nuclear=%s" % 1,
+            "--channel_membrane=%s" % 0,
             "--save_npy=%s" % "True",
             "--segmentation_mode=%s" % self.params.segmentation_mode,
             "--save_mask=%s" % self.params.save_mask,
@@ -313,6 +321,7 @@ class DeepCellSegmenter:
             "--folder_path=%s" % self.tmp_dir.name,
         ]
 
+        # call solution
         album.run(solution_to_resolve=solution_id, argv=argv)
 
         # load segmentation
@@ -322,15 +331,9 @@ class DeepCellSegmenter:
 
     def prepare(self, img, input_parameter):
         """Prepare the image for segmentation."""
-        import os
-        import tempfile
-
         import numpy as np
-        from tifffile import tifffile
 
-        # save img to temporary folder
-        self.tmp_dir = tempfile.TemporaryDirectory(dir=tempfile.gettempdir())
-        self.img_path = os.path.join(self.tmp_dir.name, "segmentation.tif")
+        from polarityjam.model.parameter import ImageParameter
 
         # store parameters
         self.mpp = 1 / input_parameter.pixel_to_micron_ratio
@@ -353,15 +356,20 @@ class DeepCellSegmenter:
 
         img_s = np.dstack(
             (
-                img_s[:, :, input_parameter.channel_nucleus],
                 img_s[:, :, input_parameter.channel_junction],
+                img_s[:, :, input_parameter.channel_nucleus],
                 np.zeros((img_s.shape[0], img_s.shape[1])),
             )
         )
 
-        tifffile.imwrite(self.img_path, img_s)
+        # build prepared image parameters
+        params_prep_img = ImageParameter()
+        params_prep_img.reset()
+        params_prep_img.channel_junction = 0
+        params_prep_img.channel_nucleus = 1
+        params_prep_img.pixel_to_micron_ratio = input_parameter.pixel_to_micron_ratio
 
-        return img, input_parameter
+        return img_s, params_prep_img
 
     def __del__(self):
         """Clean up the temporary directory."""

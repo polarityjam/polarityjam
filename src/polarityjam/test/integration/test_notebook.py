@@ -37,7 +37,7 @@ class TestIntegration(TestCommon):
         platform.system().lower() == "windows",
         "Plotting too memory extensive. Skipping test!",
     )
-    def test_nb_2(self):
+    def test_polarityjam_notebook_api(self):
         # copy to notebook tmp dir
         path_nb = Path(
             os.path.dirname(os.path.realpath(__file__))
@@ -100,7 +100,7 @@ class TestIntegration(TestCommon):
         platform.system().lower() == "windows",
         "Plotting too memory extensive. Skipping test!",
     )
-    def test_nb_3(self):
+    def test_polarityjam_notebook_vis(self):
         # copy to notebook tmp dir
         path_nb = Path(
             os.path.dirname(os.path.realpath(__file__))
@@ -150,7 +150,7 @@ class TestIntegration(TestCommon):
         platform.system().lower() == "windows",
         "Plotting too memory extensive. Skipping test!",
     )
-    def test_nb(self):
+    def test_polarityjam_notebook(self):
         # copy to notebook tmp dir
         path_nb = Path(
             os.path.dirname(os.path.realpath(__file__))
@@ -162,6 +162,8 @@ class TestIntegration(TestCommon):
         # remove ipython formatting and set data path
         replace_cell_pattern = "### ADAPT ME ###"
         replace_cell_pattern2 = "### CHANGE ME ###"
+        replace_cell_pattern3 = "### This might take a while ###"
+
         with fileinput.FileInput(p, inplace=True) as f:
             myiter = iter(f)
             for line in f:
@@ -191,6 +193,12 @@ class TestIntegration(TestCommon):
                         % self.get_test_parameter_file("parameters_golgi_nuclei.yml")
                     )
                     while not next(myiter, "None").startswith(replace_cell_pattern2):
+                        print("")
+                elif line.startswith(replace_cell_pattern3):
+                    print("mask_deepcell=None")
+                    print("img_prepared_deepcell=img_prepared")
+                    print("img_prepared_deepcell_params=img_prepared_params")
+                    while not next(myiter, "None").startswith(replace_cell_pattern3):
                         print("")
                 else:
                     print(line, end="")

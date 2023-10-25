@@ -1,6 +1,12 @@
 # Default parameters file
 # This files contains all parameters and their default values.
 
+############ Please read carefully ############
+# Does NOT contain segmentation parameters.
+# These can be found  in the corresponding yml file of the segmentation algorithm under /src/polarityjam/segmentation/
+#
+############ Please read carefully ############
+
 # ImageParameters
 channel_junction: 0
 channel_nucleus: 1
@@ -9,9 +15,7 @@ channel_expression_marker: -1 # -1 means no expression marker
 pixel_to_micron_ratio: 1.0
 
 # RuntimeParameter
-estimated_cell_diameter : 100 # estimated cell diameter in pixels
-estimated_nucleus_diameter: 30 # estimated nuclei diameter in pixels
-min_cell_size: 50  # minimum area of cell in pixel^2, will be removed otherwise
+min_cell_size: 50 # minimum area of cell in pixel^2, will be removed otherwise
 min_nucleus_size: 10 # minimum area of nucleus in pixel^2, will be removed otherwise
 min_organelle_size: 10 # minimum area of organelle in pixel^2, will be removed otherwise
 extract_group_features: False
@@ -24,7 +28,7 @@ segmentation_algorithm: "CellposeSegmenter" # "CellposeSegmenter", "SamSegmenter
 remove_small_objects_size: 10 # in pixels, put to 0 to disable
 clear_border: True
 keyfile_condition_cols: ["short_name"] # only needed if run_key option is used
-
+save_sc_image: False
 
 # PlotParameter
 plot_junctions: True
@@ -35,6 +39,7 @@ plot_marker: True
 plot_ratio_method: True
 plot_shape_orientation: True
 plot_foi: True
+plot_sc_image: False
 show_statistics: False
 show_polarity_angles: True
 show_graphics_axis: False

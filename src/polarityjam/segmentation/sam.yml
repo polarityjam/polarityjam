@@ -2,3 +2,4 @@
 path: sam.SamSegmenter
 model_url: "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth"
 # model_url: "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_l_0b3195.pth"
+model_name: "sam_vit_h_4b8939.pth"

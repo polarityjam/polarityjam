@@ -1,0 +1,6 @@
+# SegmentationParameter
+path: microsam.MicrosamSegmenter
+model_name: "vit_h"
+checkpoint_path: ""
+embedding_path: ""
+pred_iou_thresh: "0.88"

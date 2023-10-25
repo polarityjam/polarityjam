@@ -12,6 +12,7 @@ from polarityjam.controller.extractor import Extractor
 from polarityjam.controller.plotter import Plotter
 from polarityjam.controller.segmenter import SegmentationMode
 from polarityjam.model.collection import PropertiesCollection
+from polarityjam.model.masks import BioMedicalJunctionSegmentation
 from polarityjam.model.parameter import (
     ImageParameter,
     PlotParameter,
@@ -118,6 +119,21 @@ def _run(
             mode=SegmentationMode.NUCLEUS,
         )
 
+    mask_junction = None
+    if img_seg_params.channel_junction is not None:
+        infile_path = Path(infile)
+        input_mask_junc = infile_path.parent.joinpath(
+            infile_path.stem + "_seg_edge.npy"
+        )
+        if input_mask_junc.exists():
+            get_logger().info("Loading junction mask from %s" % str(input_mask_junc))
+            mask_junc_dict = np.load(str(input_mask_junc), allow_pickle=True)
+            mask_junction = BioMedicalJunctionSegmentation(
+                mask_junc_dict["edge_masks"],
+                mask_junc_dict["edge_ids"],
+                mask_junc_dict["edge_cell_ids"],
+            )
+
     # plot cellpose mask
     p.plot_mask(
         mask,
@@ -140,6 +156,7 @@ def _run(
         output_path,
         c,
         segmentation_mask_nuclei=mask_nuclei,
+        segmentation_mask_junction=mask_junction,
     )
 
     # visualize

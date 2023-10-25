@@ -156,6 +156,7 @@ class SamSegmenter:
 
         if path is not None:
             get_logger().warning(
+                "You configured a path for loading an existing segmentation. "
                 "This segmentation algorithm does not support loading segmentations from disk!"
             )
 

@@ -18,6 +18,19 @@ class CellposeSegmenter(Segmenter):
         super().__init__(params)
         self.params = params
 
+    def _check_params(self, path):
+        if self.params.use_given_mask:
+            if path is None:
+                raise ValueError(
+                    "Path to segmentation mask must be given if use_given_mask is True."
+                )
+
+        if self.params.store_segmentation:
+            if path is None:
+                raise ValueError(
+                    "Path to segmentation mask must be given if store_segmentation is True."
+                )
+
     def segment(
         self,
         img: np.ndarray,
@@ -40,6 +53,7 @@ class CellposeSegmenter(Segmenter):
             A mask as np.ndarray image.
 
         """
+        self._check_params(path)
         if mode is None:
             mode = SegmentationMode.CELL
 
@@ -164,6 +178,9 @@ class CellposeSegmenter(Segmenter):
         model = self._get_cellpose_model(cells)
         if im_seg.ndim > 1:
             channels = [1, 2]
+            if not cells:
+                channels = [0, 0]
+                im_seg = im_seg[1, :, :]
         else:
             channels = [0, 0]
 
@@ -194,13 +211,16 @@ class CellposeSegmenter(Segmenter):
         return masks
 
     def _get_segmentation_file_name(self, filepath, cells=True):
-        stem = Path(filepath).stem
+        segmentation = None
+        stem = None
+        if self.params.use_given_mask:
+            stem = Path(filepath).stem
 
-        suffix = "_seg.npy" if cells else "_seg_nuc.npy"
+            suffix = "_seg.npy" if cells else "_seg_nuc.npy"
 
-        if self.params.manually_annotated_mask:
-            suffix = self.params.manually_annotated_mask
-        segmentation = Path(filepath).parent.joinpath(stem + suffix)
+            if self.params.manually_annotated_mask:
+                suffix = self.params.manually_annotated_mask
+            segmentation = Path(filepath).parent.joinpath(stem + suffix)
 
         return segmentation, stem
 
@@ -208,7 +228,7 @@ class CellposeSegmenter(Segmenter):
         get_logger().info("Look up cellpose segmentation on disk...")
         segmentation, _ = self._get_segmentation_file_name(filepath, cells)
 
-        if segmentation.exists() and self.params.use_given_mask:
+        if self.params.use_given_mask and segmentation.exists():
             get_logger().info("Load existing segmentation from %s ..." % segmentation)
 
             # in case an annotated mask is available

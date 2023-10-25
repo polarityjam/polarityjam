@@ -19,3 +19,4 @@ from polarityjam.model.image import BioMedicalImage
 from polarityjam.controller.extractor import Extractor
 from polarityjam.controller.plotter import Plotter
 from polarityjam.polarityjam_logging import PolarityJamLogger
+from polarityjam.controller.segmenter import SegmentationMode

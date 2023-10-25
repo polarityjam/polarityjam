@@ -156,13 +156,20 @@ class MicrosamSegmenter:
         self.embedding_path = params.embedding_path  # type: ignore
         self.pred_iou_thresh = params.pred_iou_thresh  # type: ignore
 
+        self.tmp_dir = self._get_tmp_dir()
+
         if self.checkpoint_path == "":
             self.checkpoint_path = None
 
         if self.embedding_path == "":
-            self.embedding_path = None
+            self.embedding_path = self.tmp_dir.name
 
-        self.tmp_dir = None
+    @staticmethod
+    def _get_tmp_dir():
+        """Get a temporary directory."""
+        import tempfile
+
+        return tempfile.TemporaryDirectory(dir=tempfile.gettempdir())
 
     def segment(
         self,
@@ -195,6 +202,7 @@ class MicrosamSegmenter:
 
         if path is not None:
             get_logger().warning(
+                "You configured a path for loading an existing segmentation. "
                 "This segmentation algorithm does not support loading segmentations from disk!"
             )
 

@@ -258,6 +258,7 @@ class DeepCellSegmenter:
 
         if path is not None:
             get_logger().warning(
+                "You configured a path for loading an existing segmentation. "
                 "This segmentation algorithm does not support loading segmentations from disk!"
             )
 
@@ -280,14 +281,10 @@ class DeepCellSegmenter:
             )
         elif mode == SegmentationMode.CELL:
             get_logger().info("Start segmentation procedure for cells...")
-            assert (
-                self.params.segmentation_mode == "whole-cell"
-            ), 'Segmentation parameter "segmentation_mode" must be "whole-cell"!'
+            self.params.segmentation_mode = "whole-cell"
         elif mode == SegmentationMode.NUCLEUS:
             get_logger().info("Start segmentation procedure for nuclei...")
-            assert (
-                self.params.segmentation_mode == "nuclear"
-            ), 'Segmentation parameter "segmentation_mode" must be "nuclear"!'
+            self.params.segmentation_mode = "nuclear"
         else:
             raise ValueError(
                 'Mode must be either "nucleus", "organelle", "cell" or "junction".'

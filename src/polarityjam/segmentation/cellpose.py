@@ -176,7 +176,7 @@ class CellposeSegmenter(Segmenter):
             )
         )
         model = self._get_cellpose_model(cells)
-        if im_seg.ndim > 1:
+        if im_seg.ndim > 2:
             channels = [1, 2]
             if not cells:
                 channels = [0, 0]

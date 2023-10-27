@@ -658,6 +658,7 @@ class SingleCellImage(AbstractBioMedicalImage):
             single_cell_membrane_mask=self.cell_membrane_mask,
             single_cell_junction_intensity_mask=self.junction_mask,
             single_cell_mask=self.cell_mask,
+            single_cell_props=self.get_cell_properties(param),
             half_masks=self.half_mask(param.cue_direction),
             quadrant_masks=self.quarter_mask(param.cue_direction),
             cue_direction=param.cue_direction,

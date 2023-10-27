@@ -213,6 +213,8 @@ class PlotParameter(Parameter):
         self.fontsize_text_annotations = None
         self.font_color = None
         self.marker_size = None
+        self.alpha = None
+        self.alpha_cell_outline = None
 
         super().__init__(**attrs)
 

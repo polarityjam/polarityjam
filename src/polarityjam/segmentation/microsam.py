@@ -5,10 +5,15 @@ from album.runner.api import get_args, get_cache_path, setup
 
 env_file = """name:  microSAM
 channels:
+  - pytorch
+  - nvidia
   - conda-forge
 dependencies:
   - python=3.10
   - tifffile>=2023.7.18
+  - pytorch>=2.0.0
+  - torchvision>=0.15.0
+  - pytorch-cuda=11.7
   - micro_sam=0.3.0post1
   - pip
 """

@@ -1451,6 +1451,13 @@ class Plotter:
                 cmap="gray_r",
             )
 
+            # cell outlines
+            ax[1].imshow(
+                self._masked_cell_outlines(im_junction, segmentation_mask),
+                alpha=self.params.alpha_cell_outline,
+                cmap="gray_r",
+            )
+
         else:
             ax.imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
 

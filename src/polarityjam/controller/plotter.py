@@ -650,6 +650,7 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.marker is not None, "Marker channel not available"
+        assert img.junction is not None, "Junctions channel not available"
 
         im_marker = img.marker
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -746,22 +747,39 @@ class Plotter:
         # set title
         axes = [ax[0], ax[1]]
         add_title(
-            ax[0], "mean intensity cell", im_marker.data, self.params.show_graphics_axis
+            ax[0],
+            "marker mean intensity cell",
+            im_marker.data,
+            self.params.show_graphics_axis,
         )
         add_title(
             ax[1],
-            "mean intensity membrane",
+            "marker mean intensity membrane",
             im_marker.data,
             self.params.show_graphics_axis,
         )
         if nuclei_mask is not None:
             add_title(
                 ax[2],
-                "mean intensity nucleus",
+                "marker mean intensity nucleus",
                 im_marker.data,
                 self.params.show_graphics_axis,
             )
             axes = [ax[0], ax[1], ax[2]]
+
+        # show cell outlines
+        ax[0].imshow(
+            self._masked_cell_outlines(img.junction, cell_mask),
+            alpha=self.params.alpha_cell_outline,
+            cmap="gray_r",
+        )
+        if nuclei_mask is not None:
+            # show cell outlines
+            ax[2].imshow(
+                self._masked_cell_outlines(img.junction, cell_mask),
+                alpha=self.params.alpha_cell_outline,
+                cmap="gray_r",
+            )
 
         self._finish_plot(
             fig,
@@ -929,7 +947,7 @@ class Plotter:
         fig, ax = self._get_figure(1)
 
         # resources image
-        ax.imshow(im_junction, cmap=plt.cm.gray, alpha=1.0)
+        ax.imshow(img.marker.data, cmap=plt.cm.gray, alpha=1.0)
 
         # determine nucleus polarity_angle
         marker_nucleus_orientation_deg_vec = collection.get_properties_by_img_name(
@@ -1719,7 +1737,7 @@ class Plotter:
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
         ax, fig = self._plot_cue_intensity_ratio(
-            cell_mask, collection, im_junction, img_name, mcdir_mask, mcuir_mask, params
+            cell_mask, collection, img.marker, img_name, mcdir_mask, mcuir_mask, params
         )
 
         add_title(

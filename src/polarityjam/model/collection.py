@@ -360,6 +360,12 @@ class PropertiesCollection:
         ) = sc_junction_props.sc_junction_intensity_props.weighted_centroid
 
         self.dataset.at[
+            self._index, "junction_centroid_orientation_rad"
+        ] = sc_junction_props.junction_centroid_orientation_rad
+        self.dataset.at[
+            self._index, "junction_centroid_orientation_deg"
+        ] = sc_junction_props.junction_centroid_orientation_deg
+        self.dataset.at[
             self._index, "junction_centroid_X"
         ] = j_centroid_second  # x-axis is the second index
         self.dataset.at[self._index, "junction_centroid_Y"] = j_centroid_first

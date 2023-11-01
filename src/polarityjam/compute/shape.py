@@ -49,6 +49,21 @@ def mask_from_contours(
     return mask
 
 
+def _correct_for_cue_direction(angle, cue_direction):
+    """Corrects an angle for a given cue direction."""
+    if angle - cue_direction < 0:
+        return angle - cue_direction + 360
+    else:
+        return angle - cue_direction
+
+
+def _sort_2_partition(a, b, x, y, cue_direction):
+    """Sorts a 2 partition polygon based on the angle between the cell center and the polygon center."""
+    angle = compute_ref_x_abs_angle_deg(a, b, x, y)
+    angle_cor = _correct_for_cue_direction(angle, cue_direction)
+    return min(angle_cor, 360 - angle_cor)
+
+
 def partition_single_cell_mask(
     sc_mask: Union[np.ndarray, BioMedicalMask],
     cue_direction: int,
@@ -71,8 +86,8 @@ def partition_single_cell_mask(
             The contours of the single cell. If not provided, they will be computed.
 
     Returns:
-        The list of partitioned masks counter clock wise from the cue direction
-        sorted polygons counter clock wise from the cue direction
+        The list of partitioned masks sorted counter clock wise from the cue direction
+        counter clock wise in cue direction sorted polygons
         contour of the single cell
 
     """
@@ -110,21 +125,35 @@ def partition_single_cell_mask(
     polygons = list(sectors.geoms)
 
     # sort polygons counter clock wise
-    polygons.sort(
-        key=lambda x: compute_ref_x_abs_angle_deg(
-            pg_cent_a, pg_cent_b, x.centroid.coords.xy[0][0], x.centroid.coords.xy[1][0]
+    if num_partitions == 2:
+        polygons.sort(
+            key=lambda x: _sort_2_partition(
+                pg_cent_a,
+                pg_cent_b,
+                x.centroid.coords.xy[0][0],
+                x.centroid.coords.xy[1][0],
+                cue_direction,
+            )
         )
-        - (div_angle / 2)
-        + cue_direction
-    )
+    else:
+        # sort polygons based on their angle to the cell center and polygon center, correct for cue direction
+        polygons.sort(
+            key=lambda x: _correct_for_cue_direction(
+                compute_ref_x_abs_angle_deg(
+                    pg_cent_a,
+                    pg_cent_b,
+                    x.centroid.coords.xy[0][0],
+                    x.centroid.coords.xy[1][0],
+                ),
+                cue_direction,
+            )
+        )
 
     masks = []
     # TODO: check if this is sufficient to catch all cases
     for s in polygons:
         if s.geom_type != "Polygon":
-            warnings.warn(
-                "Partition of the cell i not a Polygon."
-                )
+            warnings.warn("Partition of the cell is not a Polygon.")
             continue
 
         c = s.exterior.coords.xy

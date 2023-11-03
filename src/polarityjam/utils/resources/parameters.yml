@@ -40,6 +40,7 @@ plot_ratio_method: True
 plot_shape_orientation: True
 plot_foi: True
 plot_sc_image: False
+plot_sc_partitions: False
 show_statistics: False
 show_polarity_angles: True
 show_graphics_axis: False

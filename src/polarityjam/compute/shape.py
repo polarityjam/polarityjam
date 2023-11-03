@@ -50,18 +50,23 @@ def mask_from_contours(
 
 
 def _correct_for_cue_direction(angle, cue_direction):
-    """Corrects an angle for a given cue direction."""
+    """Corrects an angle for a given cue direction. This is necessary to sort the partitions."""
     if angle - cue_direction < 0:
         return angle - cue_direction + 360
     else:
         return angle - cue_direction
 
 
-def _sort_2_partition(a, b, x, y, cue_direction):
-    """Sorts a 2 partition polygon based on the angle between the cell center and the polygon center."""
-    angle = compute_ref_x_abs_angle_deg(a, b, x, y)
-    angle_cor = _correct_for_cue_direction(angle, cue_direction)
-    return min(angle_cor, 360 - angle_cor)
+def _correct_for_num_slices(angle, div_angle):
+    """Corrects an angle for a given number of slices.
+
+    Corrects such that sorting is possible based on the
+    center points of the partition relative to the middle point of the cell.
+    """
+    if angle + int(div_angle / 2) > 360:  # must be floored
+        return angle + int(div_angle / 2) - 360
+    else:
+        return angle + int(div_angle / 2)
 
 
 def partition_single_cell_mask(
@@ -71,7 +76,7 @@ def partition_single_cell_mask(
     num_partitions: int,
     contours: Optional[np.ndarray] = None,
 ) -> Tuple[List[np.ndarray], List[Polygon], np.ndarray]:
-    """Partitions a single cell mask into multiple masks from its centroid.
+    """Partitions a single cell mask into multiple masks from its centroid. Number of partitions.
 
     Args:
         sc_mask:
@@ -91,6 +96,9 @@ def partition_single_cell_mask(
         contour of the single cell
 
     """
+    if num_partitions > 359:
+        raise ValueError("Number of partitions must be smaller than 360.")
+
     if isinstance(sc_mask, BioMedicalMask):
         sc_mask = sc_mask.data
 
@@ -124,21 +132,11 @@ def partition_single_cell_mask(
 
     polygons = list(sectors.geoms)
 
-    # sort polygons counter clock wise
-    if num_partitions == 2:
-        polygons.sort(
-            key=lambda x: _sort_2_partition(
-                pg_cent_a,
-                pg_cent_b,
-                x.centroid.coords.xy[0][0],
-                x.centroid.coords.xy[1][0],
-                cue_direction,
-            )
-        )
-    else:
-        # sort polygons based on their angle to the cell center and polygon center, correct for cue direction
-        polygons.sort(
-            key=lambda x: _correct_for_cue_direction(
+    # sort polygons based on their angle to the cell center and polygon center,
+    # correct for cue direction and number of partitions before sorting
+    polygons.sort(
+        key=lambda x: _correct_for_num_slices(
+            _correct_for_cue_direction(
                 compute_ref_x_abs_angle_deg(
                     pg_cent_a,
                     pg_cent_b,
@@ -146,8 +144,10 @@ def partition_single_cell_mask(
                     x.centroid.coords.xy[1][0],
                 ),
                 cue_direction,
-            )
+            ),
+            div_angle,
         )
+    )
 
     masks = []
     # TODO: check if this is sufficient to catch all cases

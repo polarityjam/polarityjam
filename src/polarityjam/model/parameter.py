@@ -195,6 +195,7 @@ class PlotParameter(Parameter):
         self.plot_shape_orientation = None
         self.plot_foi = None
         self.plot_sc_image = None
+        self.plot_sc_partitions = None
 
         self.outline_width = None
         self.show_polarity_angles = None

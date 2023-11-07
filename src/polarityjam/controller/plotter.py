@@ -2261,6 +2261,32 @@ class Plotter:
                     single_cell.cytosol_mask
                 )
 
+            if self.params.plot_sc_partitions:
+                half_masks = single_cell.half_mask(
+                    collection.get_runtime_params_by_img_name(img_name).cue_direction
+                )
+                quad_masks = single_cell.quarter_mask(
+                    collection.get_runtime_params_by_img_name(img_name).cue_direction
+                )
+                centered_masks["centered_half_mask_r"] = single_cell.center_mask(
+                    half_masks[0]
+                )
+                centered_masks["centered_half_mask_l"] = single_cell.center_mask(
+                    half_masks[1]
+                )
+                centered_masks["quadrant_mask_r"] = single_cell.center_mask(
+                    quad_masks[0]
+                )
+                centered_masks["quadrant_mask_t"] = single_cell.center_mask(
+                    quad_masks[1]
+                )
+                centered_masks["quadrant_mask_l"] = single_cell.center_mask(
+                    quad_masks[2]
+                )
+                centered_masks["quadrant_mask_b"] = single_cell.center_mask(
+                    quad_masks[3]
+                )
+
             # plot
             fig, ax = self._get_figure(len(centered_masks))
 

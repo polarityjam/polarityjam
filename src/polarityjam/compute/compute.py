@@ -37,13 +37,13 @@ def compute_reference_target_orientation_rad(
 def compute_ref_x_abs_angle_deg(
     ref_x: float, ref_y: float, x: float, y: float
 ) -> float:
-    """Compute the angle between the x-axis and the vector (x,y).
+    """Compute the angle between a reference point on the x-axis and another point (x,y).
 
     Args:
-        ref_y:
-            The y coordinate of the reference point
         ref_x:
             The x coordinate of the reference point
+        ref_y:
+            The y coordinate of the reference point
         x:
             The x coordinate
         y:

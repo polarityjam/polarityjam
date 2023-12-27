@@ -1,4 +1,6 @@
 path: deepcell.DeepCellSegmenter
+channel_cell_segmentation: ""  # always uses the noted channel for segmentation of cells. leave empty for default.
+channel_nuclei_segmentation: ""  # always uses the noted channel for segmentation of nuclei. leave empty for default.
 segmentation_mode: whole-cell # whole-cell or nuclear
 save_mask: False
 maxima_threshold: 0.18 # -1 for default values depending on segmentation_mode

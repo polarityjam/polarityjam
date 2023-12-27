@@ -102,7 +102,7 @@ setup(
     description="A Solution to run the polarityjam Feature Extraction Pipeline.",
     solution_creators=["Lucas Rieckert", "Jan Philipp Albrecht"],
     tags=["polarityjam", "test"],
-    license="UNLICENSE",
+    license="MIT",
     documentation=["doc.md"],
     covers=[{"description": "Polarityjam cover image", "source": "cover.png"}],
     album_api_version="0.5.5",

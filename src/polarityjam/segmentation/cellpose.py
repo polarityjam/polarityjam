@@ -111,21 +111,43 @@ class CellposeSegmenter(Segmenter):
         im_junction = None
         im_nucleus = None
 
-        if img_parameter.channel_junction >= 0:
-            get_logger().info(
-                "Junction channel used for segmentation at position: %s"
-                % str(img_parameter.channel_junction)
-            )
-            im_junction = img[:, :, img_parameter.channel_junction]
-            params_prep_img.channel_junction = 0
+        # check which channel is configured to use for cell segmentation:
+        channel_cell_segmentation = img_parameter.channel_junction
+        if self.params.channel_cell_segmentation != "":
+            try:
+                channel_cell_segmentation = img_parameter.__getattribute__(self.params.channel_cell_segmentation)
+            except AttributeError:
+                get_logger().error(
+                    "Channel %s does not exist! Wrong segmentation configuration!"
+                    % self.params.channel_cell_segmentation
+                )
 
-        if img_parameter.channel_nucleus >= 0:
+        # check which channel is configured to use for nuclei segmentation:
+        channel_nuclei_segmentation = img_parameter.channel_nucleus
+        if self.params.channel_nuclei_segmentation != "":
+            try:
+                channel_nuclei_segmentation = img_parameter.__getattribute__(self.params.channel_nuclei_segmentation)
+            except AttributeError:
+                get_logger().error(
+                    "Channel %s does not exist! Wrong segmentation configuration!"
+                    % self.params.channel_nuclei_segmentation
+                )
+
+        if channel_cell_segmentation >= 0:
             get_logger().info(
-                "Nucleus channel used for segmentation at position: %s"
-                % str(img_parameter.channel_nucleus)
+                "Channel that will be used for cell segmentation at position: %s"
+                % str(channel_cell_segmentation)
             )
-            im_nucleus = img[:, :, img_parameter.channel_nucleus]
-            params_prep_img.channel_nucleus = 1
+            im_junction = img[:, :, channel_cell_segmentation]
+            params_prep_img.channel_junction = 0  # might be called junction channel, but content depends on config
+
+        if channel_nuclei_segmentation >= 0:
+            get_logger().info(
+                "Channel that will be used for nucleus segmentation at position: %s"
+                % str(channel_nuclei_segmentation)
+            )
+            im_nucleus = img[:, :, channel_nuclei_segmentation]
+            params_prep_img.channel_nucleus = 1  # might be called nuclei channel, but content depends on config
 
         if im_nucleus is not None:
             return np.array([im_junction, im_nucleus]), params_prep_img

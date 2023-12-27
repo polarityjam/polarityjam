@@ -273,35 +273,65 @@ class SamSegmenter:
 
         numpy_img = np.zeros([img.shape[0], img.shape[1], 3])
 
-        if img_parameter.channel_junction < 0:
-            raise ValueError("No junction channel found.")
+        # check which channel is configured to use for cell segmentation:
+        channel_cell_segmentation = img_parameter.channel_junction
+        if self.params.channel_cell_segmentation != "":
+            try:
+                channel_cell_segmentation = img_parameter.__getattribute__(self.params.channel_cell_segmentation)
+            except AttributeError as e:
+                raise AttributeError("Channel %s does not exist! Wrong segmentation configuration!"
+                                     % self.params.channel_cell_segmentation) from e
+
+        # check which channel is configured to use for nuclei segmentation:
+        channel_nuclei_segmentation = img_parameter.channel_nucleus
+        if self.params.channel_nuclei_segmentation != "":
+            try:
+                channel_nuclei_segmentation = img_parameter.__getattribute__(self.params.channel_nuclei_segmentation)
+            except AttributeError as e:
+                raise AttributeError("Channel %s does not exist! Wrong segmentation configuration!"
+                                     % self.params.channel_nuclei_segmentation) from e
+
+        # check which channel is configured to use for organelle segmentation:
+        channel_organelle_segmentation = img_parameter.channel_organelle
+        if self.params.channel_organelle_segmentation != "":
+            try:
+                channel_organelle_segmentation = img_parameter.__getattribute__(
+                    self.params.channel_organelle_segmentation
+                )
+            except AttributeError as e:
+                raise AttributeError("Channel %s does not exist! Wrong segmentation configuration!"
+                                     % self.params.channel_organelle_segmentation) from e
+
+
+        if channel_cell_segmentation < 0:
+            raise ValueError("No channel for segmentation found.")
         else:
             get_logger().info(
-                "Junction channel used for segmentation at position: %s"
-                % str(img_parameter.channel_junction)
+                "Channel used for cell segmentation at position: %s"
+                % str(channel_cell_segmentation)
             )
-            im_junction = img[:, :, img_parameter.channel_junction]
-            params_prep_img.channel_junction = 0
+            im_junction = img[:, :, channel_cell_segmentation]
+            params_prep_img.channel_junction = 0  # might be called junction channel, but content depends on config
 
             numpy_img[:, :, 0] = im_junction
 
-        if img_parameter.channel_nucleus >= 0:
+        if channel_nuclei_segmentation>= 0:
             get_logger().info(
-                "Nucleus channel used for segmentation at position: %s"
-                % str(img_parameter.channel_nucleus)
+                "Channel used for nuclei segmentation at position: %s"
+                % str(channel_nuclei_segmentation)
             )
-            im_nucleus = img[:, :, img_parameter.channel_nucleus]
-            params_prep_img.channel_nucleus = 1
+            im_nucleus = img[:, :, channel_nuclei_segmentation]
+            params_prep_img.channel_nucleus = 1  # might be called nucleus channel, but content depends on config
 
             numpy_img[:, :, 1] = im_nucleus
 
-        if img_parameter.channel_organelle >= 0:
+        if channel_organelle_segmentation >= 0:
             get_logger().info(
-                "Organelle channel used for segmentation at position: %s"
-                % str(img_parameter.channel_organelle)
+                "Channel used for organelle segmentation at position: %s"
+                % str(channel_organelle_segmentation)
             )
-            im_organelle = img[:, :, img_parameter.channel_organelle]
-            params_prep_img.channel_organelle = 2
+            im_organelle = img[:, :, channel_organelle_segmentation]
+            params_prep_img.channel_organelle = 2  # might be called organelle channel, but content depends on config
 
             numpy_img[:, :, 2] = im_organelle
 

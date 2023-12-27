@@ -56,14 +56,14 @@ def run():
         image_nuc = imread(Path(args.input_path) / image_nuclear)
 
         if (len(image_nuc.shape) > 2):
-            image_nuc = image_nuc[:,:,args.channel_nuclear]
+            image_nuc = image_nuc[:, :, args.channel_nuclear]
         if (len(image_nuc.shape) == 2):
             image_nuc = np.expand_dims(image_nuc, axis=-1)
 
         if image_membrane:
             image_mem = imread(Path(args.input_path) / image_membrane)
             if (len(image_mem.shape) > 2):
-                image_mem = image_mem[:,:,args.channel_membrane]
+                image_mem = image_mem[:, :, args.channel_membrane]
             if (len(image_mem.shape) == 2):
                 # Expand from [H, W] to [H, W, C]
                 image_mem = np.expand_dims(image_mem, axis=-1)
@@ -74,7 +74,7 @@ def run():
 
         # Combine and expand to [1, H, W, C]
         image_prepped = np.concatenate([image_nuc, image_mem], axis=-1)
-        image_prepped = np.expand_dims(image_prepped,0) 
+        image_prepped = np.expand_dims(image_prepped, 0)
 
         # Model loading
         # see https://github.com/vanvalenlab/deepcell-tf/blob/master/deepcell/applications/mesmer.py
@@ -139,6 +139,7 @@ def run():
 
     print("Recent segmentation saved to:", output_name.resolve())
     return
+
 
 setup(
     group="polarityjam",
@@ -274,7 +275,7 @@ setup(
             "required": False,
             "description": ". Default: 2",
             "default": 2.
-        }, 
+        },
         {
             "name": "pixel_expansion",
             "type": "integer",
@@ -299,10 +300,10 @@ class DeepCellSegmenter:
         self.tmp_dir = None
 
     def segment(
-        self,
-        img,
-        path=None,
-        mode=None,
+            self,
+            img,
+            path=None,
+            mode=None,
     ):
         """Segment the given image."""
         import os
@@ -406,17 +407,35 @@ class DeepCellSegmenter:
         # store parameters
         self.mpp = 1 / input_parameter.pixel_to_micron_ratio
 
+        # check which channel is configured to use for cell segmentation:
+        channel_cell_segmentation = input_parameter.channel_junction
+        if self.params.channel_cell_segmentation != "":
+            try:
+                channel_cell_segmentation = input_parameter.__getattribute__(self.params.channel_cell_segmentation)
+            except AttributeError as e:
+                raise AttributeError("Channel %s does not exist! Wrong segmentation configuration!"
+                                     % self.params.channel_cell_segmentation) from e
+
+        # check which channel is configured to use for nuclei segmentation:
+        channel_nuclei_segmentation = input_parameter.channel_nucleus
+        if self.params.channel_nuclei_segmentation != "":
+            try:
+                channel_nuclei_segmentation = input_parameter.__getattribute__(self.params.channel_nuclei_segmentation)
+            except AttributeError as e:
+                raise AttributeError("Channel %s does not exist! Wrong segmentation configuration!"
+                                     % self.params.channel_nuclei_segmentation) from e
+
         if (
-            input_parameter.channel_nucleus == -1
-            or input_parameter.channel_nucleus is None
+                channel_nuclei_segmentation == -1
+                or channel_nuclei_segmentation is None
         ):
             raise ValueError("Segmentation without nucleus channel is not supported!")
 
         if (
-            input_parameter.channel_junction == -1
-            or input_parameter.channel_junction is None
+                channel_cell_segmentation == -1
+                or channel_cell_segmentation is None
         ):
-            raise ValueError("Segmentation without nucleus channel is not supported!")
+            raise ValueError("Segmentation without junction channel is not supported!")
 
         img_s = img
         if img.shape[0] < img.shape[-1]:
@@ -424,8 +443,8 @@ class DeepCellSegmenter:
 
         img_s = np.dstack(
             (
-                img_s[:, :, input_parameter.channel_junction],
-                img_s[:, :, input_parameter.channel_nucleus],
+                img_s[:, :, channel_cell_segmentation],
+                img_s[:, :, channel_nuclei_segmentation],
                 np.zeros((img_s.shape[0], img_s.shape[1])),
             )
         )
@@ -433,8 +452,8 @@ class DeepCellSegmenter:
         # build prepared image parameters
         params_prep_img = ImageParameter()
         params_prep_img.reset()
-        params_prep_img.channel_junction = 0
-        params_prep_img.channel_nucleus = 1
+        params_prep_img.channel_junction = 0  # might be called junction channel, but content depends on config
+        params_prep_img.channel_nucleus = 1  # might be called nuclei channel, but content depends on config
         params_prep_img.pixel_to_micron_ratio = input_parameter.pixel_to_micron_ratio
 
         return img_s, params_prep_img

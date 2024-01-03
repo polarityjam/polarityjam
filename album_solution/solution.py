@@ -97,11 +97,18 @@ def test():
 setup(
     group="de.mdc-berlin",
     name="polarityjam",
-    version="0.1.0",
+    version="0.1.0",  # refers to the album solution version, not the polarityjam version
     title="A Solution to run the polarityjam feature extraction pipeline",
     description="A Solution to run the polarityjam Feature Extraction Pipeline.",
     solution_creators=["Lucas Rieckert", "Jan Philipp Albrecht"],
-    tags=["polarityjam", "test"],
+    tags=[
+        "polarityjam",
+        "cell polarity",
+        "circular statistics",
+        "endothelial cells",
+        "workflow",
+        "software",
+    ],
     license="MIT",
     documentation=["doc.md"],
     covers=[{"description": "Polarityjam cover image", "source": "cover.png"}],

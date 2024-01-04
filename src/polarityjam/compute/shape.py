@@ -49,6 +49,26 @@ def mask_from_contours(
     return mask
 
 
+def _correct_for_cue_direction(angle, cue_direction):
+    """Corrects an angle for a given cue direction. This is necessary to sort the partitions."""
+    if angle - cue_direction < 0:
+        return angle - cue_direction + 360
+    else:
+        return angle - cue_direction
+
+
+def _correct_for_num_slices(angle, div_angle):
+    """Corrects an angle for a given number of slices.
+
+    Corrects such that sorting is possible based on the
+    center points of the partition relative to the middle point of the cell.
+    """
+    if angle + int(div_angle / 2) > 360:  # must be floored
+        return angle + int(div_angle / 2) - 360
+    else:
+        return angle + int(div_angle / 2)
+
+
 def partition_single_cell_mask(
     sc_mask: Union[np.ndarray, BioMedicalMask],
     cue_direction: int,
@@ -56,7 +76,7 @@ def partition_single_cell_mask(
     num_partitions: int,
     contours: Optional[np.ndarray] = None,
 ) -> Tuple[List[np.ndarray], List[Polygon], np.ndarray]:
-    """Partitions a single cell mask into multiple masks from its centroid.
+    """Partitions a single cell mask into multiple masks from its centroid. Number of partitions.
 
     Args:
         sc_mask:
@@ -71,11 +91,14 @@ def partition_single_cell_mask(
             The contours of the single cell. If not provided, they will be computed.
 
     Returns:
-        The list of partitioned masks counter clock wise from the cue direction
-        sorted polygons counter clock wise from the cue direction
+        The list of partitioned masks sorted counter clock wise from the cue direction
+        counter clock wise in cue direction sorted polygons
         contour of the single cell
 
     """
+    if num_partitions > 359:
+        raise ValueError("Number of partitions must be smaller than 360.")
+
     if isinstance(sc_mask, BioMedicalMask):
         sc_mask = sc_mask.data
 
@@ -109,22 +132,28 @@ def partition_single_cell_mask(
 
     polygons = list(sectors.geoms)
 
-    # sort polygons counter clock wise
+    # sort polygons based on their angle to the cell center and polygon center,
+    # correct for cue direction and number of partitions before sorting
     polygons.sort(
-        key=lambda x: compute_ref_x_abs_angle_deg(
-            pg_cent_a, pg_cent_b, x.centroid.coords.xy[0][0], x.centroid.coords.xy[1][0]
+        key=lambda x: _correct_for_num_slices(
+            _correct_for_cue_direction(
+                compute_ref_x_abs_angle_deg(
+                    pg_cent_a,
+                    pg_cent_b,
+                    x.centroid.coords.xy[0][0],
+                    x.centroid.coords.xy[1][0],
+                ),
+                cue_direction,
+            ),
+            div_angle,
         )
-        - (div_angle / 2)
-        + cue_direction
     )
 
     masks = []
     # TODO: check if this is sufficient to catch all cases
     for s in polygons:
         if s.geom_type != "Polygon":
-            warnings.warn(
-                "Partition of the cell i not a Polygon."
-                )
+            warnings.warn("Partition of the cell is not a Polygon.")
             continue
 
         c = s.exterior.coords.xy

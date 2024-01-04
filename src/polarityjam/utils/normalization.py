@@ -82,7 +82,7 @@ def normalize_arr(
         The normalized array
     """
     if source_limits is None:
-        source_limits = (x.min(initial=0), x.max(initial=np.inf))
+        source_limits = (x.min(initial=0), x.max(initial=np.iinfo(x.dtype).max))
 
     if target_limits is None:
         target_limits = (0, 1)

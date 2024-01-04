@@ -128,6 +128,7 @@ class RuntimeParameter(Parameter):
         self.segmentation_algorithm = None
         self.remove_small_objects_size = None
         self.clear_border = None
+        self.save_sc_image = None
         self.keyfile_condition_cols = None
 
         super().__init__(**attrs)
@@ -155,6 +156,7 @@ class SegmentationParameter(Parameter):
         d = {
             # constructor
             "__new__": _obj_constructor,
+            "to_dict": SegmentationParameter.to_dict,
         }
         d.update(get_dict_from_yml(SegmentationParameterE[segmentation_algorithm].value))  # type: ignore
         segmentation_parameter_type = type("SegmentationParameter", (Parameter,), d)
@@ -192,6 +194,8 @@ class PlotParameter(Parameter):
         self.plot_ratio_method = None
         self.plot_shape_orientation = None
         self.plot_foi = None
+        self.plot_sc_image = None
+        self.plot_sc_partitions = None
 
         self.outline_width = None
         self.show_statistics = None
@@ -210,6 +214,8 @@ class PlotParameter(Parameter):
         self.fontsize_text_annotations = None
         self.font_color = None
         self.marker_size = None
+        self.alpha = None
+        self.alpha_cell_outline = None
 
         super().__init__(**attrs)
 

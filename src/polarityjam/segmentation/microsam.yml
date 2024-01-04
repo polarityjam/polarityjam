@@ -1,0 +1,9 @@
+# SegmentationParameter
+path: microsam.MicrosamSegmenter
+channel_cell_segmentation: ""  # always uses the noted channel for segmentation of cells. leave empty for default.
+channel_nuclei_segmentation: ""  # always uses the noted channel for segmentation of nuclei. leave empty for default.
+channel_organelle_segmentation: "" # always uses the noted channel for segmentation of organelle. empty for default.
+model_name: "vit_h"
+checkpoint_path: ""
+embedding_path: ""
+pred_iou_thresh: "0.88"

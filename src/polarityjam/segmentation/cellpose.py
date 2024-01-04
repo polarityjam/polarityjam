@@ -18,6 +18,19 @@ class CellposeSegmenter(Segmenter):
         super().__init__(params)
         self.params = params
 
+    def _check_params(self, path):
+        if self.params.use_given_mask:
+            if path is None:
+                raise ValueError(
+                    "Path to segmentation mask must be given if use_given_mask is True."
+                )
+
+        if self.params.store_segmentation:
+            if path is None:
+                raise ValueError(
+                    "Path to segmentation mask must be given if store_segmentation is True."
+                )
+
     def segment(
         self,
         img: np.ndarray,
@@ -40,11 +53,35 @@ class CellposeSegmenter(Segmenter):
             A mask as np.ndarray image.
 
         """
-        cells = False if mode == SegmentationMode.NUCLEUS else True
-        get_logger().info(
-            "Start segmentation procedure for %s..." % ("cells" if cells else "nuclei")
-        )
-        return self._load_or_get_cellpose_segmentation(img, path, cells)
+        self._check_params(path)
+        if mode is None:
+            mode = SegmentationMode.CELL
+
+        if isinstance(mode, str):
+            try:
+                mode = SegmentationMode(mode)
+            except ValueError:
+                raise ValueError(
+                    'Mode must be either "nucleus", "organelle", "cell" or "junction".'
+                )
+
+        if mode == SegmentationMode.JUNCTION:
+            raise ValueError("This segmentation algorithm does not support this mode!")
+        elif mode == SegmentationMode.ORGANELLE:
+            get_logger().info(
+                "This model is probably not trained for organelles segmentation. Please handle results with care."
+            )
+            return self._load_or_get_cellpose_segmentation(img, path, True)
+        elif mode == SegmentationMode.CELL:
+            get_logger().info("Start segmentation procedure for cells...")
+            return self._load_or_get_cellpose_segmentation(img, path, True)
+        elif mode == SegmentationMode.NUCLEUS:
+            get_logger().info("Start segmentation procedure for nuclei...")
+            return self._load_or_get_cellpose_segmentation(img, path, False)
+        else:
+            raise ValueError(
+                'Mode must be either "nucleus", "organelle", "cell" or "junction".'
+            )
 
     def prepare(
         self, img: np.ndarray, img_parameter: ImageParameter
@@ -74,21 +111,43 @@ class CellposeSegmenter(Segmenter):
         im_junction = None
         im_nucleus = None
 
-        if img_parameter.channel_junction >= 0:
-            get_logger().info(
-                "Junction channel used for segmentation at position: %s"
-                % str(img_parameter.channel_junction)
-            )
-            im_junction = img[:, :, img_parameter.channel_junction]
-            params_prep_img.channel_junction = 0
+        # check which channel is configured to use for cell segmentation:
+        channel_cell_segmentation = img_parameter.channel_junction
+        if self.params.channel_cell_segmentation != "":
+            try:
+                channel_cell_segmentation = img_parameter.__getattribute__(self.params.channel_cell_segmentation)
+            except AttributeError:
+                get_logger().error(
+                    "Channel %s does not exist! Wrong segmentation configuration!"
+                    % self.params.channel_cell_segmentation
+                )
 
-        if img_parameter.channel_nucleus >= 0:
+        # check which channel is configured to use for nuclei segmentation:
+        channel_nuclei_segmentation = img_parameter.channel_nucleus
+        if self.params.channel_nuclei_segmentation != "":
+            try:
+                channel_nuclei_segmentation = img_parameter.__getattribute__(self.params.channel_nuclei_segmentation)
+            except AttributeError:
+                get_logger().error(
+                    "Channel %s does not exist! Wrong segmentation configuration!"
+                    % self.params.channel_nuclei_segmentation
+                )
+
+        if channel_cell_segmentation >= 0:
             get_logger().info(
-                "Nucleus channel used for segmentation at position: %s"
-                % str(img_parameter.channel_nucleus)
+                "Channel that will be used for cell segmentation at position: %s"
+                % str(channel_cell_segmentation)
             )
-            im_nucleus = img[:, :, img_parameter.channel_nucleus]
-            params_prep_img.channel_nucleus = 1
+            im_junction = img[:, :, channel_cell_segmentation]
+            params_prep_img.channel_junction = 0  # might be called junction channel, but content depends on config
+
+        if channel_nuclei_segmentation >= 0:
+            get_logger().info(
+                "Channel that will be used for nucleus segmentation at position: %s"
+                % str(channel_nuclei_segmentation)
+            )
+            im_nucleus = img[:, :, channel_nuclei_segmentation]
+            params_prep_img.channel_nucleus = 1  # might be called nuclei channel, but content depends on config
 
         if im_nucleus is not None:
             return np.array([im_junction, im_nucleus]), params_prep_img
@@ -139,8 +198,11 @@ class CellposeSegmenter(Segmenter):
             )
         )
         model = self._get_cellpose_model(cells)
-        if im_seg.ndim > 1:
+        if im_seg.ndim > 2:
             channels = [1, 2]
+            if not cells:
+                channels = [0, 0]
+                im_seg = im_seg[1, :, :]
         else:
             channels = [0, 0]
 
@@ -171,13 +233,16 @@ class CellposeSegmenter(Segmenter):
         return masks
 
     def _get_segmentation_file_name(self, filepath, cells=True):
-        stem = Path(filepath).stem
+        segmentation = None
+        stem = None
+        if self.params.use_given_mask:
+            stem = Path(filepath).stem
 
-        suffix = "_seg.npy" if cells else "_seg_nuc.npy"
+            suffix = "_seg.npy" if cells else "_seg_nuc.npy"
 
-        if self.params.manually_annotated_mask:
-            suffix = self.params.manually_annotated_mask
-        segmentation = Path(filepath).parent.joinpath(stem + suffix)
+            if self.params.manually_annotated_mask:
+                suffix = self.params.manually_annotated_mask
+            segmentation = Path(filepath).parent.joinpath(stem + suffix)
 
         return segmentation, stem
 
@@ -185,7 +250,7 @@ class CellposeSegmenter(Segmenter):
         get_logger().info("Look up cellpose segmentation on disk...")
         segmentation, _ = self._get_segmentation_file_name(filepath, cells)
 
-        if segmentation.exists() and self.params.use_given_mask:
+        if self.params.use_given_mask and segmentation.exists():
             get_logger().info("Load existing segmentation from %s ..." % segmentation)
 
             # in case an annotated mask is available

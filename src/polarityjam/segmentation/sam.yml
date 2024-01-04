@@ -1,4 +1,8 @@
 # SegmentationParameter
 path: sam.SamSegmenter
+channel_cell_segmentation: ""  # always uses the noted channel for segmentation of cells. leave empty for default.
+channel_nuclei_segmentation: ""  # always uses the noted channel for segmentation of nuclei. leave empty for default.
+channel_organelle_segmentation: "" # always uses the noted channel for segmentation of organelle. empty for default.
 model_url: "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth"
 # model_url: "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_l_0b3195.pth"
+model_name: "sam_vit_h_4b8939.pth"

@@ -15,6 +15,7 @@ from polarityjam.model.image import BioMedicalImage, SingleCellImage
 from polarityjam.model.masks import (
     BioMedicalInstanceSegmentation,
     BioMedicalInstanceSegmentationMask,
+    BioMedicalJunctionSegmentation,
     BioMedicalMask,
 )
 from polarityjam.model.parameter import ImageParameter, RuntimeParameter
@@ -48,7 +49,12 @@ class Extractor:
             return True
         return False
 
-    def extract_cell_features(self, collection, bio_med_image, filename_prefix):
+    def extract_cell_features(
+        self,
+        collection: PropertiesCollection,
+        bio_med_image: BioMedicalImage,
+        filename_prefix: str,
+    ):
         """Extract features from cells.
 
         Args:
@@ -64,11 +70,15 @@ class Extractor:
             bio_med_image.segmentation is not None
         ), "Segmentation needed to extract cell features!"
 
+        # get all additional segmentation masks
         bio_med_image.segmentation.segmentation_mask_nuclei = self._get_nuclei_mask(
             bio_med_image
         )
         bio_med_image.segmentation.segmentation_mask_organelle = (
             self._get_organelle_mask(bio_med_image)
+        )
+        bio_med_image.segmentation.segmentation_mask_junction = self._get_junction_mask(
+            bio_med_image
         )
 
         sc_image_list, threshold_cells = self._get_sc_images(bio_med_image)
@@ -114,14 +124,24 @@ class Extractor:
                 sc_image.connected_component_label,
             )
 
+        if self.params.save_sc_image:
+            # add sc_image to collection
+            PropertyCollector.add_sc_imgs(collection, filename_prefix, sc_image_list)
+
     @staticmethod
-    def _remove_threshold_cells(bio_med_image, threshold_cells):
+    def _remove_threshold_cells(
+        bio_med_image: BioMedicalImage, threshold_cells: List[int]
+    ):
+        assert (
+            bio_med_image.segmentation is not None
+        ), "Segmentation needed to extract cell features!"
+
         # remove threshold cells from segmentation
-        islands_to_remove = []
+        islands_to_remove: List[int] = []
         conn_graph = bio_med_image.segmentation.connection_graph
         bio_med_image.segmentation.connection_graph = False
-        for connected_component_label in threshold_cells[:-1]:
 
+        for connected_component_label in threshold_cells[:-1]:
             bio_med_image.segmentation.remove_instance_label(connected_component_label)
 
         # remove islands after iteration
@@ -141,9 +161,15 @@ class Extractor:
 
         return islands_to_remove
 
-    def _get_sc_images(self, bio_med_image) -> Tuple[List[SingleCellImage], List[int]]:
+    def _get_sc_images(
+        self, bio_med_image: BioMedicalImage
+    ) -> Tuple[List[SingleCellImage], List[int]]:
         sc_image_list = []
         threshold_cells = []
+        assert (
+            bio_med_image.segmentation is not None
+        ), "Segmentation needed to extract cell features!"
+
         # iterate through each unique segmented cell
         for (
             cc_label
@@ -164,7 +190,9 @@ class Extractor:
         return sc_image_list, threshold_cells
 
     @staticmethod
-    def _get_organelle_mask(bio_med_image: BioMedicalImage) -> Optional[np.ndarray]:
+    def _get_organelle_mask(
+        bio_med_image: BioMedicalImage,
+    ) -> Optional[BioMedicalInstanceSegmentationMask]:
         organelle_mask_seg = None
         if bio_med_image.segmentation is not None:
             if bio_med_image.segmentation.segmentation_mask_organelle is not None:
@@ -187,7 +215,9 @@ class Extractor:
         return organelle_mask_seg
 
     @staticmethod
-    def _get_nuclei_mask(bio_med_image: BioMedicalImage) -> Optional[np.ndarray]:
+    def _get_nuclei_mask(
+        bio_med_image: BioMedicalImage,
+    ) -> Optional[BioMedicalInstanceSegmentationMask]:
         nuclei_mask_seg = None
         if bio_med_image.segmentation is not None:
             if bio_med_image.segmentation.segmentation_mask_nuclei is not None:
@@ -207,6 +237,28 @@ class Extractor:
                 )  # convert to instance segmentation
         return nuclei_mask_seg
 
+    @staticmethod
+    def _get_junction_mask(
+        bio_med_image: BioMedicalImage,
+    ) -> Optional[BioMedicalJunctionSegmentation]:
+        junction_mask_seg = None
+        if bio_med_image.segmentation is not None:
+            if bio_med_image.segmentation.segmentation_mask_junction is not None:
+                junction_mask_seg = (
+                    bio_med_image.segmentation.segmentation_mask_junction
+                )
+            elif bio_med_image.has_junction():
+                assert (
+                    bio_med_image.junction is not None
+                ), "Image has no junction channel!"
+                get_logger().info(
+                    "Junction channel found, but junction mask not provided. "
+                    "Mask will be created via thresholding..."
+                )
+                return None
+
+        return junction_mask_seg
+
     def extract(
         self,
         img: np.ndarray,
@@ -221,6 +273,7 @@ class Extractor:
         segmentation_mask_organelle: Optional[
             Union[np.ndarray, BioMedicalInstanceSegmentationMask]
         ] = None,
+        segmentation_mask_junction: Optional[BioMedicalJunctionSegmentation] = None,
     ) -> PropertiesCollection:
         """Extract features from an input image into a given collection.
 
@@ -241,6 +294,8 @@ class Extractor:
                 np.ndarray of the nuclei mask. Enhances feature quality. Optional.
             segmentation_mask_organelle:
                 np.ndarray of the organelle mask. Enhances feature quality. Optional.
+            segmentation_mask_junction:
+                BioMedicalJunctionSegmentation. Enhances feature quality. Optional.
 
         Returns:
             PropertiesCollection object containing the extracted features.
@@ -269,6 +324,7 @@ class Extractor:
             bio_med_segmentation_mask,
             segmentation_mask_nuclei=segmentation_mask_nuclei,
             segmentation_mask_organelle=segmentation_mask_organelle,
+            segmentation_mask_junction=segmentation_mask_junction,
             connection_graph=self.params.connection_graph,
         )
 

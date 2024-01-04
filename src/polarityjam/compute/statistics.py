@@ -1,5 +1,7 @@
 """Module for support computing statistics."""
+import numpy as np
 
+from polarityjam.polarityjam_logging import get_logger
 
 import numpy as np
 from polarityjam.polarityjam_logging import get_logger
@@ -22,31 +24,33 @@ def compute_polarity_index(angles: np.ndarray, cue_direction:  float = 0.0, stat
         of deviation from the mean angle, used to calculate the V-score: V=cR
 
     """
-
     get_logger().info("Compute circular statistics")
 
     sum_cos = 0.0
     sum_sin = 0.0
 
     #if cue_direction > 360.0:
-    #    get_logger().warn("Warning invalid cue direction, must be between 0 and 360 degrees")
+    #    get_logger().warn(
+    #        "Warning invalid cue direction, must be between 0 and 360 degrees"
+    #    )
+
 
     p = 1.0
-    if stats_mode == 'axial':
+    if stats_mode == "axial":
         p = 2.0
 
     if unit == 'degrees':
         angles = np.deg2rad(angles)
 
     for angle in angles:
-        sum_cos += np.cos(p*angle)
-        sum_sin += np.sin(p*angle)
+        sum_cos += np.cos(p * angle)
+        sum_sin += np.sin(p * angle)
 
     r_x = sum_cos / len(angles)
     r_y = sum_sin / len(angles)
 
     R = np.sqrt(r_x**2 + r_y**2)
-    alpha_m = np.arctan2(r_y, r_x)/p
+    alpha_m = np.arctan2(r_y, r_x) / p
 
     if unit == 'degrees':
         cue_direction = np.deg2rad(cue_direction)
@@ -55,18 +59,21 @@ def compute_polarity_index(angles: np.ndarray, cue_direction:  float = 0.0, stat
         if cue_direction >= np.pi:
             cue_direction -= np.pi
     c = np.cos(p*(alpha_m - cue_direction))
-
     alpha_m = np.rad2deg(alpha_m)
 
     if alpha_m < 0.0:
-        alpha_m += 360.0/p
+        alpha_m += 360.0 / p
 
     return [alpha_m, R, c]
-
 
 def compute_polarity_index_per_image(feature_df, feature_name):
     '''Compute the polarity index for each image in the feature_df.
     
+    Args:
+        feature_df:
+            pandas data frame with circular features
+        feature_name
+            str, name of circular feature
     '''
 
     cols = ["filename", "alpha_m", "R", "c", "V"]
@@ -75,9 +82,9 @@ def compute_polarity_index_per_image(feature_df, feature_name):
 
     counter = 0
     for filename in feature_df["filename"].unique():
-        # print(filename)
+
         single_image_properties_df = feature_df[feature_df["filename"] == filename]
-        # compute_polarity_index(angles: np.ndarray, cue_direction:  float = 0.0, stats_mode: str = 'directional')
+
         angles = np.array(single_image_properties_df[feature_name])
         alpha_m, R, c = compute_polarity_index(angles, cue_direction=0.0, stats_mode='directional', unit='radians')
         polarity_index_df.at[counter, "filename"] = filename
@@ -88,4 +95,3 @@ def compute_polarity_index_per_image(feature_df, feature_name):
         counter += 1
 
     return polarity_index_df
-

@@ -42,6 +42,7 @@ class Mask:
         channel: np.ndarray,
         gaussian_filter=None,
         rolling_ball_radius=None,
+        median_filter=None,
     ) -> _T:
         """Initialize a mask from a channel using Otsu's method."""
         if gaussian_filter is not None:
@@ -53,6 +54,9 @@ class Mask:
             img_channel_blur = rolling_ball(
                 img_channel_blur, radius=rolling_ball_radius
             )
+
+        if median_filter is not None:
+            img_channel_blur = ndi.median_filter(img_channel_blur, size=median_filter)
 
         interior_mask = np.where(
             img_channel_blur > threshold_otsu(img_channel_blur),
@@ -139,9 +143,13 @@ class BioMedicalMask(Mask):
             np.ma.masked_where(self.data == False, self.data)  # noqa: E712
         )
 
-    def combine(self, other_mask: BioMedicalMask):
-        """Combine the mask with another mask."""
+    def combine(self, other_mask: BioMedicalMask) -> BioMedicalMask:
+        """Combine (AND) the mask with another mask."""
         return BioMedicalMask(np.logical_and(self.data, other_mask.data))
+
+    def disjoin(self, other_mask: BioMedicalMask) -> BioMedicalMask:
+        """Logical disjunction (XOR) from the other mask and this mask."""
+        return BioMedicalMask(np.logical_xor(self.data, other_mask.data))
 
 
 class BioMedicalInstanceSegmentationMask(Mask):
@@ -347,8 +355,93 @@ class BioMedicalInstanceSegmentationMask(Mask):
         )
 
 
+class BioMedicalJunctionSegmentation:
+    """Class for a junction segmentation of an image."""
+
+    def __init__(
+        self,
+        junction_masks,
+        junction_ids,
+        junction_cell_ids,
+    ):
+        """Initialize a junction segmentation from a mask."""
+        self.junction_masks = junction_masks
+        self.junction_ids = junction_ids
+        self.junction_cell_ids = junction_cell_ids
+
+    def get_single_instance_mask(self, instance_label) -> BioMedicalMask:
+        """Get the single cell mask given its label."""
+        return BioMedicalMask(
+            self.get_junction_by_cell_ids(self.get_junction_cell_ids(instance_label))
+        )
+
+    def get_junction_cell_ids(self, cell_id):
+        """Get the junction ids of a cell."""
+        edges = np.sum(self.junction_cell_ids == cell_id, axis=0)
+        return self.junction_ids[edges.astype(bool)]
+
+    def get_junction_by_cell_ids(self, junction_cell_ids):
+        """Get the junction mask of a cell."""
+        lab = 0 * np.copy(self.junction_masks)
+
+        for inst_id in junction_cell_ids:
+            inst = (self.junction_masks == inst_id).astype(bool)
+            lab[inst] = 1
+        return lab
+
+    def remove_instance(self, instance_label: int) -> BioMedicalJunctionSegmentation:
+        """Remove an instance from the mask.
+
+        Args:
+            instance_label:
+                The instance label to remove.
+
+        Returns:
+            New mask object with the instance removed.
+
+        """
+        new_junction_masks = np.copy(self.junction_masks)
+        new_junction_ids = np.copy(self.junction_ids)
+        new_junction_cell_ids = np.copy(self.junction_cell_ids)
+
+        instance_id_mask_cell_1 = self.junction_cell_ids[0, :] == instance_label
+        instance_id_mask_cell_2 = self.junction_cell_ids[1, :] == instance_label
+
+        # set cell_ids to 0
+        new_junction_cell_ids[0, instance_id_mask_cell_1] = 0
+        new_junction_cell_ids[1, instance_id_mask_cell_2] = 0
+
+        # remove junction id iff both cell_ids are 0
+        x = []
+        [
+            x.append(idx)  # type: ignore
+            for idx in range(self.junction_cell_ids.shape[1])
+            if self.junction_cell_ids[:, idx].sum() == 0
+        ]
+
+        for en_idx, idx in enumerate(x):
+            # index offset
+            idx = idx - en_idx
+
+            # get boolean mask
+            ind = np.ones(new_junction_cell_ids.shape[1], bool)
+            ind[idx] = False
+            new_junction_cell_ids = new_junction_cell_ids[:, ind]
+
+            # delete based on boolean mask
+            junction_id_to_delete = new_junction_ids[idx]
+            new_junction_ids = new_junction_ids[ind]
+
+            # remove junction mask values
+            new_junction_masks[new_junction_masks == junction_id_to_delete] = 0
+
+        return BioMedicalJunctionSegmentation(
+            new_junction_masks, new_junction_ids, new_junction_cell_ids
+        )
+
+
 class BioMedicalInstanceSegmentation:
-    """Class representing an entire instance segmentation."""
+    """Class holding entire biomedical image instance segmentations of various components."""
 
     def __init__(
         self,
@@ -358,11 +451,13 @@ class BioMedicalInstanceSegmentation:
         segmentation_mask_organelle: Optional[
             BioMedicalInstanceSegmentationMask
         ] = None,
+        segmentation_mask_junction: Optional[BioMedicalJunctionSegmentation] = None,
     ):
         """Initialize an instance segmentation from a mask."""
         self.segmentation_mask = segmentation_mask
         self._segmentation_mask_nuclei = None
         self._segmentation_mask_organelle = None
+        self._segmentation_mask_junction = None
 
         self.connection_graph = connection_graph
 
@@ -383,6 +478,9 @@ class BioMedicalInstanceSegmentation:
         if segmentation_mask_organelle is not None:
             # assure same labels
             self.segmentation_mask_organelle = segmentation_mask_organelle
+
+        if segmentation_mask_junction is not None:
+            self.segmentation_mask_junction = segmentation_mask_junction
 
         if self.connection_graph:
             self.update_graphs()
@@ -416,6 +514,18 @@ class BioMedicalInstanceSegmentation:
                     self.segmentation_mask_connected
                 )
             )
+
+    @property
+    def segmentation_mask_junction(self):
+        """Get the junction segmentation mask."""
+        return self._segmentation_mask_junction
+
+    @segmentation_mask_junction.setter
+    def segmentation_mask_junction(self, value: BioMedicalJunctionSegmentation):
+        """Set the junction segmentation mask."""
+        if value is not None:
+            # todo: how to assure same labels?
+            self._segmentation_mask_junction = value
 
     def update_graphs(self) -> List[int]:
         """Update the graphs after a change in the segmentation mask.
@@ -460,6 +570,11 @@ class BioMedicalInstanceSegmentation:
         if self.segmentation_mask_organelle is not None:
             self.segmentation_mask_organelle = (
                 self.segmentation_mask_organelle.remove_instance(instance_label)
+            )
+
+        if self.segmentation_mask_junction is not None:
+            self.segmentation_mask_junction = (
+                self.segmentation_mask_junction.remove_instance(instance_label)
             )
 
         # remove all cells that are not connected to the main graph anymore
@@ -527,6 +642,12 @@ class BioMedicalInstanceSegmentation:
             if self.segmentation_mask_organelle is not None:
                 self.segmentation_mask_organelle = (
                     self.segmentation_mask_organelle.remove_instance(element)
+                )
+
+            # junction mask
+            if self.segmentation_mask_junction is not None:
+                self.segmentation_mask_junction = (
+                    self.segmentation_mask_junction.remove_instance(element)
                 )
 
         return list_of_islands

@@ -190,6 +190,10 @@ Junction features
 +----------------------------------------+---------------------------------------------------------------------------------------------------+
 | junction_cluster_density               | The ratio between the junction protein intensity and the junction protein area                    |
 +----------------------------------------+---------------------------------------------------------------------------------------------------+
+| junction_centroid_orientation_rad      | The orientation in rad of the junction intensity area centroid to the center of the cell.         |
++----------------------------------------+---------------------------------------------------------------------------------------------------+
+| junction_centroid_orientation_deg      | The orientation in deg of the junction intensity area centroid to the center of the cell.         |
++----------------------------------------+---------------------------------------------------------------------------------------------------+
 | junction_cue_intensity_ratio           | The ratio of the left vs right cell membrane intensity in cue direction.                          |
 +----------------------------------------+---------------------------------------------------------------------------------------------------+
 | junction_axial_cue_intensity_ratio     | The ratio of the sum of cell membrane quarters in cue direction and the total membrane intensity. |

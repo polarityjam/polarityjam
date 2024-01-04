@@ -56,6 +56,7 @@ repos:
       - id: check-ast
       - id: check-symlinks
       - id: check-added-large-files
+        exclude: ^docs/
       - id: check-executables-have-shebangs
       - id: fix-encoding-pragma
         args: [--remove]

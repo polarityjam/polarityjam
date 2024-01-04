@@ -52,6 +52,7 @@ Welcome to polarityjam's documentation!
    Web-App
    notebooks/polarityjam-notebook.ipynb
    notebooks/polarityjam-notebook_api.ipynb
+   notebooks/polarityjam-notebook_seg.ipynb
    Methods
    Contribute
    Cite

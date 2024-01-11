@@ -198,12 +198,12 @@ class PlotParameter(Parameter):
         self.plot_sc_partitions = None
 
         self.outline_width = None
+        self.show_statistics = None
         self.show_polarity_angles = None
         self.show_graphics_axis = None
         self.pixel_to_micron_ratio = None
         self.plot_scalebar = None
         self.length_scalebar_microns = None
-        self.plot_statistics = None
 
         self.graphics_output_format = None
         self.dpi = None

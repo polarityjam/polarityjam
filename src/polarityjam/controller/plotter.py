@@ -1033,6 +1033,56 @@ class Plotter:
 
         return fig, [ax]
 
+    def plot_junction_features(
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
+    ):
+        """Plot the junction features of a specific image in the collection.
+
+        Args:
+            collection:
+                The collection containing the features
+            img_name:
+                The name of the image to plot
+            close:
+                whether to close the figure after saving
+
+        """
+
+        img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+        assert img.junction is not None, "Junction channel not available"
+
+        im_junction = img.junction
+        cell_mask = img.segmentation.segmentation_mask_connected
+
+        pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
+        collection.get_runtime_params_by_img_name(img_name)
+
+        get_logger().info("Plotting: junction features")
+        number_sub_figs = 3  
+        # figure and axes
+        fig, ax = self._get_figure(number_sub_figs)
+
+        # plot junction channel for all subplots
+        for i in range(number_sub_figs):
+            ax[i].imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
+
+        # get mask for junction interface area (primary feature)
+        outline_mem = cell_mask.get_outline_from_mask(
+            self.params.membrane_thickness
+        )
+
+        # TODO: get mask for fragmented junction area (primary feature)
+
+        intensity_cell = feature_row["marker_mean_expression"].values[0]
+        intensity_mem = feature_row["marker_mean_expression_mem"].values[0]
+
+
+        return fig, [ax]
+
+
+
+
     def plot_junction_polarity(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
@@ -1053,6 +1103,10 @@ class Plotter:
 
         im_junction = img.junction
         cell_mask = img.segmentation.segmentation_mask_connected
+        single_cell_dataset = collection.dataset.loc[
+            collection.dataset["filename"] == img_name
+        ]
+
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
         collection.get_runtime_params_by_img_name(img_name)

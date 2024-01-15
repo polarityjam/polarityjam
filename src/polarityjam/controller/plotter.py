@@ -13,10 +13,12 @@ import scipy.ndimage as ndi
 from matplotlib import pyplot as plt
 from shapely.geometry import LineString
 
+
 from polarityjam.compute.shape import get_divisor_lines
 from polarityjam.compute.statistics import compute_polarity_index
 from polarityjam.model.collection import PropertiesCollection
 from polarityjam.model.image import BioMedicalChannel
+from polarityjam.model.image import BioMedicalImage
 from polarityjam.model.masks import BioMedicalInstanceSegmentationMask, BioMedicalMask
 from polarityjam.model.parameter import ImageParameter, PlotParameter
 from polarityjam.polarityjam_logging import get_logger
@@ -115,8 +117,10 @@ class Plotter:
         return [inlines_cell.data, inlines_mem, inlines_nuc.data]
 
     def _get_inlines_junction(self,
+        img : BioMedicalImage,
         im_junction: BioMedicalChannel,
         cell_mask: BioMedicalInstanceSegmentationMask,
+        #collection: PropertiesCollection,
         single_cell_dataset: pandas.DataFrame,
     ) -> List[np.ndarray]:
 
@@ -139,9 +143,11 @@ class Plotter:
                 self.params.membrane_thickness
             )
 
+            sc_junction_mask = img.get_single_junction_mask(cell_label,self.params.membrane_thickness)
+
             # TODO: get mask for fragmented junction area (primary feature)
             inlines_junction_interface_occupancy = np.where(
-                np.logical_and(outline_junction.data, inlines_junction_interface_occupancy.data < junction_interface_occupancy),
+                np.logical_and(sc_junction_mask.data, inlines_junction_interface_occupancy.data < junction_interface_occupancy),
                 junction_interface_occupancy,
                 inlines_junction_interface_occupancy.data,
             )
@@ -154,7 +160,7 @@ class Plotter:
 
             # TODO: check why we use this logical and here, inline_junction_cluster_density is always 0
             inlines_junction_cluster_density = np.where(
-                np.logical_and(outline_junction.data, inlines_junction_cluster_density.data < junction_cluster_density),
+                np.logical_and(sc_junction_mask.data, inlines_junction_cluster_density.data < junction_cluster_density),
                 junction_cluster_density,
                 inlines_junction_cluster_density.data,
             )
@@ -1131,7 +1137,7 @@ class Plotter:
         )
 
         outlines_junction_interface_occupancy, outlines_junction_intensity_per_interface_area, outlines_junction_cluster_density = self._get_inlines_junction(
-            im_junction, cell_mask, single_cell_dataset
+            img, im_junction, cell_mask, single_cell_dataset
         )
 
         outlines_junction_ = np.where(outlines_junction_interface_occupancy > 0, outlines_junction_interface_occupancy, np.nan)

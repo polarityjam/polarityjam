@@ -20,7 +20,7 @@ min_nucleus_size: 10 # minimum area of nucleus in pixel^2, will be removed other
 min_organelle_size: 10 # minimum area of organelle in pixel^2, will be removed otherwise
 extract_group_features: False
 membrane_thickness: 5
-junction_threshold_parameter: -1 # -1 means no manual thresholding, but otsu thresholding
+junction_threshold: -1 # -1 means no manual thresholding, but otsu thresholding
 feature_of_interest: "cell_area"
 dp_epsilon: 5
 cue_direction: 0 # should be provided in degrees and take values between 0 and 360

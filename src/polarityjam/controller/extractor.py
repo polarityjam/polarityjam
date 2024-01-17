@@ -178,7 +178,7 @@ class Extractor:
             single_cell_image = bio_med_image.focus(
                 cc_label,
                 self.params.membrane_thickness,
-                self.params.junction_threshold_parameter,
+                self.params.junction_threshold,
             )
             sc_image_list.append(single_cell_image)
 

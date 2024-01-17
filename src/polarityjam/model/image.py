@@ -235,7 +235,7 @@ class BioMedicalImage(AbstractBioMedicalImage):
         self,
         connected_component_label: int,
         membrane_thickness: int,
-        junction_threshold_parameter: Optional[float] = None,
+        junction_threshold: Optional[float] = None,
     ) -> SingleCellImage:
         """Focus the image on a given connected component label.
 
@@ -256,7 +256,7 @@ class BioMedicalImage(AbstractBioMedicalImage):
             sc_organelle_mask,
             sc_junction_protein_mask,
         ) = self.get_single_cell_masks(
-            connected_component_label, membrane_thickness, junction_threshold_parameter
+            connected_component_label, membrane_thickness, junction_threshold
         )
 
         sc_mask_f = np.flip(sc_mask.data, axis=0)  # y-axis is flipped
@@ -278,7 +278,7 @@ class BioMedicalImage(AbstractBioMedicalImage):
         self,
         connected_component_label: int,
         membrane_thickness: int,
-        junction_threshold_parameter: Optional[float] = None,
+        junction_threshold: Optional[float] = None,
     ) -> Tuple[
         BioMedicalMask,
         BioMedicalMask,
@@ -325,7 +325,7 @@ class BioMedicalImage(AbstractBioMedicalImage):
             sc_junction_protein_mask = self.get_single_junction_mask(
                 connected_component_label,
                 membrane_thickness,
-                junction_threshold_parameter,
+                junction_threshold,
             )
 
         return (
@@ -461,7 +461,7 @@ class BioMedicalImage(AbstractBioMedicalImage):
         self,
         connected_component_label: int,
         membrane_thickness: int,
-        junction_threshold_parameter: Optional[float] = None,
+        junction_threshold: Optional[float] = None,
     ) -> Optional[BioMedicalMask]:
         """Get the mask of the single cell junction protein.
 
@@ -484,7 +484,7 @@ class BioMedicalImage(AbstractBioMedicalImage):
                 self._calc_default_single_cell_junction_segmentation(
                     connected_component_label,
                     membrane_thickness,
-                    junction_threshold_parameter,
+                    junction_threshold,
                 )
             )
         else:  # case mask given as BioMedicalJunctionSegmentation
@@ -501,7 +501,7 @@ class BioMedicalImage(AbstractBioMedicalImage):
         self,
         connected_component_label,
         membrane_thickness,
-        junction_threshold_parameter,
+        junction_threshold,
     ):
         """Calculate single cell junction protein mask."""
         assert self.junction is not None, "The image has no junction channel."
@@ -513,13 +513,10 @@ class BioMedicalImage(AbstractBioMedicalImage):
         )
         masked_sc_junction_channel = self.junction.mask(sc_membrane_mask)
 
-        if (
-            junction_threshold_parameter is not None
-            and junction_threshold_parameter > 0
-        ):
+        if junction_threshold is not None and junction_threshold > 0:
             # manual threshold
             sc_junction_protein_mask = BioMedicalMask.from_threshold(
-                masked_sc_junction_channel.data, junction_threshold_parameter
+                masked_sc_junction_channel.data, junction_threshold
             )
         else:
             # auto threshold

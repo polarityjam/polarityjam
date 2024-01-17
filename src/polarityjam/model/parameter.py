@@ -118,7 +118,7 @@ class RuntimeParameter(Parameter):
             attrs = {}
         self.extract_group_features = None
         self.membrane_thickness = None
-        self.junction_threshold_parameter = None
+        self.junction_threshold = None
         self.feature_of_interest = None
         self.min_cell_size = None
         self.min_nucleus_size = None

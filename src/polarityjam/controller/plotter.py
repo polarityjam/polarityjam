@@ -13,12 +13,10 @@ import scipy.ndimage as ndi
 from matplotlib import pyplot as plt
 from shapely.geometry import LineString
 
-
 from polarityjam.compute.shape import get_divisor_lines
 from polarityjam.compute.statistics import compute_polarity_index
 from polarityjam.model.collection import PropertiesCollection
-from polarityjam.model.image import BioMedicalChannel
-from polarityjam.model.image import BioMedicalImage
+from polarityjam.model.image import BioMedicalChannel, BioMedicalImage
 from polarityjam.model.masks import BioMedicalInstanceSegmentationMask, BioMedicalMask
 from polarityjam.model.parameter import ImageParameter, PlotParameter
 from polarityjam.polarityjam_logging import get_logger
@@ -116,24 +114,35 @@ class Plotter:
 
         return [inlines_cell.data, inlines_mem, inlines_nuc.data]
 
-    def _get_inlines_junction(self,
-        img : BioMedicalImage,
+    def _get_inlines_junction(
+        self,
+        img: BioMedicalImage,
         im_junction: BioMedicalChannel,
         cell_mask: BioMedicalInstanceSegmentationMask,
-        #collection: PropertiesCollection,
+        # collection: PropertiesCollection,
         single_cell_dataset: pandas.DataFrame,
     ) -> List[np.ndarray]:
 
-        inlines_junction_interface_occupancy = np.zeros((im_junction.data.shape[0], im_junction.data.shape[1]))
-        inlines_junction_intensity_per_interface_area= np.zeros((im_junction.data.shape[0], im_junction.data.shape[1]))
-        inlines_junction_cluster_density = np.zeros((im_junction.data.shape[0], im_junction.data.shape[1]))
+        inlines_junction_interface_occupancy = np.zeros(
+            (im_junction.data.shape[0], im_junction.data.shape[1])
+        )
+        inlines_junction_intensity_per_interface_area = np.zeros(
+            (im_junction.data.shape[0], im_junction.data.shape[1])
+        )
+        inlines_junction_cluster_density = np.zeros(
+            (im_junction.data.shape[0], im_junction.data.shape[1])
+        )
 
         for cell_label in single_cell_dataset["label"]:
             feature_row = single_cell_dataset.loc[
                 single_cell_dataset["label"] == cell_label
             ]
-            junction_interface_occupancy = feature_row["junction_interface_occupancy"].values[0]
-            junction_intensity_per_interface_area = feature_row["junction_intensity_per_interface_area"].values[0]
+            junction_interface_occupancy = feature_row[
+                "junction_interface_occupancy"
+            ].values[0]
+            junction_intensity_per_interface_area = feature_row[
+                "junction_intensity_per_interface_area"
+            ].values[0]
             junction_cluster_density = feature_row["junction_cluster_density"].values[0]
 
             single_cell_mask = cell_mask.get_single_instance_mask(cell_label)
@@ -143,24 +152,37 @@ class Plotter:
                 self.params.membrane_thickness
             )
 
-            sc_junction_mask = img.get_single_junction_mask(cell_label,self.params.membrane_thickness)
+            sc_junction_mask = img.get_single_junction_mask(
+                cell_label, self.params.membrane_thickness
+            )
 
             # TODO: get mask for fragmented junction area (primary feature)
             inlines_junction_interface_occupancy = np.where(
-                np.logical_and(sc_junction_mask.data, inlines_junction_interface_occupancy.data < junction_interface_occupancy),
+                np.logical_and(
+                    sc_junction_mask.data,
+                    inlines_junction_interface_occupancy.data
+                    < junction_interface_occupancy,
+                ),
                 junction_interface_occupancy,
                 inlines_junction_interface_occupancy.data,
             )
 
             inlines_junction_intensity_per_interface_area = np.where(
-                np.logical_and(outline_junction.data, inlines_junction_intensity_per_interface_area.data < junction_intensity_per_interface_area),
+                np.logical_and(
+                    outline_junction.data,
+                    inlines_junction_intensity_per_interface_area.data
+                    < junction_intensity_per_interface_area,
+                ),
                 junction_intensity_per_interface_area,
                 inlines_junction_intensity_per_interface_area.data,
             )
 
             # TODO: check why we use this logical and here, inline_junction_cluster_density is always 0
             inlines_junction_cluster_density = np.where(
-                np.logical_and(sc_junction_mask.data, inlines_junction_cluster_density.data < junction_cluster_density),
+                np.logical_and(
+                    sc_junction_mask.data,
+                    inlines_junction_cluster_density.data < junction_cluster_density,
+                ),
                 junction_cluster_density,
                 inlines_junction_cluster_density.data,
             )
@@ -170,8 +192,11 @@ class Plotter:
         # junction_intensity_per_interface_area
         # junction_cluster_density
 
-        return [inlines_junction_interface_occupancy, inlines_junction_intensity_per_interface_area, inlines_junction_cluster_density]
-
+        return [
+            inlines_junction_interface_occupancy,
+            inlines_junction_intensity_per_interface_area,
+            inlines_junction_cluster_density,
+        ]
 
     def _masked_cell_outlines(
         self,
@@ -1130,7 +1155,6 @@ class Plotter:
                 whether to close the figure after saving
 
         """
-
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
@@ -1150,8 +1174,19 @@ class Plotter:
         fig, ax = self._get_figure(number_sub_figs)
 
         # plot junction channel for all subplots
+        cax = []
         for i in range(number_sub_figs):
-            ax[i].imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
+            _cax = ax[i].imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
+            cax.append(_cax)
+
+        # add color bar for plain junction channel
+        yticks_mem = [
+            np.nanmin(im_junction.data),
+            np.nanmax(
+                im_junction.data,
+            ),
+        ]
+        add_colorbar(fig, cax[0], ax[0], yticks_mem, "junction intensity")
 
         add_title(
             ax[0],
@@ -1160,11 +1195,17 @@ class Plotter:
             self.params.show_graphics_axis,
         )
 
-        outlines_junction_interface_occupancy, outlines_junction_intensity_per_interface_area, outlines_junction_cluster_density = self._get_inlines_junction(
-            img, im_junction, cell_mask, single_cell_dataset
-        )
+        (
+            outlines_junction_interface_occupancy,
+            outlines_junction_intensity_per_interface_area,
+            outlines_junction_cluster_density,
+        ) = self._get_inlines_junction(img, im_junction, cell_mask, single_cell_dataset)
 
-        outlines_junction_ = np.where(outlines_junction_interface_occupancy > 0, outlines_junction_interface_occupancy, np.nan)
+        outlines_junction_ = np.where(
+            outlines_junction_interface_occupancy > 0,
+            outlines_junction_interface_occupancy,
+            np.nan,
+        )
         cax_1 = ax[1].imshow(outlines_junction_, plt.cm.bwr, alpha=self.params.alpha)
 
         # colorbar for membrane
@@ -1182,8 +1223,11 @@ class Plotter:
             self.params.show_graphics_axis,
         )
 
-        outlines_junction_ = np.where(outlines_junction_intensity_per_interface_area > 0, outlines_junction_intensity_per_interface_area,
-                                      np.nan)
+        outlines_junction_ = np.where(
+            outlines_junction_intensity_per_interface_area > 0,
+            outlines_junction_intensity_per_interface_area,
+            np.nan,
+        )
         cax_2 = ax[2].imshow(outlines_junction_, plt.cm.bwr, alpha=self.params.alpha)
 
         # colorbar for membrane
@@ -1193,7 +1237,9 @@ class Plotter:
                 outlines_junction_,
             ),
         ]
-        add_colorbar(fig, cax_2, ax[2], yticks_mem, "junction intensity per interface area")
+        add_colorbar(
+            fig, cax_2, ax[2], yticks_mem, "junction intensity per interface area"
+        )
         add_title(
             ax[2],
             "junction intensity per interface area",
@@ -1201,11 +1247,14 @@ class Plotter:
             self.params.show_graphics_axis,
         )
 
-        outlines_junction_ = np.where(outlines_junction_cluster_density > 0, outlines_junction_cluster_density,
-                                      np.nan)
+        outlines_junction_ = np.where(
+            outlines_junction_cluster_density > 0,
+            outlines_junction_cluster_density,
+            np.nan,
+        )
         cax_3 = ax[3].imshow(outlines_junction_, plt.cm.bwr, alpha=self.params.alpha)
 
-        #colorbar for membrane
+        # colorbar for membrane
         yticks_mem = [
             np.nanmin(outlines_junction_),
             np.nanmax(
@@ -1232,7 +1281,6 @@ class Plotter:
             close,
         )
 
-
         return fig, axes
 
     def plot_junction_polarity(
@@ -1255,10 +1303,6 @@ class Plotter:
 
         im_junction = img.junction
         cell_mask = img.segmentation.segmentation_mask_connected
-        single_cell_dataset = collection.dataset.loc[
-            collection.dataset["filename"] == img_name
-        ]
-
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
         collection.get_runtime_params_by_img_name(img_name)

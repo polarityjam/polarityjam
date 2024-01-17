@@ -462,7 +462,7 @@ class BioMedicalImage(AbstractBioMedicalImage):
         connected_component_label: int,
         membrane_thickness: int,
         junction_threshold: Optional[float] = None,
-    ) -> Optional[BioMedicalMask]:
+    ) -> BioMedicalMask:
         """Get the mask of the single cell junction protein.
 
         Args:

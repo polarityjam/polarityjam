@@ -67,6 +67,17 @@ class Mask:
         return cls(interior_mask)  # type: ignore [call-arg]
 
     @classmethod
+    def from_threshold(cls: Type[_T], channel: np.ndarray, threshold: float) -> _T:
+        """Initialize a mask from a channel using a manual threshold."""
+        interior_mask = np.where(
+            channel > threshold,
+            True,
+            False,
+        )
+
+        return cls(interior_mask)  # type: ignore [call-arg]
+
+    @classmethod
     def empty(cls: Type[_T], shape: Tuple[int, ...]) -> _T:
         """Create an empty mask of a given shape."""
         return cls(np.zeros(shape))  # type: ignore [call-arg]

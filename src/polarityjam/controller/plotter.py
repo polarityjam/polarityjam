@@ -466,9 +466,15 @@ class Plotter:
 
         plot_title = "organelle polarity"
         if self.params.show_statistics:
-            angles = np.array(collection.get_properties_by_img_name(img_name)["organelle_orientation_rad"])
+            angles = np.array(
+                collection.get_properties_by_img_name(img_name)[
+                    "organelle_orientation_rad"
+                ]
+            )
             cue_direction_rad = np.deg2rad(cue_direction)
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction=cue_direction_rad, stats_mode='directional')
+            alpha_m, R, c = compute_polarity_index(
+                angles, cue_direction=cue_direction_rad, stats_mode="directional"
+            )
             plot_title += "\n N: " + str(len(angles)) + ", "
             plot_title += "mean angle: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
@@ -583,11 +589,17 @@ class Plotter:
                 )
 
         plot_title = "nucleus displacement orientation"
-        
+
         if self.params.show_statistics:
-            angles = np.array(collection.get_properties_by_img_name(img_name)["nuc_displacement_orientation_rad"])
+            angles = np.array(
+                collection.get_properties_by_img_name(img_name)[
+                    "nuc_displacement_orientation_rad"
+                ]
+            )
             cue_direction_rad = np.deg2rad(cue_direction)
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction=cue_direction_rad, stats_mode='directional')
+            alpha_m, R, c = compute_polarity_index(
+                angles, cue_direction=cue_direction_rad, stats_mode="directional"
+            )
             plot_title += "\n N: " + str(len(angles)) + ", "
             plot_title += "mean angle: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
@@ -868,10 +880,16 @@ class Plotter:
         plot_title = "marker polarity"
 
         if self.params.show_statistics:
-            angles = np.array(collection.get_properties_by_img_name(img_name)["marker_centroid_orientation_rad"])
+            angles = np.array(
+                collection.get_properties_by_img_name(img_name)[
+                    "marker_centroid_orientation_rad"
+                ]
+            )
             cue_direction_rad = np.deg2rad(cue_direction)
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction=cue_direction_rad, stats_mode='directional')
-            #plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
+            alpha_m, R, c = compute_polarity_index(
+                angles, cue_direction=cue_direction_rad, stats_mode="directional"
+            )
+            # plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "\n N: " + str(len(angles)) + ", "
             plot_title += "mean angle: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
@@ -994,10 +1012,16 @@ class Plotter:
         plot_title = "marker nucleus orientation"
 
         if self.params.show_statistics:
-            angles = np.array(collection.get_properties_by_img_name(img_name)["marker_nucleus_orientation_rad"])
+            angles = np.array(
+                collection.get_properties_by_img_name(img_name)[
+                    "marker_nucleus_orientation_rad"
+                ]
+            )
             cue_direction_rad = np.deg2rad(cue_direction)
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction=cue_direction_rad, stats_mode='directional')
-            #plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
+            alpha_m, R, c = compute_polarity_index(
+                angles, cue_direction=cue_direction_rad, stats_mode="directional"
+            )
+            # plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "\n N: " + str(len(angles)) + ", "
             plot_title += "mean angle: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
@@ -2111,9 +2135,15 @@ class Plotter:
         plot_title = "cell shape orientation"
 
         if self.params.show_statistics:
-            angles = np.array(collection.get_properties_by_img_name(img_name)["cell_shape_orientation_rad"])
+            angles = np.array(
+                collection.get_properties_by_img_name(img_name)[
+                    "cell_shape_orientation_rad"
+                ]
+            )
             cue_direction_rad = np.deg2rad(cue_direction)
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction = cue_direction_rad, stats_mode='axial')
+            alpha_m, R, c = compute_polarity_index(
+                angles, cue_direction=cue_direction_rad, stats_mode="axial"
+            )
             plot_title += "\n N: " + str(len(angles)) + ", "
             plot_title += "mean angle: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
@@ -2132,9 +2162,15 @@ class Plotter:
             plot_title_nuc = "nuclei shape orientation"
 
             if self.params.show_statistics:
-                angles = np.array(collection.get_properties_by_img_name(img_name)["nuc_shape_orientation_rad"])
+                angles = np.array(
+                    collection.get_properties_by_img_name(img_name)[
+                        "nuc_shape_orientation_rad"
+                    ]
+                )
                 cue_direction_rad = np.deg2rad(cue_direction)
-                alpha_m, R, c = compute_polarity_index(angles, cue_direction=cue_direction_rad, stats_mode='axial')
+                alpha_m, R, c = compute_polarity_index(
+                    angles, cue_direction=cue_direction_rad, stats_mode="axial"
+                )
                 plot_title += "\n N: " + str(len(angles)) + ", "
                 plot_title += "mean angle: " + str(np.round(alpha_m, 2)) + "°, "
                 plot_title_nuc += "PI: " + str(np.round(R, 2)) + ","

@@ -175,7 +175,7 @@ Plot Parameter
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | plot_foi                 | plot      | bool     | True          | True, False           | Indicates whether to perform the feature of interest plot.                                |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
-| plot_scalebar            | plot      | bool     | True          | True, False           | Shows the scalebar with the pixel to micron ratio specified with the image.               |
+| show_scalebar            | plot      | bool     | True          | True, False           | Shows the scalebar with the pixel to micron ratio specified with the image.               |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+
 | show_statistics          | plot      | bool     | True          | True, False           | Add circular statistics to plot title.                                                    |
 +--------------------------+-----------+----------+---------------+-----------------------+-------------------------------------------------------------------------------------------+

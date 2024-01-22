@@ -2000,6 +2000,8 @@ class Plotter:
             close,
         )
 
+        return fig, ax
+
     def plot_junction_cue_intensity_ratio(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
@@ -2468,8 +2470,8 @@ class Plotter:
             )
             return
 
-        plt_scalebar = self.params.plot_scalebar
-        self.params.plot_scalebar = False
+        plt_scalebar = self.params.show_scalebar
+        self.params.show_scalebar = False
 
         # loop
         for idx, single_cell in enumerate(single_cells_list):
@@ -2547,7 +2549,99 @@ class Plotter:
                 close,
             )
 
-        self.params.plot_scalebar = plt_scalebar
+        self.params.show_scalebar = plt_scalebar
+
+    def plot_threshold_segmentation_mask(
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
+    ):
+        """Show the processed segmentation mask.
+
+        Args:
+            collection:
+                The collection containing the features
+            img_name:
+                The name of the image to plot
+            close:
+                whether to close the figure after saving
+
+        """
+        get_logger().info("Plotting: processed segmentation mask")
+
+        img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+
+        masks = []
+        titles = []
+        num_fig = 2
+        if img.segmentation.segmentation_mask_nuclei is not None:
+            masks.append(img.segmentation.segmentation_mask_nuclei)
+            titles.append("threshold segmentation mask nuclei")
+            num_fig += 1
+        if img.segmentation.segmentation_mask_organelle is not None:
+            masks.append(img.segmentation.segmentation_mask_organelle)
+            titles.append("threshold segmentation mask organelle")
+            num_fig += 1
+        if img.segmentation.segmentation_mask_junction is not None:
+            masks.append(img.segmentation.segmentation_mask_junction)
+            titles.append("threshold segmentation mask junction")
+            num_fig += 1
+
+        fig, ax = self._get_figure(num_fig)
+
+        # ignore background
+        _mask = np.where(
+            img.segmentation.segmentation_mask.data > 0,
+            img.segmentation.segmentation_mask.data,
+            np.nan,
+        )
+        _mask = self._rand_labels(_mask)
+
+        # plot unconnected segmentation mask
+        ax[0].imshow(_mask, cmap=plt.cm.gist_rainbow)
+        add_title(
+            ax[0],
+            "threshold segmentation mask",
+            img.segmentation.segmentation_mask.data,
+            self.params.show_graphics_axis,
+        )
+
+        # ignore background
+        _mask_con = np.where(
+            img.segmentation.segmentation_mask_connected.data > 0,
+            img.segmentation.segmentation_mask_connected.data,
+            np.nan,
+        )
+        _mask_con = self._rand_labels(_mask_con)
+
+        # plot connected segmentation mask
+        ax[1].imshow(_mask_con, cmap=plt.cm.gist_rainbow)
+        add_title(
+            ax[1],
+            "connected threshold segmentation mask",
+            img.segmentation.segmentation_mask_connected.data,
+            self.params.show_graphics_axis,
+        )
+
+        # plot optional masks
+        for i, (mask, title) in enumerate(zip(masks, titles)):
+            # ignore background
+            mask = np.where(mask.data > 0, mask.data, np.nan)
+            mask_ = self._rand_labels(mask)
+
+            ax[i + 2].imshow(mask_, cmap=plt.cm.gist_rainbow)
+            add_title(ax[i + 2], title, mask_, self.params.show_graphics_axis)
+
+        self._finish_plot(
+            fig,
+            collection.get_out_path_by_name(img_name),
+            img_name,
+            "_threshold_segmentation_mask",
+            ax,
+            img.img_params.pixel_to_micron_ratio,
+            close,
+        )
+
+        return fig, ax
 
     def _finish_plot(
         self,
@@ -2561,7 +2655,7 @@ class Plotter:
         image=None,
     ):
         # plot scale bar for this figure
-        if self.params.plot_scalebar:
+        if self.params.show_scalebar:
             for ax in axes:
                 add_scalebar(
                     ax,
@@ -2597,6 +2691,9 @@ class Plotter:
         for key in collection.img_dict.keys():
             img = collection.get_image_by_img_name(key)
             r_params = collection.get_runtime_params_by_img_name(key)
+
+            if self.params.plot_threshold_masks:
+                self.plot_threshold_segmentation_mask(collection, key, close)
 
             if self.params.plot_polarity and img.has_nuclei() and img.has_organelle():
                 self.plot_organelle_polarity(collection, key, close)

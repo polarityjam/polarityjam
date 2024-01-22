@@ -40,12 +40,13 @@ plot_marker: True
 plot_ratio_method: True
 plot_shape_orientation: True
 plot_foi: True
+plot_processed_masks: True
 plot_sc_image: False
 plot_sc_partitions: False
 show_statistics: False
 show_polarity_angles: True
 show_graphics_axis: False
-plot_scalebar: True
+show_scalebar: True
 length_scalebar_microns: 20.0
 outline_width: 2
 graphics_output_format: ["png"] # 'png', 'pdf', 'svg'

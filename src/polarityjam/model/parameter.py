@@ -196,14 +196,15 @@ class PlotParameter(Parameter):
         self.plot_shape_orientation = None
         self.plot_foi = None
         self.plot_sc_image = None
+        self.plot_threshold_masks = None
         self.plot_sc_partitions = None
 
         self.outline_width = None
         self.show_statistics = None
         self.show_polarity_angles = None
         self.show_graphics_axis = None
+        self.show_scalebar = None
         self.pixel_to_micron_ratio = None
-        self.plot_scalebar = None
         self.length_scalebar_microns = None
 
         self.graphics_output_format = None

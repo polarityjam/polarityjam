@@ -86,7 +86,7 @@ class Plotter:
 
             # membrane outline cannot be summed up on an empty mask, because outlines overlap.
             outline_mem = single_cell_mask.get_outline_from_mask(
-                self.params.membrane_thickness
+                self.params.membrane_thickness  # todo: do not use membrane thickness from plot parameters.
             )
             inlines_mem = np.where(
                 np.logical_and(outline_mem.data, inlines_mem.data < intensity_mem),
@@ -149,11 +149,12 @@ class Plotter:
 
             # junction outline cannot be summed up on an empty mask, because outlines overlap.
             outline_junction = single_cell_mask.get_outline_from_mask(
-                self.params.membrane_thickness
+                self.params.membrane_thickness  # todo: do not use membrane thickness from plot parameters.
             )
 
             sc_junction_mask = img.get_single_junction_mask(
-                cell_label, self.params.membrane_thickness
+                cell_label,
+                self.params.membrane_thickness,  # todo: do not use membrane thickness from plot parameters.
             )
 
             # TODO: get mask for fragmented junction area (primary feature)

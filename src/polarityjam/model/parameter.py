@@ -199,19 +199,19 @@ class PlotParameter(Parameter):
         self.plot_threshold_masks = None
         self.plot_sc_partitions = None
 
-        self.outline_width = None
         self.show_statistics = None
         self.show_polarity_angles = None
         self.show_graphics_axis = None
         self.show_scalebar = None
-        self.pixel_to_micron_ratio = None
+
+        self.outline_width = None
         self.length_scalebar_microns = None
 
         self.graphics_output_format = None
         self.dpi = None
         self.graphics_width = None
         self.graphics_height = None
-        self.membrane_thickness = None
+        self.membrane_thickness = None  # todo: remove me
 
         self.fontsize_text_annotations = None
         self.font_color = None

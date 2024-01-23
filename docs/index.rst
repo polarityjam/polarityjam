@@ -65,8 +65,3 @@ Welcome to polarityjam's documentation!
    * :ref:`modindex`
    * :ref:`search`
 
-
-.. image:: images/ePrivacyApp_F.svg
-   :width: 300px
-   :align: center
-

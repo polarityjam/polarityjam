@@ -473,6 +473,10 @@ class Plotter:
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junctions channel not available"
         assert img.nucleus is not None, "Nuclei channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction.data
         con_inst_seg_mask = img.segmentation.segmentation_mask_connected
@@ -613,6 +617,10 @@ class Plotter:
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junctions channel not available"
         assert img.nucleus is not None, "Nuclei channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
         r_params = collection.get_runtime_params_by_img_name(img_name)
@@ -740,6 +748,10 @@ class Plotter:
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.marker is not None, "Marker channel not available"
         assert img.junction is not None, "Junctions channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_marker = img.marker
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -899,6 +911,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.marker is not None, "Marker channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_marker = img.marker
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -1025,6 +1041,10 @@ class Plotter:
         assert img.junction is not None, "Junction channel not available"
         assert img.nucleus is not None, "Nuclei channel not available"
         assert img.marker is not None, "Marker channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction.data
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -1159,6 +1179,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -1301,6 +1325,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -1405,6 +1433,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -1633,6 +1665,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -1839,6 +1875,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -1956,6 +1996,10 @@ class Plotter:
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
         assert img.marker is not None, "Marker channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         params = collection.get_runtime_params_by_img_name(img_name)
 
@@ -2153,6 +2197,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction
         mask = img.segmentation.segmentation_mask_connected
@@ -2237,6 +2285,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction
         instance_segmentation_con = img.segmentation.segmentation_mask_connected

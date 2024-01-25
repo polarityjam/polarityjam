@@ -656,7 +656,7 @@ class SingleCellPropertiesCollection:
         marker_nuc_cyt_props: Optional[SingleCellMarkerCytosolProps] = None,
         junction_props: Optional[SingleCellJunctionProps] = None,
     ):
-        """Initialize the properties collection."""
+        """Initialize the properties' collection."""
         self.nucleus_props = nucleus_props
         self.organelle_props = organelle_props
         self.single_cell_props = single_cell_props

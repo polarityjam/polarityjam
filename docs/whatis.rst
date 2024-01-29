@@ -6,7 +6,7 @@ What is PolarityJaM?
 PolarityJaM suite
 -----------------
 
-The PolarityJaM suite is a software package that lets you study cell polarity, junctions and morphology.
+The `PolarityJaM <https://doi.org/10.1101/2024.01.24.577027>`_ suite is a software package that lets you study cell polarity, junctions and morphology.
 
 .. image:: images/sketch-data-analysis-organization-v5_.png
 

@@ -130,10 +130,16 @@ deviation, which is not further discussed here.
 Panel: Correlation analysis
 ---------------------------
 
+Hang in tight. We are working on an update on the documentation here.
 
 
 Panel: Compare
 --------------
+
+Hang in tight. We are working on an update on the documentation here.
+
+Further literature
+------------------
 
 For further reading we recommend:
 

@@ -20,6 +20,7 @@ min_nucleus_size: 10 # minimum area of nucleus in pixel^2, will be removed other
 min_organelle_size: 10 # minimum area of organelle in pixel^2, will be removed otherwise
 extract_group_features: False
 membrane_thickness: 5
+junction_threshold: -1 # -1 means no manual thresholding, but otsu thresholding
 feature_of_interest: "cell_area"
 dp_epsilon: 5
 cue_direction: 0 # should be provided in degrees and take values between 0 and 360
@@ -39,12 +40,13 @@ plot_marker: True
 plot_ratio_method: True
 plot_shape_orientation: True
 plot_foi: True
+plot_processed_masks: True
 plot_sc_image: False
 plot_sc_partitions: False
 show_statistics: False
 show_polarity_angles: True
 show_graphics_axis: False
-plot_scalebar: True
+show_scalebar: True
 length_scalebar_microns: 20.0
 outline_width: 2
 graphics_output_format: ["png"] # 'png', 'pdf', 'svg'

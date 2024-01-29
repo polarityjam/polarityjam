@@ -176,7 +176,9 @@ class Extractor:
         ) in bio_med_image.segmentation.segmentation_mask_connected.get_labels():
 
             single_cell_image = bio_med_image.focus(
-                cc_label, self.params.membrane_thickness
+                cc_label,
+                self.params.membrane_thickness,
+                self.params.junction_threshold,
             )
             sc_image_list.append(single_cell_image)
 
@@ -255,6 +257,7 @@ class Extractor:
                     "Junction channel found, but junction mask not provided. "
                     "Mask will be created via thresholding..."
                 )
+                # this happens on single cell level, as we do not want to threshold the whole image
                 return None
 
         return junction_mask_seg

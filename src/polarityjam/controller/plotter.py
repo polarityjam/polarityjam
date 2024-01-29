@@ -16,7 +16,7 @@ from shapely.geometry import LineString
 from polarityjam.compute.shape import get_divisor_lines
 from polarityjam.compute.statistics import compute_polarity_index
 from polarityjam.model.collection import PropertiesCollection
-from polarityjam.model.image import BioMedicalChannel
+from polarityjam.model.image import BioMedicalChannel, BioMedicalImage
 from polarityjam.model.masks import BioMedicalInstanceSegmentationMask, BioMedicalMask
 from polarityjam.model.parameter import ImageParameter, PlotParameter
 from polarityjam.polarityjam_logging import get_logger
@@ -86,7 +86,7 @@ class Plotter:
 
             # membrane outline cannot be summed up on an empty mask, because outlines overlap.
             outline_mem = single_cell_mask.get_outline_from_mask(
-                self.params.membrane_thickness
+                self.params.membrane_thickness  # todo: do not use membrane thickness from plot parameters.
             )
             inlines_mem = np.where(
                 np.logical_and(outline_mem.data, inlines_mem.data < intensity_mem),
@@ -113,6 +113,91 @@ class Plotter:
                 inlines_nuc = inlines_nuc.element_add(single_nuc_inlay_intensity_mask)
 
         return [inlines_cell.data, inlines_mem, inlines_nuc.data]
+
+    def _get_inlines_junction(
+        self,
+        img: BioMedicalImage,
+        im_junction: BioMedicalChannel,
+        cell_mask: BioMedicalInstanceSegmentationMask,
+        # collection: PropertiesCollection,
+        single_cell_dataset: pandas.DataFrame,
+    ) -> List[np.ndarray]:
+
+        inlines_junction_interface_occupancy = np.zeros(
+            (im_junction.data.shape[0], im_junction.data.shape[1])
+        )
+        inlines_junction_intensity_per_interface_area = np.zeros(
+            (im_junction.data.shape[0], im_junction.data.shape[1])
+        )
+        inlines_junction_cluster_density = np.zeros(
+            (im_junction.data.shape[0], im_junction.data.shape[1])
+        )
+
+        for cell_label in single_cell_dataset["label"]:
+            feature_row = single_cell_dataset.loc[
+                single_cell_dataset["label"] == cell_label
+            ]
+            junction_interface_occupancy = feature_row[
+                "junction_interface_occupancy"
+            ].values[0]
+            junction_intensity_per_interface_area = feature_row[
+                "junction_intensity_per_interface_area"
+            ].values[0]
+            junction_cluster_density = feature_row["junction_cluster_density"].values[0]
+
+            single_cell_mask = cell_mask.get_single_instance_mask(cell_label)
+
+            # junction outline cannot be summed up on an empty mask, because outlines overlap.
+            outline_junction = single_cell_mask.get_outline_from_mask(
+                self.params.membrane_thickness  # todo: do not use membrane thickness from plot parameters.
+            )
+
+            sc_junction_mask = img.get_single_junction_mask(
+                cell_label,
+                self.params.membrane_thickness,  # todo: do not use membrane thickness from plot parameters.
+            )
+
+            # TODO: get mask for fragmented junction area (primary feature)
+            inlines_junction_interface_occupancy = np.where(
+                np.logical_and(
+                    sc_junction_mask.data,
+                    inlines_junction_interface_occupancy.data
+                    < junction_interface_occupancy,
+                ),
+                junction_interface_occupancy,
+                inlines_junction_interface_occupancy.data,
+            )
+
+            inlines_junction_intensity_per_interface_area = np.where(
+                np.logical_and(
+                    outline_junction.data,
+                    inlines_junction_intensity_per_interface_area.data
+                    < junction_intensity_per_interface_area,
+                ),
+                junction_intensity_per_interface_area,
+                inlines_junction_intensity_per_interface_area.data,
+            )
+
+            # TODO: check why we use this logical and here, inline_junction_cluster_density is always 0
+            inlines_junction_cluster_density = np.where(
+                np.logical_and(
+                    sc_junction_mask.data,
+                    inlines_junction_cluster_density.data < junction_cluster_density,
+                ),
+                junction_cluster_density,
+                inlines_junction_cluster_density.data,
+            )
+
+        # TODO: incorporate all three features
+        # junction_interface_occupancy
+        # junction_intensity_per_interface_area
+        # junction_cluster_density
+
+        return [
+            inlines_junction_interface_occupancy,
+            inlines_junction_intensity_per_interface_area,
+            inlines_junction_cluster_density,
+        ]
 
     def _masked_cell_outlines(
         self,
@@ -388,6 +473,10 @@ class Plotter:
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junctions channel not available"
         assert img.nucleus is not None, "Nuclei channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction.data
         con_inst_seg_mask = img.segmentation.segmentation_mask_connected
@@ -466,9 +555,15 @@ class Plotter:
 
         plot_title = "organelle polarity"
         if self.params.show_statistics:
-            angles = np.array(collection.get_properties_by_img_name(img_name)["organelle_orientation_rad"])
+            angles = np.array(
+                collection.get_properties_by_img_name(img_name)[
+                    "organelle_orientation_rad"
+                ]
+            )
             cue_direction_rad = np.deg2rad(cue_direction)
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction=cue_direction_rad, stats_mode='directional')
+            alpha_m, R, c = compute_polarity_index(
+                angles, cue_direction=cue_direction_rad, stats_mode="directional"
+            )
             plot_title += "\n N: " + str(len(angles)) + ", "
             plot_title += "mean angle: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
@@ -522,6 +617,10 @@ class Plotter:
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junctions channel not available"
         assert img.nucleus is not None, "Nuclei channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
         r_params = collection.get_runtime_params_by_img_name(img_name)
@@ -583,11 +682,17 @@ class Plotter:
                 )
 
         plot_title = "nucleus displacement orientation"
-        
+
         if self.params.show_statistics:
-            angles = np.array(collection.get_properties_by_img_name(img_name)["nuc_displacement_orientation_rad"])
+            angles = np.array(
+                collection.get_properties_by_img_name(img_name)[
+                    "nuc_displacement_orientation_rad"
+                ]
+            )
             cue_direction_rad = np.deg2rad(cue_direction)
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction=cue_direction_rad, stats_mode='directional')
+            alpha_m, R, c = compute_polarity_index(
+                angles, cue_direction=cue_direction_rad, stats_mode="directional"
+            )
             plot_title += "\n N: " + str(len(angles)) + ", "
             plot_title += "mean angle: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
@@ -643,6 +748,10 @@ class Plotter:
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.marker is not None, "Marker channel not available"
         assert img.junction is not None, "Junctions channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_marker = img.marker
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -802,6 +911,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.marker is not None, "Marker channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_marker = img.marker
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -868,10 +981,16 @@ class Plotter:
         plot_title = "marker polarity"
 
         if self.params.show_statistics:
-            angles = np.array(collection.get_properties_by_img_name(img_name)["marker_centroid_orientation_rad"])
+            angles = np.array(
+                collection.get_properties_by_img_name(img_name)[
+                    "marker_centroid_orientation_rad"
+                ]
+            )
             cue_direction_rad = np.deg2rad(cue_direction)
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction=cue_direction_rad, stats_mode='directional')
-            #plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
+            alpha_m, R, c = compute_polarity_index(
+                angles, cue_direction=cue_direction_rad, stats_mode="directional"
+            )
+            # plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "\n N: " + str(len(angles)) + ", "
             plot_title += "mean angle: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
@@ -922,6 +1041,10 @@ class Plotter:
         assert img.junction is not None, "Junction channel not available"
         assert img.nucleus is not None, "Nuclei channel not available"
         assert img.marker is not None, "Marker channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction.data
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -994,10 +1117,16 @@ class Plotter:
         plot_title = "marker nucleus orientation"
 
         if self.params.show_statistics:
-            angles = np.array(collection.get_properties_by_img_name(img_name)["marker_nucleus_orientation_rad"])
+            angles = np.array(
+                collection.get_properties_by_img_name(img_name)[
+                    "marker_nucleus_orientation_rad"
+                ]
+            )
             cue_direction_rad = np.deg2rad(cue_direction)
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction=cue_direction_rad, stats_mode='directional')
-            #plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
+            alpha_m, R, c = compute_polarity_index(
+                angles, cue_direction=cue_direction_rad, stats_mode="directional"
+            )
+            # plot_title += "\n mean \u03B1: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "\n N: " + str(len(angles)) + ", "
             plot_title += "mean angle: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
@@ -1033,6 +1162,152 @@ class Plotter:
 
         return fig, [ax]
 
+    def plot_junction_features(
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
+    ):
+        """Plot the junction features of a specific image in the collection.
+
+        Args:
+            collection:
+                The collection containing the features
+            img_name:
+                The name of the image to plot
+            close:
+                whether to close the figure after saving
+
+        """
+        img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+        assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
+
+        im_junction = img.junction
+        cell_mask = img.segmentation.segmentation_mask_connected
+        single_cell_dataset = collection.dataset.loc[
+            collection.dataset["filename"] == img_name
+        ]
+
+        pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
+        collection.get_runtime_params_by_img_name(img_name)
+
+        get_logger().info("Plotting: junction features")
+        number_sub_figs = 4
+        # figure and axes
+        fig, ax = self._get_figure(number_sub_figs)
+
+        # plot junction channel for all subplots
+        cax = []
+        for i in range(number_sub_figs):
+            _cax = ax[i].imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
+            cax.append(_cax)
+
+        # add color bar for plain junction channel
+        yticks_mem = [
+            np.nanmin(im_junction.data),
+            np.nanmax(
+                im_junction.data,
+            ),
+        ]
+        add_colorbar(fig, cax[0], ax[0], yticks_mem, "junction intensity")
+
+        add_title(
+            ax[0],
+            "junction channel",
+            im_junction.data,
+            self.params.show_graphics_axis,
+        )
+
+        (
+            outlines_junction_interface_occupancy,
+            outlines_junction_intensity_per_interface_area,
+            outlines_junction_cluster_density,
+        ) = self._get_inlines_junction(img, im_junction, cell_mask, single_cell_dataset)
+
+        outlines_junction_ = np.where(
+            outlines_junction_interface_occupancy > 0,
+            outlines_junction_interface_occupancy,
+            np.nan,
+        )
+        cax_1 = ax[1].imshow(outlines_junction_, plt.cm.bwr, alpha=self.params.alpha)
+
+        # colorbar for membrane
+        yticks_mem = [
+            np.nanmin(outlines_junction_),
+            np.nanmax(
+                outlines_junction_,
+            ),
+        ]
+        add_colorbar(fig, cax_1, ax[1], yticks_mem, "junction interface occupancy")
+        add_title(
+            ax[1],
+            "junction interface occupancy",
+            im_junction.data,
+            self.params.show_graphics_axis,
+        )
+
+        outlines_junction_ = np.where(
+            outlines_junction_intensity_per_interface_area > 0,
+            outlines_junction_intensity_per_interface_area,
+            np.nan,
+        )
+        cax_2 = ax[2].imshow(outlines_junction_, plt.cm.bwr, alpha=self.params.alpha)
+
+        # colorbar for membrane
+        yticks_mem = [
+            np.nanmin(outlines_junction_),
+            np.nanmax(
+                outlines_junction_,
+            ),
+        ]
+        add_colorbar(
+            fig, cax_2, ax[2], yticks_mem, "junction intensity per interface area"
+        )
+        add_title(
+            ax[2],
+            "junction intensity per interface area",
+            im_junction.data,
+            self.params.show_graphics_axis,
+        )
+
+        outlines_junction_ = np.where(
+            outlines_junction_cluster_density > 0,
+            outlines_junction_cluster_density,
+            np.nan,
+        )
+        cax_3 = ax[3].imshow(outlines_junction_, plt.cm.bwr, alpha=self.params.alpha)
+
+        # colorbar for membrane
+        yticks_mem = [
+            np.nanmin(outlines_junction_),
+            np.nanmax(
+                outlines_junction_,
+            ),
+        ]
+        add_colorbar(fig, cax_3, ax[3], yticks_mem, "junction cluster density")
+        add_title(
+            ax[3],
+            "junction cluster density",
+            im_junction.data,
+            self.params.show_graphics_axis,
+        )
+
+        axes = [ax[0], ax[1], ax[2], ax[3]]
+
+        self._finish_plot(
+            fig,
+            collection.get_out_path_by_name(img_name),
+            img_name,
+            "_junction_features",
+            axes,
+            pixel_to_micron_ratio,
+            close,
+        )
+
+        return fig, axes
+
     def plot_junction_polarity(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
@@ -1050,6 +1325,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -1154,6 +1433,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -1382,6 +1665,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -1588,6 +1875,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -1705,6 +1996,10 @@ class Plotter:
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
         assert img.marker is not None, "Marker channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         params = collection.get_runtime_params_by_img_name(img_name)
 
@@ -1749,6 +2044,8 @@ class Plotter:
             pixel_to_micron_ratio,
             close,
         )
+
+        return fig, ax
 
     def plot_junction_cue_intensity_ratio(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
@@ -1900,6 +2197,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction
         mask = img.segmentation.segmentation_mask_connected
@@ -1984,6 +2285,10 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
 
         im_junction = img.junction
         instance_segmentation_con = img.segmentation.segmentation_mask_connected
@@ -2111,9 +2416,15 @@ class Plotter:
         plot_title = "cell shape orientation"
 
         if self.params.show_statistics:
-            angles = np.array(collection.get_properties_by_img_name(img_name)["cell_shape_orientation_rad"])
+            angles = np.array(
+                collection.get_properties_by_img_name(img_name)[
+                    "cell_shape_orientation_rad"
+                ]
+            )
             cue_direction_rad = np.deg2rad(cue_direction)
-            alpha_m, R, c = compute_polarity_index(angles, cue_direction = cue_direction_rad, stats_mode='axial')
+            alpha_m, R, c = compute_polarity_index(
+                angles, cue_direction=cue_direction_rad, stats_mode="axial"
+            )
             plot_title += "\n N: " + str(len(angles)) + ", "
             plot_title += "mean angle: " + str(np.round(alpha_m, 2)) + "°, "
             plot_title += "PI: " + str(np.round(R, 2)) + ","
@@ -2132,9 +2443,15 @@ class Plotter:
             plot_title_nuc = "nuclei shape orientation"
 
             if self.params.show_statistics:
-                angles = np.array(collection.get_properties_by_img_name(img_name)["nuc_shape_orientation_rad"])
+                angles = np.array(
+                    collection.get_properties_by_img_name(img_name)[
+                        "nuc_shape_orientation_rad"
+                    ]
+                )
                 cue_direction_rad = np.deg2rad(cue_direction)
-                alpha_m, R, c = compute_polarity_index(angles, cue_direction=cue_direction_rad, stats_mode='axial')
+                alpha_m, R, c = compute_polarity_index(
+                    angles, cue_direction=cue_direction_rad, stats_mode="axial"
+                )
                 plot_title += "\n N: " + str(len(angles)) + ", "
                 plot_title += "mean angle: " + str(np.round(alpha_m, 2)) + "°, "
                 plot_title_nuc += "PI: " + str(np.round(R, 2)) + ","
@@ -2206,8 +2523,8 @@ class Plotter:
             )
             return
 
-        plt_scalebar = self.params.plot_scalebar
-        self.params.plot_scalebar = False
+        plt_scalebar = self.params.show_scalebar
+        self.params.show_scalebar = False
 
         # loop
         for idx, single_cell in enumerate(single_cells_list):
@@ -2285,7 +2602,99 @@ class Plotter:
                 close,
             )
 
-        self.params.plot_scalebar = plt_scalebar
+        self.params.show_scalebar = plt_scalebar
+
+    def plot_threshold_segmentation_mask(
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
+    ):
+        """Show the processed segmentation mask.
+
+        Args:
+            collection:
+                The collection containing the features
+            img_name:
+                The name of the image to plot
+            close:
+                whether to close the figure after saving
+
+        """
+        get_logger().info("Plotting: processed segmentation mask")
+
+        img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+
+        masks = []
+        titles = []
+        num_fig = 2
+        if img.segmentation.segmentation_mask_nuclei is not None:
+            masks.append(img.segmentation.segmentation_mask_nuclei)
+            titles.append("threshold segmentation mask nuclei")
+            num_fig += 1
+        if img.segmentation.segmentation_mask_organelle is not None:
+            masks.append(img.segmentation.segmentation_mask_organelle)
+            titles.append("threshold segmentation mask organelle")
+            num_fig += 1
+        if img.segmentation.segmentation_mask_junction is not None:
+            masks.append(img.segmentation.segmentation_mask_junction)
+            titles.append("threshold segmentation mask junction")
+            num_fig += 1
+
+        fig, ax = self._get_figure(num_fig)
+
+        # ignore background
+        _mask = np.where(
+            img.segmentation.segmentation_mask.data > 0,
+            img.segmentation.segmentation_mask.data,
+            np.nan,
+        )
+        _mask = self._rand_labels(_mask)
+
+        # plot unconnected segmentation mask
+        ax[0].imshow(_mask, cmap=plt.cm.gist_rainbow)
+        add_title(
+            ax[0],
+            "threshold segmentation mask",
+            img.segmentation.segmentation_mask.data,
+            self.params.show_graphics_axis,
+        )
+
+        # ignore background
+        _mask_con = np.where(
+            img.segmentation.segmentation_mask_connected.data > 0,
+            img.segmentation.segmentation_mask_connected.data,
+            np.nan,
+        )
+        _mask_con = self._rand_labels(_mask_con)
+
+        # plot connected segmentation mask
+        ax[1].imshow(_mask_con, cmap=plt.cm.gist_rainbow)
+        add_title(
+            ax[1],
+            "connected threshold segmentation mask",
+            img.segmentation.segmentation_mask_connected.data,
+            self.params.show_graphics_axis,
+        )
+
+        # plot optional masks
+        for i, (mask, title) in enumerate(zip(masks, titles)):
+            # ignore background
+            mask = np.where(mask.data > 0, mask.data, np.nan)
+            mask_ = self._rand_labels(mask)
+
+            ax[i + 2].imshow(mask_, cmap=plt.cm.gist_rainbow)
+            add_title(ax[i + 2], title, mask_, self.params.show_graphics_axis)
+
+        self._finish_plot(
+            fig,
+            collection.get_out_path_by_name(img_name),
+            img_name,
+            "_threshold_segmentation_mask",
+            ax,
+            img.img_params.pixel_to_micron_ratio,
+            close,
+        )
+
+        return fig, ax
 
     def _finish_plot(
         self,
@@ -2299,7 +2708,7 @@ class Plotter:
         image=None,
     ):
         # plot scale bar for this figure
-        if self.params.plot_scalebar:
+        if self.params.show_scalebar:
             for ax in axes:
                 add_scalebar(
                     ax,
@@ -2336,6 +2745,9 @@ class Plotter:
             img = collection.get_image_by_img_name(key)
             r_params = collection.get_runtime_params_by_img_name(key)
 
+            if self.params.plot_threshold_masks:
+                self.plot_threshold_segmentation_mask(collection, key, close)
+
             if self.params.plot_polarity and img.has_nuclei() and img.has_organelle():
                 self.plot_organelle_polarity(collection, key, close)
                 if img.has_nuclei():
@@ -2351,6 +2763,7 @@ class Plotter:
                     self.plot_marker_cue_intensity_ratio(collection, key, close)
 
             if self.params.plot_junctions and img.has_junction():
+                self.plot_junction_features(collection, key, close)
                 self.plot_junction_polarity(collection, key, close)
                 self.plot_corners(collection, key, close)
 

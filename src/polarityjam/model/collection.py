@@ -269,27 +269,26 @@ class PropertiesCollection:
             self._index, "organelle_orientation_deg"
         ] = organelle_props.organelle_orientation_deg
 
-    # TODO: currently unused add marker_nuc_props in case only nuclei staining is present
-    # def add_sc_marker_nuclei_props(self, marker_nuc_props: SingleCellMarkerNucleiProps):
-    #    """Add specific single cell marker-nuclei properties to the dataset.
+    def add_sc_marker_nuclei_props(self, marker_nuc_props: SingleCellMarkerNucleiProps):
+        """Add specific single cell marker-nuclei properties to the dataset.
 
-    #    Args:
-    #        marker_nuc_props:
-    #            The single cell marker-nuclei properties
+        Args:
+            marker_nuc_props:
+                The single cell marker-nuclei properties
 
-    #   """
-    #    self.dataset.at[
-    #        self._index, "marker_mean_expression_nuc"
-    #    ] = marker_nuc_props.mean_intensity
-    #    self.dataset.at[
-    #        self._index, "marker_sum_expression_nuc"
-    #    ] = marker_nuc_props.marker_sum_expression_nuc
-    #    self.dataset.at[
-    #        self._index, "marker_nucleus_orientation_rad"
-    #    ] = marker_nuc_props.marker_nucleus_orientation_rad
-    #    self.dataset.at[
-    #        self._index, "marker_nucleus_orientation_deg"
-    #    ] = marker_nuc_props.marker_nucleus_orientation_deg
+        """
+        self.dataset.at[
+            self._index, "marker_mean_expression_nuc"
+        ] = marker_nuc_props.mean_intensity
+        self.dataset.at[
+            self._index, "marker_sum_expression_nuc"
+        ] = marker_nuc_props.marker_sum_expression_nuc
+        self.dataset.at[
+            self._index, "marker_nucleus_orientation_rad"
+        ] = marker_nuc_props.marker_nucleus_orientation_rad
+        self.dataset.at[
+            self._index, "marker_nucleus_orientation_deg"
+        ] = marker_nuc_props.marker_nucleus_orientation_deg
 
     def add_sc_marker_nuclei_cytosol_props(
         self,

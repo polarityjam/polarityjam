@@ -1,7 +1,7 @@
 # SegmentationParameter
 path: cellpose.CellposeSegmenter
-channel_cell_segmentation: ""  # always uses the noted channel for segmentation of cells. leave empty for default.
-channel_nuclei_segmentation: ""  # always uses the noted channel for segmentation of nuclei. leave empty for default.
+channel_cell_segmentation: "" # always uses the noted channel for segmentation of cells. leave empty for default.
+channel_nuclei_segmentation: "" # always uses the noted channel for segmentation of nuclei. leave empty for default.
 manually_annotated_mask: "" # in case a manually annotated cellpose mask exists specify suffix here
 store_segmentation: False
 use_given_mask: True
@@ -12,5 +12,4 @@ estimated_cell_diameter: 100 # estimated cell diameter in pixels
 estimated_nucleus_diameter: 30 # estimated nuclei diameter in pixels
 flow_threshold: 0.4 # default cellpose value
 cellprob_threshold: 0.0 # default cellpose value
-
 use_gpu: False

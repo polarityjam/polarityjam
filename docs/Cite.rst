@@ -6,7 +6,7 @@ Please cite our software if you use PolarityJam in your research!
 The Article is available `https://doi.org/10.1101/2024.01.24.577027 <https://doi.org/10.1101/2024.01.24.577027>`_.
 
 We additionally have a citation.cff `here <https://github.com/polarityjam/polarityjam/blob/main/CITATION.cff>`_.
-(Or see `https://github.com/polarityjam/polarityjam <https://github.com/polarityjam/polarityjam>`_ "Cite this repository".
+(Or see `https://github.com/polarityjam/polarityjam <https://github.com/polarityjam/polarityjam>`_ "Cite this repository").
 
 
 Thank you.

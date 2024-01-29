@@ -12,10 +12,10 @@ Segmentation
 ++++++++++++
 
 Segmentation can currently be performed using the following methods:
-- Cellpose `cellpose <https://github.com/MouseLand/cellpose>`_
-- Segment Anything `segmentanything <https://segment-anything.com/>`_
-- Mesmer deepcell `mesmer deepcell <https://github.com/vanvalenlab/deepcell-tf/tree/master>`_
-- microSAM `microSAM <https://github.com/computational-cell-analytics/micro-sam>`_
+* Cellpose `cellpose <https://github.com/MouseLand/cellpose>`_
+* Segment Anything `segmentanything <https://segment-anything.com/>`_
+* Mesmer deepcell `mesmer deepcell <https://github.com/vanvalenlab/deepcell-tf/tree/master>`_
+* microSAM `microSAM <https://github.com/computational-cell-analytics/micro-sam>`_
 
 Polarity-JaM natively uses Cellpose. Cellpose is a generalist algorithm for cell and nucleus segmentation.
 Cellpose uses a neural network that was trained to predict horizontal and vertical gradients of

@@ -22,9 +22,14 @@ dependencies:
 
 def setup_album():
     """Initialize the album api."""
+    import os
+    from pathlib import Path
+
     from album.api import Album
 
-    album_api = Album.Builder().build()
+    # create a collection inside the solution calling "album in album"
+    album_base_path = Path(os.path.abspath(__file__)).parent
+    album_api = Album.Builder().base_cache_path(album_base_path).build()
     album_api.load_or_create_collection()
 
     return album_api
@@ -277,19 +282,27 @@ class SamSegmenter:
         channel_cell_segmentation = img_parameter.channel_junction
         if self.params.channel_cell_segmentation != "":
             try:
-                channel_cell_segmentation = img_parameter.__getattribute__(self.params.channel_cell_segmentation)
+                channel_cell_segmentation = img_parameter.__getattribute__(
+                    self.params.channel_cell_segmentation
+                )
             except AttributeError as e:
-                raise AttributeError("Channel %s does not exist! Wrong segmentation configuration!"
-                                     % self.params.channel_cell_segmentation) from e
+                raise AttributeError(
+                    "Channel %s does not exist! Wrong segmentation configuration!"
+                    % self.params.channel_cell_segmentation
+                ) from e
 
         # check which channel is configured to use for nuclei segmentation:
         channel_nuclei_segmentation = img_parameter.channel_nucleus
         if self.params.channel_nuclei_segmentation != "":
             try:
-                channel_nuclei_segmentation = img_parameter.__getattribute__(self.params.channel_nuclei_segmentation)
+                channel_nuclei_segmentation = img_parameter.__getattribute__(
+                    self.params.channel_nuclei_segmentation
+                )
             except AttributeError as e:
-                raise AttributeError("Channel %s does not exist! Wrong segmentation configuration!"
-                                     % self.params.channel_nuclei_segmentation) from e
+                raise AttributeError(
+                    "Channel %s does not exist! Wrong segmentation configuration!"
+                    % self.params.channel_nuclei_segmentation
+                ) from e
 
         # check which channel is configured to use for organelle segmentation:
         channel_organelle_segmentation = img_parameter.channel_organelle
@@ -299,9 +312,10 @@ class SamSegmenter:
                     self.params.channel_organelle_segmentation
                 )
             except AttributeError as e:
-                raise AttributeError("Channel %s does not exist! Wrong segmentation configuration!"
-                                     % self.params.channel_organelle_segmentation) from e
-
+                raise AttributeError(
+                    "Channel %s does not exist! Wrong segmentation configuration!"
+                    % self.params.channel_organelle_segmentation
+                ) from e
 
         if channel_cell_segmentation < 0:
             raise ValueError("No channel for segmentation found.")
@@ -311,17 +325,21 @@ class SamSegmenter:
                 % str(channel_cell_segmentation)
             )
             im_junction = img[:, :, channel_cell_segmentation]
-            params_prep_img.channel_junction = 0  # might be called junction channel, but content depends on config
+            params_prep_img.channel_junction = (
+                0  # might be called junction channel, but content depends on config
+            )
 
             numpy_img[:, :, 0] = im_junction
 
-        if channel_nuclei_segmentation>= 0:
+        if channel_nuclei_segmentation >= 0:
             get_logger().info(
                 "Channel used for nuclei segmentation at position: %s"
                 % str(channel_nuclei_segmentation)
             )
             im_nucleus = img[:, :, channel_nuclei_segmentation]
-            params_prep_img.channel_nucleus = 1  # might be called nucleus channel, but content depends on config
+            params_prep_img.channel_nucleus = (
+                1  # might be called nucleus channel, but content depends on config
+            )
 
             numpy_img[:, :, 1] = im_nucleus
 
@@ -331,7 +349,9 @@ class SamSegmenter:
                 % str(channel_organelle_segmentation)
             )
             im_organelle = img[:, :, channel_organelle_segmentation]
-            params_prep_img.channel_organelle = 2  # might be called organelle channel, but content depends on config
+            params_prep_img.channel_organelle = (
+                2  # might be called organelle channel, but content depends on config
+            )
 
             numpy_img[:, :, 2] = im_organelle
 

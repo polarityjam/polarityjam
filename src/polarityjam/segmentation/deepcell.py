@@ -22,28 +22,37 @@ dependencies:
 
 def setup_album():
     """Initialize the album api."""
+    import os
+    from pathlib import Path
+
     from album.api import Album
 
-    album_api = Album.Builder().build()
+    # create a collection inside the solution calling "album in album"
+    album_base_path = Path(os.path.abspath(__file__)).parent
+    album_api = Album.Builder().base_cache_path(album_base_path).build()
     album_api.load_or_create_collection()
 
     return album_api
 
 
 def run():
+    """Run the deepcell solution."""
     # parse arguments
     args = get_args()
 
-    # imports 
+    # imports
     import argparse
+    from pathlib import Path
+
     import numpy as np
     import tifffile
-    from skimage.io import imread
-    from pathlib import Path
     from deepcell.applications import Mesmer
+    from skimage.io import imread
 
-    def segmentation(args: argparse.Namespace, image_nuclear: str, image_membrane: str = None) -> str:
-        """Loads the color channels, prepares them for the network, and runs the segmentation.
+    def segmentation(
+        args: argparse.Namespace, image_nuclear, image_membrane=None
+    ) -> str:
+        """Load the color channels, prepares them for the network, and runs the segmentation.
 
         Args:
             args: Arguments provided by the user.
@@ -55,16 +64,16 @@ def run():
         """
         image_nuc = imread(Path(args.input_path) / image_nuclear)
 
-        if (len(image_nuc.shape) > 2):
+        if len(image_nuc.shape) > 2:
             image_nuc = image_nuc[:, :, args.channel_nuclear]
-        if (len(image_nuc.shape) == 2):
+        if len(image_nuc.shape) == 2:
             image_nuc = np.expand_dims(image_nuc, axis=-1)
 
         if image_membrane:
             image_mem = imread(Path(args.input_path) / image_membrane)
-            if (len(image_mem.shape) > 2):
+            if len(image_mem.shape) > 2:
                 image_mem = image_mem[:, :, args.channel_membrane]
-            if (len(image_mem.shape) == 2):
+            if len(image_mem.shape) == 2:
                 # Expand from [H, W] to [H, W, C]
                 image_mem = np.expand_dims(image_mem, axis=-1)
         else:
@@ -79,7 +88,11 @@ def run():
         # Model loading
         # see https://github.com/vanvalenlab/deepcell-tf/blob/master/deepcell/applications/mesmer.py
         app = Mesmer()
-        print('Image resolution the network was trained on:', app.model_mpp, 'microns per pixel')
+        print(
+            "Image resolution the network was trained on:",
+            app.model_mpp,
+            "microns per pixel",
+        )
 
         # Postprocessing
         if (args.maxima_threshold is None) or (args.maxima_threshold <= 0):
@@ -96,7 +109,7 @@ def run():
             "small_objects_threshold": args.small_objects_threshold,
             "fill_holes_threshold": args.fill_holes_threshold,
             "radius": args.radius,
-            "pixel_expansion": args.pixel_expansion
+            "pixel_expansion": args.pixel_expansion,
         }
 
         # Prediction
@@ -106,7 +119,7 @@ def run():
             postprocess_kwargs_whole_cell=postprocess,
             postprocess_kwargs_nuclear=postprocess,
             compartment=args.segmentation_mode,
-            batch_size=1
+            batch_size=1,
         )
         segmentation_predictions = np.squeeze(segmentation_predictions)
         # Convert from 64 to 16 bit
@@ -120,7 +133,7 @@ def run():
             tifffile.imwrite(output_name.with_suffix(".tiff"), segmentation_predictions)
         if args.save_npy:
             np.save(output_name, segmentation_predictions)
-        return output_name
+        return str(output_name)
 
     # Test if input_path contains tif files
     input_path = Path(args.input_path)
@@ -131,7 +144,7 @@ def run():
     if args.img_name_nuclear:
         output_name = segmentation(args, args.img_name_nuclear, args.img_name_membrane)
     else:
-        files = list(input_path.glob('*.tif*'))
+        files = list(input_path.glob("*.tif*"))
         if not files:
             raise ValueError("No tif files found in folder.")
         for file in files:
@@ -151,10 +164,12 @@ setup(
     tags=["segmentation", "machine_learning", "images", "deepcell", "mesmer", "2D"],
     license="Modified Apache v2",
     documentation=["https://deepcell.readthedocs.io/en/master/"],
-    cite=[{
-        "text": "Noah F. Greenwald and Geneva Miller and Erick Moen and Alex Kong and Adam Kagel and Thomas Dougherty and Christine Camacho Fullaway and Brianna J. McIntosh and Ke Xuan Leow and Morgan Sarah Schwartz and Cole Pavelchek and Sunny Cui and Isabella Camplisson and Omer Bar-Tal and Jaiveer Singh and Mara Fong and Gautam Chaudhry and Zion Abraham and Jackson Moseley and Shiri Warshawsky and Erin Soon and Shirley Greenbaum and Tyler Risom and Travis Hollmann and Sean C. Bendall and Leeat Keren and William Graf and Michael Angelo and David Van Valen; Whole-cell segmentation of tissue images with human-level performance using large-scale data annotation and deep learning",
-        "doi": "https://doi.org/10.1038/s41587-021-01094-0"
-    }],
+    cite=[
+        {
+            "text": "Noah F. Greenwald and Geneva Miller and Erick Moen and Alex Kong and Adam Kagel and Thomas Dougherty and Christine Camacho Fullaway and Brianna J. McIntosh and Ke Xuan Leow and Morgan Sarah Schwartz and Cole Pavelchek and Sunny Cui and Isabella Camplisson and Omer Bar-Tal and Jaiveer Singh and Mara Fong and Gautam Chaudhry and Zion Abraham and Jackson Moseley and Shiri Warshawsky and Erin Soon and Shirley Greenbaum and Tyler Risom and Travis Hollmann and Sean C. Bendall and Leeat Keren and William Graf and Michael Angelo and David Van Valen; Whole-cell segmentation of tissue images with human-level performance using large-scale data annotation and deep learning",  # noqa: E501
+            "doi": "https://doi.org/10.1038/s41587-021-01094-0",
+        }
+    ],
     covers=[],
     album_api_version="0.5.5",
     args=[
@@ -163,126 +178,126 @@ setup(
             "type": "string",
             "required": True,
             "description": "Full path to the folder containing the images.",
-            "default": "./"
+            "default": "./",
         },
         {
             "name": "img_name_nuclear",
             "type": "string",
             "required": False,
-            "description": "Name of image containing the nuclei. (If not set or empty, the solution will run on all images in the folder while assuming each image contains nuclei and membrane information in the provided color channels.)",
-            "default": ""
+            "description": "Name of image containing the nuclei. (If not set or empty, the solution will run on all images in the folder while assuming each image contains nuclei and membrane information in the provided color channels.)",  # noqa: E501
+            "default": "",
         },
         {
             "name": "channel_nuclear",
             "type": "integer",
             "required": True,
             "description": "Channel index of the nuclear image, starting with 0.",
-            "default": 0
+            "default": 0,
         },
         {
             "name": "img_name_membrane",
             "type": "string",
             "required": False,
-            "description": "Name of the image containing the membrane information. This can be in the same file as the nuclear image, but would require to set `channel_membrane` to a different value. If not set, an empty channel will be used for the membrane.",
-            "default": ""
+            "description": "Name of the image containing the membrane information. This can be in the same file as the nuclear image, but would require to set `channel_membrane` to a different value. If not set, an empty channel will be used for the membrane.",  # noqa: E501
+            "default": "",
         },
         {
             "name": "channel_membrane",
             "type": "integer",
             "required": False,
-            "description": "Channel index of the membrane image, starting with 0. If `img_name_membrane` is not set, this value will be ignored.",
-            "default": 1
+            "description": "Channel index of the membrane image, starting with 0. If `img_name_membrane` is not set, this value will be ignored.",  # noqa: E501
+            "default": 1,
         },
         {
             "name": "image_mpp",
             "type": "float",
             "required": False,
             "description": "Resolution of the images in `Microns per pixel`. If not set, it will default to 0.5.",
-            "default": 0.5
+            "default": 0.5,
         },
         {
             "name": "segmentation_mode",
             "type": "string",
             "required": False,
-            "description": "Segmentation mode can be either `whole-cell` or `nuclear`. If `img_name_membrane` is not set, this will default to `nuclear`.",
-            "default": "whole-cell"
+            "description": "Segmentation mode can be either `whole-cell` or `nuclear`. If `img_name_membrane` is not set, this will default to `nuclear`.",  # noqa: E501
+            "default": "whole-cell",
         },
         {
             "name": "output_path",
             "type": "string",
             "required": False,
             "description": "Full path to the output folder in which the result gets stored.",
-            "default": "./output"
+            "default": "./output",
         },
         {
             "name": "save_mask",
             "type": "boolean",
             "required": False,
             "description": "Set this to `True` to save the segmentation mask as a tif file.",
-            "default": True
+            "default": True,
         },
         {
             "name": "save_npy",
             "type": "boolean",
             "required": False,
             "description": "Set this to `True` to save the segmentation mask as a numpy file.",
-            "default": False
+            "default": False,
         },
         {
             "name": "maxima_threshold",
             "type": "float",
             "required": False,
-            "description": "To finetune specific and consistent errors in your data, the following arguments can be used during postprocessing. Lower values will result in more cells being detected. Higher values will result in fewer cells being detected. When set to -1, the default for mode `whole_cell` (0.1) and for `nuclear` (0.075) will be applied",
+            "description": "To finetune specific and consistent errors in your data, the following arguments can be used during postprocessing. Lower values will result in more cells being detected. Higher values will result in fewer cells being detected. When set to -1, the default for mode `whole_cell` (0.1) and for `nuclear` (0.075) will be applied",  # noqa: E501
         },
         {
             "name": "maxima_smooth",
             "type": "float",
             "required": False,
             "description": "Default: 0",
-            "default": 0.0
+            "default": 0.0,
         },
         {
             "name": "interior_threshold",
             "type": "float",
             "required": False,
-            "description": "Comparison threshold for cell vs. background. Lower values tend to result in larger cells. Default: 0.2",
-            "default": 0.2
+            "description": "Comparison threshold for cell vs. background. Lower values tend to result in larger cells. Default: 0.2",  # noqa: E501
+            "default": 0.2,
         },
         {
             "name": "interior_smooth",
             "type": "float",
             "required": False,
             "description": "Default: 0",
-            "default": 0.0
+            "default": 0.0,
         },
         {
             "name": "small_objects_threshold",
             "type": "float",
             "required": False,
             "description": "Default: 15",
-            "default": 15.
+            "default": 15.0,
         },
         {
             "name": "fill_holes_threshold",
             "type": "float",
             "required": False,
             "description": "Default: 15",
-            "default": 15.
+            "default": 15.0,
         },
         {
             "name": "radius",
             "type": "float",
             "required": False,
             "description": ". Default: 2",
-            "default": 2.
+            "default": 2.0,
         },
         {
             "name": "pixel_expansion",
             "type": "integer",
             "required": False,
             "description": "Add a manual pixel expansion after segmentation to each cell. Default: 0",
-            "default": 0
-        }
+            "default": 0,
+        },
     ],
     run=run,
     dependencies={"environment_file": env_file},
@@ -300,10 +315,10 @@ class DeepCellSegmenter:
         self.tmp_dir = None
 
     def segment(
-            self,
-            img,
-            path=None,
-            mode=None,
+        self,
+        img,
+        path=None,
+        mode=None,
     ):
         """Segment the given image."""
         import os
@@ -411,30 +426,32 @@ class DeepCellSegmenter:
         channel_cell_segmentation = input_parameter.channel_junction
         if self.params.channel_cell_segmentation != "":
             try:
-                channel_cell_segmentation = input_parameter.__getattribute__(self.params.channel_cell_segmentation)
+                channel_cell_segmentation = input_parameter.__getattribute__(
+                    self.params.channel_cell_segmentation
+                )
             except AttributeError as e:
-                raise AttributeError("Channel %s does not exist! Wrong segmentation configuration!"
-                                     % self.params.channel_cell_segmentation) from e
+                raise AttributeError(
+                    "Channel %s does not exist! Wrong segmentation configuration!"
+                    % self.params.channel_cell_segmentation
+                ) from e
 
         # check which channel is configured to use for nuclei segmentation:
         channel_nuclei_segmentation = input_parameter.channel_nucleus
         if self.params.channel_nuclei_segmentation != "":
             try:
-                channel_nuclei_segmentation = input_parameter.__getattribute__(self.params.channel_nuclei_segmentation)
+                channel_nuclei_segmentation = input_parameter.__getattribute__(
+                    self.params.channel_nuclei_segmentation
+                )
             except AttributeError as e:
-                raise AttributeError("Channel %s does not exist! Wrong segmentation configuration!"
-                                     % self.params.channel_nuclei_segmentation) from e
+                raise AttributeError(
+                    "Channel %s does not exist! Wrong segmentation configuration!"
+                    % self.params.channel_nuclei_segmentation
+                ) from e
 
-        if (
-                channel_nuclei_segmentation == -1
-                or channel_nuclei_segmentation is None
-        ):
+        if channel_nuclei_segmentation == -1 or channel_nuclei_segmentation is None:
             raise ValueError("Segmentation without nucleus channel is not supported!")
 
-        if (
-                channel_cell_segmentation == -1
-                or channel_cell_segmentation is None
-        ):
+        if channel_cell_segmentation == -1 or channel_cell_segmentation is None:
             raise ValueError("Segmentation without junction channel is not supported!")
 
         img_s = img
@@ -452,8 +469,12 @@ class DeepCellSegmenter:
         # build prepared image parameters
         params_prep_img = ImageParameter()
         params_prep_img.reset()
-        params_prep_img.channel_junction = 0  # might be called junction channel, but content depends on config
-        params_prep_img.channel_nucleus = 1  # might be called nuclei channel, but content depends on config
+        params_prep_img.channel_junction = (
+            0  # might be called junction channel, but content depends on config
+        )
+        params_prep_img.channel_nucleus = (
+            1  # might be called nuclei channel, but content depends on config
+        )
         params_prep_img.pixel_to_micron_ratio = input_parameter.pixel_to_micron_ratio
 
         return img_s, params_prep_img

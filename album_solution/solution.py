@@ -1,4 +1,5 @@
 """polarityjam album solution."""
+import pkg_resources
 from album.runner.api import get_args, setup
 
 env_file = """name: Polarityjam
@@ -11,6 +12,21 @@ dependencies:
   - pip:
      - polarityjam==0.2.0
 """
+
+album_version = None
+installed_packages = pkg_resources.working_set
+for package in installed_packages:
+    if package.key == "album":
+        album_version = package.version
+        break
+
+if album_version is not None:
+    if str(album_version) != "0.10.3":
+        if str(album_version) != "0.10.4":
+            raise RuntimeError(
+                "This solution requires album version 0.10.3 or 0.10.4, found %s"
+                % album_version
+            )
 
 
 def run():

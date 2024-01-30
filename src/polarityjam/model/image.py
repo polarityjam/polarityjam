@@ -232,7 +232,10 @@ class BioMedicalImage(AbstractBioMedicalImage):
         return self.marker is not None
 
     def focus(
-        self, connected_component_label: int, membrane_thickness: int
+        self,
+        connected_component_label: int,
+        membrane_thickness: int,
+        junction_threshold: Optional[float] = None,
     ) -> SingleCellImage:
         """Focus the image on a given connected component label.
 
@@ -252,9 +255,11 @@ class BioMedicalImage(AbstractBioMedicalImage):
             sc_cytosol_mask,
             sc_organelle_mask,
             sc_junction_protein_mask,
-        ) = self.get_single_cell_masks(connected_component_label, membrane_thickness)
+        ) = self.get_single_cell_masks(
+            connected_component_label, membrane_thickness, junction_threshold
+        )
 
-        sc_mask_f = np.flip(sc_mask.data, axis=0)  # y axis is flipped
+        sc_mask_f = np.flip(sc_mask.data, axis=0)  # y-axis is flipped
         contour = get_contour(sc_mask_f.astype(int))
 
         return SingleCellImage(
@@ -270,7 +275,10 @@ class BioMedicalImage(AbstractBioMedicalImage):
         )
 
     def get_single_cell_masks(
-        self, connected_component_label: int, membrane_thickness: int
+        self,
+        connected_component_label: int,
+        membrane_thickness: int,
+        junction_threshold: Optional[float] = None,
     ) -> Tuple[
         BioMedicalMask,
         BioMedicalMask,
@@ -315,7 +323,9 @@ class BioMedicalImage(AbstractBioMedicalImage):
 
         if self.has_junction():
             sc_junction_protein_mask = self.get_single_junction_mask(
-                connected_component_label, membrane_thickness
+                connected_component_label,
+                membrane_thickness,
+                junction_threshold,
             )
 
         return (
@@ -361,8 +371,20 @@ class BioMedicalImage(AbstractBioMedicalImage):
             The mask of the single cell membrane.
 
         """
+        assert self.segmentation is not None, "The image has no segmentation."
+
         sc_mask = self.get_single_cell_mask(connected_component_label)
         sc_membrane_mask = sc_mask.get_outline_from_mask(membrane_thickness)
+
+        if self.segmentation.segmentation_mask_junction is not None:
+            assert self.segmentation.segmentation_mask_junction is not None
+
+            # get membrane mask from junction mask
+            sc_membrane_mask = (
+                self.segmentation.segmentation_mask_junction.get_single_instance_mask(
+                    connected_component_label
+                ).operation(sc_membrane_mask, np.logical_or)
+            )
 
         return sc_membrane_mask
 
@@ -436,8 +458,11 @@ class BioMedicalImage(AbstractBioMedicalImage):
         return sc_organelle_mask
 
     def get_single_junction_mask(
-        self, connected_component_label: int, membrane_thickness: int
-    ) -> Optional[BioMedicalMask]:
+        self,
+        connected_component_label: int,
+        membrane_thickness: int,
+        junction_threshold: Optional[float] = None,
+    ) -> BioMedicalMask:
         """Get the mask of the single cell junction protein.
 
         Args:
@@ -452,13 +477,52 @@ class BioMedicalImage(AbstractBioMedicalImage):
         """
         assert self.segmentation is not None, "The image has no segmentation."
         assert self.junction is not None, "The image has no junction channel."
+
+        # segmentation not necessarily given and cannot be computed on whole image
+        if self.segmentation.segmentation_mask_junction is None:
+            sc_junction_protein_mask = (
+                self._calc_default_single_cell_junction_segmentation(
+                    connected_component_label,
+                    membrane_thickness,
+                    junction_threshold,
+                )
+            )
+        else:  # case mask given as BioMedicalJunctionSegmentation
+            # todo: future concept of BioMedicalJunctionSegmentation
+            sc_junction_protein_mask = (
+                self.segmentation.segmentation_mask_junction.get_single_instance_mask(
+                    connected_component_label
+                )
+            )
+
+        return sc_junction_protein_mask
+
+    def _calc_default_single_cell_junction_segmentation(
+        self,
+        connected_component_label,
+        membrane_thickness,
+        junction_threshold,
+    ):
+        """Calculate single cell junction protein mask."""
+        assert self.junction is not None, "The image has no junction channel."
+
+        # we cannot compute the segmentation on the whole junction channel,
+        # hence we calculate it now on the single cell membrane mask
         sc_membrane_mask = self.get_single_membrane_mask(
             connected_component_label, membrane_thickness
         )
         masked_sc_junction_channel = self.junction.mask(sc_membrane_mask)
-        sc_junction_protein_mask = BioMedicalMask.from_threshold_otsu(
-            masked_sc_junction_channel.data, gaussian_filter=None
-        )
+
+        if junction_threshold is not None and junction_threshold > 0:
+            # manual threshold
+            sc_junction_protein_mask = BioMedicalMask.from_threshold(
+                masked_sc_junction_channel.data, junction_threshold
+            )
+        else:
+            # auto threshold
+            sc_junction_protein_mask = BioMedicalMask.from_threshold_otsu(
+                masked_sc_junction_channel.data, gaussian_filter=None
+            )
         return sc_junction_protein_mask
 
 
@@ -638,6 +702,7 @@ class SingleCellImage(AbstractBioMedicalImage):
             single_cell_membrane_mask=self.cell_membrane_mask,
             single_cell_junction_intensity_mask=self.junction_mask,
             single_cell_mask=self.cell_mask,
+            single_cell_props=self.get_cell_properties(param),
             half_masks=self.half_mask(param.cue_direction),
             quadrant_masks=self.quarter_mask(param.cue_direction),
             cue_direction=param.cue_direction,
@@ -686,7 +751,11 @@ class SingleCellImage(AbstractBioMedicalImage):
 
         """
         half_masks_, _, _ = partition_single_cell_mask(
-            self.cell_mask, cue_direction, self.contour_width, 2, self.contour
+            self.cell_mask.operation(self.cell_membrane_mask, np.logical_or),
+            cue_direction,
+            self.contour_width,
+            2,
+            self.contour,
         )
         half_masks = [BioMedicalMask(half_mask_) for half_mask_ in half_masks_]
         return half_masks
@@ -703,7 +772,11 @@ class SingleCellImage(AbstractBioMedicalImage):
 
         """
         quadrant_masks_, _, _ = partition_single_cell_mask(
-            self.cell_mask, cue_direction, self.contour_width, 4, self.contour
+            self.cell_mask.operation(self.cell_membrane_mask, np.logical_or),
+            cue_direction,
+            self.contour_width,
+            4,
+            self.contour,
         )
         quadrant_mask = [
             BioMedicalMask(quadrant_mask_) for quadrant_mask_ in quadrant_masks_

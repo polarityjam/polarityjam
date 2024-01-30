@@ -118,6 +118,7 @@ class RuntimeParameter(Parameter):
             attrs = {}
         self.extract_group_features = None
         self.membrane_thickness = None
+        self.junction_threshold = None
         self.feature_of_interest = None
         self.min_cell_size = None
         self.min_nucleus_size = None
@@ -128,6 +129,7 @@ class RuntimeParameter(Parameter):
         self.segmentation_algorithm = None
         self.remove_small_objects_size = None
         self.clear_border = None
+        self.save_sc_image = None
         self.keyfile_condition_cols = None
 
         super().__init__(**attrs)
@@ -155,6 +157,7 @@ class SegmentationParameter(Parameter):
         d = {
             # constructor
             "__new__": _obj_constructor,
+            "to_dict": SegmentationParameter.to_dict,
         }
         d.update(get_dict_from_yml(SegmentationParameterE[segmentation_algorithm].value))  # type: ignore
         segmentation_parameter_type = type("SegmentationParameter", (Parameter,), d)
@@ -186,28 +189,35 @@ class PlotParameter(Parameter):
             attrs = {}
         self.plot_junctions = None
         self.plot_polarity = None
-        self.plot_orientation = None
+        self.plot_elongation = None
+        self.plot_circularity = None
         self.plot_marker = None
         self.plot_ratio_method = None
-        self.plot_cyclic_orientation = None
+        self.plot_shape_orientation = None
         self.plot_foi = None
+        self.plot_sc_image = None
+        self.plot_threshold_masks = None
+        self.plot_sc_partitions = None
 
-        self.outline_width = None
+        self.show_statistics = None
         self.show_polarity_angles = None
         self.show_graphics_axis = None
-        self.pixel_to_micron_ratio = None
-        self.plot_scalebar = None
+        self.show_scalebar = None
+
+        self.outline_width = None
         self.length_scalebar_microns = None
 
         self.graphics_output_format = None
         self.dpi = None
         self.graphics_width = None
         self.graphics_height = None
-        self.membrane_thickness = None
+        self.membrane_thickness = None  # todo: remove me
 
         self.fontsize_text_annotations = None
         self.font_color = None
         self.marker_size = None
+        self.alpha = None
+        self.alpha_cell_outline = None
 
         super().__init__(**attrs)
 

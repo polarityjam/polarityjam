@@ -1,6 +1,12 @@
 # Default parameters file
 # This files contains all parameters and their default values.
 
+############ Please read carefully ############
+# Does NOT contain segmentation parameters.
+# These can be found  in the corresponding yml file of the segmentation algorithm under /src/polarityjam/segmentation/
+#
+############ Please read carefully ############
+
 # ImageParameters
 channel_junction: 0
 channel_nucleus: 1
@@ -9,36 +15,40 @@ channel_expression_marker: -1 # -1 means no expression marker
 pixel_to_micron_ratio: 1.0
 
 # RuntimeParameter
-estimated_cell_diameter : 100 # estimated cell diameter in pixels
-estimated_nucleus_diameter: 30 # estimated nuclei diameter in pixels
-min_cell_size: 50  # minimum area of cell in pixel^2, will be removed otherwise
+min_cell_size: 50 # minimum area of cell in pixel^2, will be removed otherwise
 min_nucleus_size: 10 # minimum area of nucleus in pixel^2, will be removed otherwise
 min_organelle_size: 10 # minimum area of organelle in pixel^2, will be removed otherwise
 extract_group_features: False
 membrane_thickness: 5
+junction_threshold: -1 # -1 means no manual thresholding, but otsu thresholding
 feature_of_interest: "cell_area"
 dp_epsilon: 5
-cue_direction: 0
+cue_direction: 0 # should be provided in degrees and take values between 0 and 360
 connection_graph: True
 segmentation_algorithm: "CellposeSegmenter" # "CellposeSegmenter", "SamSegmenter"
 remove_small_objects_size: 10 # in pixels, put to 0 to disable
 clear_border: True
 keyfile_condition_cols: ["short_name"] # only needed if run_key option is used
-
+save_sc_image: False
 
 # PlotParameter
 plot_junctions: True
 plot_polarity: True
-plot_orientation: True
+plot_elongation: True
+plot_circularity: True
 plot_marker: True
 plot_ratio_method: True
-plot_cyclic_orientation: True
+plot_shape_orientation: True
 plot_foi: True
-outline_width: 2
+plot_processed_masks: True
+plot_sc_image: False
+plot_sc_partitions: False
+show_statistics: False
 show_polarity_angles: True
 show_graphics_axis: False
-plot_scalebar: True
+show_scalebar: True
 length_scalebar_microns: 20.0
+outline_width: 2
 graphics_output_format: ["png"] # 'png', 'pdf', 'svg'
 dpi: 300
 graphics_width: 5 # figure width in inches
@@ -47,3 +57,5 @@ length_unit: "pixel" # "microns"
 fontsize_text_annotations: 6
 font_color: "w"
 marker_size: 2
+alpha: 0.7
+alpha_cell_outline: 1.0

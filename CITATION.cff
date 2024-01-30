@@ -14,3 +14,6 @@ version: 0.1.6
 date-released: 2023-09-04
 repository: "https://github.com/polarityjam/polarityjam.git"
 type: software
+identifiers:
+  - type: doi
+    value: 10.1101/2024.01.24.577027

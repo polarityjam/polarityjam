@@ -1,13 +1,22 @@
 Citation
 ========
 
-Please cite our software if you use PolarityJam in your research:
+Please cite our software if you use PolarityJam in your research!
 
-Albrecht, Jan Philipp, & Giese, Wolfgang. (2023). PolarityJaM (v0.1.6). Zenodo. https://doi.org/10.5281/zenodo.8317234.
+The Article is available `https://doi.org/10.1101/2024.01.24.577027 <https://doi.org/10.1101/2024.01.24.577027>`_.
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.8317234.svg
-   :target: https://doi.org/10.5281/zenodo.8317234
-   :width: 250px
-   :align: center
+We additionally have a citation.cff `here <https://github.com/polarityjam/polarityjam/blob/main/CITATION.cff>`_.
+(Or see `https://github.com/polarityjam/polarityjam <https://github.com/polarityjam/polarityjam>`_ "Cite this repository").
+
 
 Thank you.
+
+
+If you used the segmentation module, please also cite based on your algorithm of choice:
+
+Cellpose: `https://www.nature.com/articles/s41592-020-01018-x <https://www.nature.com/articles/s41592-020-01018-x>`_
+
+Mesmer Deepcell: `https://www.nature.com/articles/s41587-021-01094-0 <https://www.nature.com/articles/s41587-021-01094-0>`_
+
+microSam: `https://arxiv.org/abs/2304.02643 <https://arxiv.org/abs/2304.02643>`_ and `https://www.biorxiv.org/content/10.1101/2023.08.21.554208v1 <https://www.biorxiv.org/content/10.1101/2023.08.21.554208v1>`_
+

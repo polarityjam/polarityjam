@@ -6,7 +6,7 @@ What is PolarityJaM?
 PolarityJaM suite
 -----------------
 
-The PolarityJaM suite is a software package that lets you study cell polarity, junctions and morphology.
+The `PolarityJaM <https://doi.org/10.1101/2024.01.24.577027>`_ suite is a software package that lets you study cell polarity, junctions and morphology.
 
 .. image:: images/sketch-data-analysis-organization-v5_.png
 
@@ -60,8 +60,3 @@ Security
 We take security of our service very seriously! Data might stem from sensitive experiments and should treated
 with care. Therefore, we do not store any data on our servers. All uploaded data is deleted once
 the user closes the browser tab. Of course it is not sent to any third party during the statistical analysis.
-We are certified by ePrivacy. Feel free to look at our `certificate <https://www.eprivacy.eu/kunden/vergebene-siegel/firma/max-delbrueck-centrum-fuer-molekulare-medizin/>`_.
-
-.. image:: images/ePrivacyApp_F.svg
-   :width: 300px
-   :align: center

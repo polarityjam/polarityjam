@@ -12,10 +12,12 @@ Segmentation
 ++++++++++++
 
 Segmentation can currently be performed using the following methods:
-- Cellpose `cellpose <https://github.com/MouseLand/cellpose>`_.
-- Segment Anything `segmentanything <https://segment-anything.com/>`_
+* Cellpose `cellpose <https://github.com/MouseLand/cellpose>`_
+* Segment Anything `segmentanything <https://segment-anything.com/>`_
+* Mesmer deepcell `mesmer deepcell <https://github.com/vanvalenlab/deepcell-tf/tree/master>`_
+* microSAM `microSAM <https://github.com/computational-cell-analytics/micro-sam>`_
 
-Cellpose is a generalist algorithm for cell and nucleus segmentation.
+Polarity-JaM natively uses Cellpose. Cellpose is a generalist algorithm for cell and nucleus segmentation.
 Cellpose uses a neural network that was trained to predict horizontal and vertical gradients of
 topological maps, together with a binary map indicating whether or not a pixel is inside a region
 of interest. The topological maps were previously created with the help of ground-truth masks.
@@ -23,9 +25,15 @@ Following the combined gradients in a process known as gradient tracking, groupi
 pixel that converge to the same point and combining results with the information from the binary mask,
 precise cell shapes can be recovered.
 
-
+Alternatively, the user can try the following segmentation methods:
 Segment Anything Model (SAM) is a new AI model from Meta AI that can "cut out" any object, in any image,
 with a single click. For more information, please visit `segmentanything <https://segment-anything.com/>`_.
+
+Mesmer deepcell is a deep learning model for cell segmentation (whole-cell and nuclear). For more information,
+please visit `mesmer deepcell <https://github.com/vanvalenlab/deepcell-tf/tree/master>`_.
+
+microSAM is a tool for segmentation and tracking in microscopy build on top of SegmentAnything. For more information,
+please visit `microSAM <https://github.com/computational-cell-analytics/micro-sam>`_.
 
 Cell properties
 +++++++++++++++

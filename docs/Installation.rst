@@ -2,8 +2,8 @@ Installation
 ============
 
 
-Feature Extraction Pipeline
----------------------------
+Polarity-JaM - Feature Extraction Pipeline
+------------------------------------------
 
 The feature extraction pipeline is the process of extracting all relevant features from all input images.
 The result will always be a ``.csv`` file for each image containing its individual cells as rows and their
@@ -15,8 +15,7 @@ Manual installation
 +++++++++++++++++++
 Make sure you have `conda <https://anaconda.com/>`_ installed.
 
-Execute the following steps to manually install the polarityjam feature extraction pipeline
-with a working conda installation:
+Execute the following steps to manually install Polarity-JaM with a working conda installation via:
 
 .. code-block:: console
 
@@ -25,10 +24,25 @@ with a working conda installation:
     pip install polarityjam
 
 
+Manual installation with additional segmentation options
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+For additional support in segmentation, we suggest to install Polarity-JaM
+via micromamba and the conda-forge channel. For that, make sure you have
+`micromamba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_ installed.
+Manually install Polarity-JaM via:
+
+.. code-block:: console
+
+    micromamba create -y -n polarityjam python=3.8 pip
+    micromamba activate polarityjam
+    pip install polarityjam
+
+
 Automatic installation with album
 +++++++++++++++++++++++++++++++++
 
-Install `album <https://album.solutions/>`_. Then execute the following steps:
+Install `album <https://album.solutions/>`_. This installation comes natively with
+micromamba. Then execute the following steps:
 
 .. code-block:: console
 
@@ -58,10 +72,10 @@ Execute the following steps on the commandline:
     pip install -e .
 
 
-Web App
--------------------
+Polarity-JaM - Web App
+----------------------
 
-The R-shiny web app further analyses the results of the feature extraction process in the browser.
+The R-shiny Polarity-JaM web app further analyses the results of the feature extraction process in the browser.
 There are several statistics available which parameters can be adapted during runtime to immediately
 observe the change in the corresponding visualization.
 Thus, Exploring the data and relieving interesting patterns is heavily facilitated.
@@ -76,7 +90,8 @@ To get to know more about the statics continue reading or visit the :any:`Method
 Manual installation
 +++++++++++++++++++
 
-Make sure you have `conda <https://anaconda.com/>`_ installed.
+Make sure you have `conda <https://anaconda.com/>`_ installed.  Alternatively, you can also use
+micromamba. If you do so, replace ``conda`` with ``micromamba`` in the following commands.
 
 Execute the following steps on the commandline:
 
@@ -96,7 +111,8 @@ Automatic installation with album
 +++++++++++++++++++++++++++++++++
 
 
-Install `album <https://album.solutions/>`_. Then execute the following steps:
+Install `album <https://album.solutions/>`_. This installation comes natively with
+micromamba. Then execute the following steps:
 
 .. code-block:: console
 

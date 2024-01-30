@@ -134,9 +134,7 @@ setup(
             "name": "run_command",
             "type": "string",
             "default": "run",
-            "description": """How do you want to run polarityjam? run for single tiff file,
-            run-stack for a directory containing multiple tiff files, run-key for a csv
-            file containing a list of  directories containing tiff files or test for the test-suit""",
+            "description": "How do you want to run polarityjam? run for single tiff file, run-stack for a directory containing multiple tiff files, run-key for a csv file containing a list of directories containing tiff files or test for the test-suit",
             "required": True,
         },
         {

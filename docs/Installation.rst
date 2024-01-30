@@ -55,6 +55,9 @@ You can now run the pipeline with the following command:
 
     album run de.mdc-berlin:polarityjam:0.1.0
 
+.. note::
+    Please make sure you are using album version 0.10.4 for installation of polarityjam.
+
 
 Manual installation from GitHub
 +++++++++++++++++++++++++++++++

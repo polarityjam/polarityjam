@@ -90,7 +90,7 @@ setup(
     group="polarityjam",
     name="microSAM-predict",
     version="0.1.0",
-    title="Micro Segment Anything Segmentation",
+    title="Segment Anything for Microscopy",
     description="A solution to create segmentations with the previously trained "
     "microSAM model fintetuned from the Segment Anything model from facebookresearch.",
     solution_creators=["Jan Philipp Albrecht"],

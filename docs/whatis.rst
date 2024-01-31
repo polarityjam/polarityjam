@@ -10,10 +10,13 @@ The `PolarityJaM <https://doi.org/10.1101/2024.01.24.577027>`_ suite is a softwa
 
 .. image:: images/sketch-data-analysis-organization-v5_.png
 
-At the heart lies your data that you wish to explore. That usually involves three steps: (1) extracting relevant
-features from your data, (2) analyzing the features and (3) visualizing the results. Moreover, you want your work
-to be reproducible, easily comprehensible and eventually extendable by others. PolarityJaM is designed to help you with
-all of these tasks.
+At the heart lies your data that you wish to explore. That usually involves three steps:
+(1) extracting relevant features from your data,
+(2) analyzing the features and
+(3) visualizing the results.
+
+Moreover, you want your work to be reproducible, easily comprehensible and eventually extendable by others.
+PolarityJaM is designed to help you with all of these tasks!
 
 The analysis of images performed by PolarityJaM is divided into two individual processing parts which
 can be executed independently. Firstly, all necessary information from the input is
@@ -23,7 +26,7 @@ analysed in the web-app and interesting patterns can be revealed. Typically, gai
 into data requires a significant investment of time and domain knowledge.
 To minimize the amount of time needed to quickly look at complex cell patterns and potentially
 discover interesting collective behavior, visualizing the features can be done interactively in an
-online setting. Simply visit `www.polarityjam.com <https://www.polarityjam.com>`_ to experience what is possible,
+online setting. Simply visit `www.polarityjam.com <http://www.polarityjam.com>`_ to experience what is possible,
 without the need to execute anything.
 
 

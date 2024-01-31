@@ -11,19 +11,6 @@ corresponding feature values as columns. Additionally, plots will be created.
 These visualizations can be used for quality control but might also be suitable for a publication.
 
 
-Manual installation
-+++++++++++++++++++
-Make sure you have `conda <https://anaconda.com/>`_ installed.
-
-Execute the following steps to manually install Polarity-JaM with a working conda installation via:
-
-.. code-block:: console
-
-    conda create -y -n polarityjam python=3.8
-    conda activate polarityjam
-    pip install polarityjam
-
-
 Manual installation with additional segmentation options
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 For additional support in segmentation, we suggest to install Polarity-JaM
@@ -35,6 +22,19 @@ Manually install Polarity-JaM via:
 
     micromamba create -y -n polarityjam python=3.8 pip
     micromamba activate polarityjam
+    pip install polarityjam
+
+
+Manual installation without additional segmentation options
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Make sure you have `conda <https://anaconda.com/>`_ installed.
+
+Execute the following steps to manually install Polarity-JaM with a working conda installation via:
+
+.. code-block:: console
+
+    conda create -y -n polarityjam python=3.8
+    conda activate polarityjam
     pip install polarityjam
 
 
@@ -54,6 +54,9 @@ You can now run the pipeline with the following command:
 .. code-block:: console
 
     album run de.mdc-berlin:polarityjam:0.1.0
+
+.. note::
+    Please make sure you are using album version 0.10.4 (current version) for installation of the polarityjam solution.
 
 
 Manual installation from GitHub
@@ -83,8 +86,8 @@ To get to know more about the statics continue reading or visit the :any:`Method
 
 .. note::
     You don't need to install the web app to use the feature extraction pipeline. The web app is
-    only a visualization tool for the results of the feature extraction pipeline.
-    You can simply use our online service `here <https://www.polarityjam.com>`_.
+    our visualization tool for the results of the feature extraction pipeline.
+    You can simply use our online service `here <http://www.polarityjam.com>`_.
     Or visit :ref:`software suite <software suite>` for more information.
 
 Manual installation
@@ -125,6 +128,7 @@ You can now run the pipeline with the following command:
 
     album run de.mdc-berlin:polarityjam-app:0.1.0
 
+A browser should automatically open. If not, open http://127.0.0.1:8888
 
 Run with Rstudio
 ++++++++++++++++

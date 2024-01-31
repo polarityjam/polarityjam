@@ -3,12 +3,12 @@ Contribute
 
 You ...
 
-- know features that are missing?
-- found a bug?
-- have a great idea for a visualization?
-- want to build on the code?
-- have a complaint?
-- want to really express how awesome the project is?
+* know features that are missing?
+* found a bug?
+* have a great idea for a visualization?
+* want to build on the code?
+* have a complaint?
+* want to really express how awesome the project is?
 
 Regardless what it is - contact us!
 

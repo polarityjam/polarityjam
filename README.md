@@ -1,9 +1,5 @@
-# Feature extraction pipeline
+# BRANCH FOR DOCUMENTATION ONLY!
 
-The feature extraction pipeline to study endothelial cell polarity, junctions and morphology.
+THE FOLDER "docs" IS SYNCED WITH https://readthedocs.org/dashboard/. ANY CHANGES IN THIS BRANCH WILL GO LIVE IMMEDIATELY.
 
-Check out our [paper](https://doi.org/10.1101/2024.01.24.577027).
-
-For installation, usage, and more read our [wiki](https://polarityjam.readthedocs.io/en/latest/).
-
-Administrators and Maintainers please look here: [admin-wiki](https://github.com/polarityjam/polarityjam/wiki)
+ANY CHANGES ANYWHERE ELSE IS SIMPLY IGNORED!

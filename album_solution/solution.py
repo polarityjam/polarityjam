@@ -125,6 +125,10 @@ setup(
         "workflow",
         "software",
     ],
+    cite=[{
+        "text": "Polarity-JaM: An image analysis toolbox for cell polarity, junction and morphology quantification",
+        "doi": "10.1101/2024.01.24.577027"
+    }],
     license="MIT",
     documentation=["doc.md"],
     covers=[{"description": "Polarityjam cover image", "source": "cover.png"}],

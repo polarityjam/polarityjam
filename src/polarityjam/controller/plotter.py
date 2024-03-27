@@ -1943,24 +1943,47 @@ class Plotter:
                 cmap="gray_r",
             )
 
+
+        plot_title = "cell circularity"
+        if self.params.show_statistics:
+            cell_circularity_values = collection.get_properties_by_img_name(
+                img_name
+            )["cell_circularity"].values
+            cell_circularity_values = cell_circularity_values[~np.isnan(cell_circularity_values)]
+            plot_title += "\n N: " + str(len(cell_circularity_values)) + ", "
+            plot_title += "mean: " + str(np.round(np.mean(cell_circularity_values), 2)) + ", "
+            plot_title += "std: " + str(np.round(np.std(cell_circularity_values), 2))
+
         # set title and ax limits
         if inst_nuclei_mask is not None:
+            
             add_title(
                 ax[0],
-                "cell circularity",
+                plot_title,
                 im_junction.data,
                 self.params.show_graphics_axis,
             )
+
+            plot_title = "nuclei circularity"
+            if self.params.show_statistics:
+                cell_circularity_values = collection.get_properties_by_img_name(
+                    img_name
+                )["nuc_circularity"].values
+                cell_circularity_values = cell_circularity_values[~np.isnan(cell_circularity_values)]
+                plot_title += "\n N: " + str(len(cell_circularity_values)) + ", "
+                plot_title += "mean: " + str(np.round(np.mean(cell_circularity_values), 2)) + ", "
+                plot_title += "std: " + str(np.round(np.std(cell_circularity_values), 2))
+
             add_title(
                 ax[1],
-                "nuclei circularity",
+                plot_title,
                 im_junction.data,
                 self.params.show_graphics_axis,
             )
             axes = [ax[0], ax[1]]
         else:
             add_title(
-                ax, "cell circularity", im_junction.data, self.params.show_graphics_axis
+                ax, plot_title, im_junction.data, self.params.show_graphics_axis
             )
             axes = [ax]
 
@@ -2372,46 +2395,47 @@ class Plotter:
             )
 
         # plot major and minor axis
-        for _, row in collection.get_properties_by_img_name(img_name).iterrows():
-            if inst_nuclei_mask is not None:
-                # plot orientation degree
-                Plotter._add_single_cell_orientation_degree_axis(
-                    ax[0],
-                    row["cell_X"],
-                    row["cell_Y"],
-                    row["cell_shape_orientation_rad"],
-                    row["cell_major_axis_length"],
-                    row["cell_minor_axis_length"],
-                    self.params.fontsize_text_annotations,
-                    self.params.font_color,
-                    self.params.marker_size,
-                )
+        if self.params.show_polarity_angles:
+            for _, row in collection.get_properties_by_img_name(img_name).iterrows():
+                if inst_nuclei_mask is not None:
+                    # plot orientation degree
+                    Plotter._add_single_cell_orientation_degree_axis(
+                        ax[0],
+                        row["cell_X"],
+                        row["cell_Y"],
+                        row["cell_shape_orientation_rad"],
+                        row["cell_major_axis_length"],
+                        row["cell_minor_axis_length"],
+                        self.params.fontsize_text_annotations,
+                        self.params.font_color,
+                        self.params.marker_size,
+                    )
 
-                # plot orientation degree nucleus
-                Plotter._add_single_cell_orientation_degree_axis(
-                    ax[1],
-                    row["nuc_X"],
-                    row["nuc_Y"],
-                    row["nuc_shape_orientation_rad"],
-                    row["nuc_major_axis_length"],
-                    row["nuc_minor_axis_length"],
-                    self.params.fontsize_text_annotations,
-                    self.params.font_color,
-                    self.params.marker_size,
-                )
-            else:
-                # plot orientation degree
-                Plotter._add_single_cell_orientation_degree_axis(
-                    ax,
-                    row["cell_X"],
-                    row["cell_Y"],
-                    row["cell_shape_orientation_rad"],
-                    row["cell_major_axis_length"],
-                    row["cell_minor_axis_length"],
-                    self.params.fontsize_text_annotations,
-                    self.params.font_color,
-                    self.params.marker_size,
-                )
+                    # plot orientation degree nucleus
+                    Plotter._add_single_cell_orientation_degree_axis(
+                        ax[1],
+                        row["nuc_X"],
+                        row["nuc_Y"],
+                        row["nuc_shape_orientation_rad"],
+                        row["nuc_major_axis_length"],
+                        row["nuc_minor_axis_length"],
+                        self.params.fontsize_text_annotations,
+                        self.params.font_color,
+                        self.params.marker_size,
+                    )
+                else:
+                    # plot orientation degree
+                    Plotter._add_single_cell_orientation_degree_axis(
+                        ax,
+                        row["cell_X"],
+                        row["cell_Y"],
+                        row["cell_shape_orientation_rad"],
+                        row["cell_major_axis_length"],
+                        row["cell_minor_axis_length"],
+                        self.params.fontsize_text_annotations,
+                        self.params.font_color,
+                        self.params.marker_size,
+                    )
 
         plot_title = "cell shape orientation"
 

@@ -384,8 +384,14 @@ class Plotter:
         num_fig = len(channels)
         num_fig = num_fig + 2 if mask_nuclei is not None else num_fig + 1
 
+        mask_golgi_ = None
         if mask_golgi is not None:
             num_fig = num_fig + 1
+
+            mask_golgi_ = self._rand_labels(mask_golgi)
+
+            # ignore background
+            mask_golgi_ = np.where(mask_golgi_ > 0, mask_golgi_, np.nan)
 
         indx_nuc = num_fig - 1
 
@@ -435,7 +441,9 @@ class Plotter:
         # show golgi mask
         if mask_golgi is not None and seg_img_params.channel_organelle != -1:
             ax[-1].imshow(seg_img[seg_img_params.channel_organelle, :, :], cmap=cmap)
-            ax[-1].imshow(mask_golgi, cmap=plt.cm.gist_rainbow, alpha=self.params.alpha)
+            ax[-1].imshow(
+                mask_golgi_, cmap=plt.cm.gist_rainbow, alpha=self.params.alpha
+            )
             add_title(
                 ax[-1],
                 "segmentation golgi",

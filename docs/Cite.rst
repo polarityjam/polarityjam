@@ -20,3 +20,5 @@ Mesmer Deepcell: `https://www.nature.com/articles/s41587-021-01094-0 <https://ww
 
 microSam: `https://arxiv.org/abs/2304.02643 <https://arxiv.org/abs/2304.02643>`_ and `https://www.biorxiv.org/content/10.1101/2023.08.21.554208v1 <https://www.biorxiv.org/content/10.1101/2023.08.21.554208v1>`_
 
+.. note::
+    Citing Polarity-JaM without citing the segmentation algorithm that was used is not recommended, as the segmentation module is a critical part of the workflow.

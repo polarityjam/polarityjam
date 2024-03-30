@@ -4,7 +4,7 @@ channel_cell_segmentation: "" # always uses the noted channel for segmentation o
 channel_nuclei_segmentation: "" # always uses the noted channel for segmentation of nuclei. leave empty for default.
 manually_annotated_mask: "" # in case a manually annotated cellpose mask exists specify suffix here
 store_segmentation: False
-use_given_mask: False
+use_given_mask: True
 model_type: "cyto" # "cyto", "cyto2", "custom"
 model_type_nucleus: "nuclei" # "custom"
 model_path: ""

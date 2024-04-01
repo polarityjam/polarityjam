@@ -10,7 +10,7 @@ dependencies:
   - python=3.8.13
   - pip
   - pip:
-     - polarityjam==0.2.0
+     - polarityjam==0.2.1
 """
 
 album_version = None

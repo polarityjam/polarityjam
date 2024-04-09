@@ -241,12 +241,18 @@ class SingleCellMarkerProps(SingleInstanceProps):
             gaussian_filter=None,
             rolling_ball_radius=None,
         )
-        sc_marker_intensity_mask_r = sc_marker_intensity_mask.combine(
-            self.half_masks[0]
-        ).mask_background()
-        sc_marker_intensity_mask_l = sc_marker_intensity_mask.combine(
-            self.half_masks[1]
-        ).mask_background()
+        if len(self.half_masks) > 1:
+            sc_marker_intensity_mask_r = sc_marker_intensity_mask.combine(
+                self.half_masks[0]
+            ).mask_background()
+            sc_marker_intensity_mask_l = sc_marker_intensity_mask.combine(
+                self.half_masks[1]
+            ).mask_background()
+        else:
+            warnings.warn(
+                "Warning: Number of partitions(2) does not match the number of created masks (1):"
+            )
+            return np.nan
 
         right = (
             sc_marker_intensity_mask_r.data * sc_marker_intensity
@@ -273,18 +279,24 @@ class SingleCellMarkerProps(SingleInstanceProps):
             gaussian_filter=None,
             rolling_ball_radius=None,
         )
-        sc_marker_intensity_mask_r = sc_marker_intensity_mask.combine(
-            self.quadrant_masks[0]
-        ).mask_background()
-        sc_marker_intensity_mask_t = sc_marker_intensity_mask.combine(
-            self.quadrant_masks[1]
-        ).mask_background()
-        sc_marker_intensity_mask_l = sc_marker_intensity_mask.combine(
-            self.quadrant_masks[2]
-        ).mask_background()
-        sc_marker_intensity_mask_b = sc_marker_intensity_mask.combine(
-            self.quadrant_masks[3]
-        ).mask_background()
+        if len(self.quadrant_masks) > 3:
+            sc_marker_intensity_mask_r = sc_marker_intensity_mask.combine(
+                self.quadrant_masks[0]
+            ).mask_background()
+            sc_marker_intensity_mask_t = sc_marker_intensity_mask.combine(
+                self.quadrant_masks[1]
+            ).mask_background()
+            sc_marker_intensity_mask_l = sc_marker_intensity_mask.combine(
+                self.quadrant_masks[2]
+            ).mask_background()
+            sc_marker_intensity_mask_b = sc_marker_intensity_mask.combine(
+                self.quadrant_masks[3]
+            ).mask_background()
+        else:
+            warnings.warn(
+                "Warning: Number of partitions(4) does not match the number of created masks (3):"
+            )
+            return np.nan
 
         top = sc_marker_intensity_mask_t.data * sc_marker_intensity  # masked top half
         left = sc_marker_intensity_mask_l.data * sc_marker_intensity  # masked left half

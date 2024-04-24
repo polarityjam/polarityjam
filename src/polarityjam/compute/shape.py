@@ -120,8 +120,11 @@ def partition_single_cell_mask(
     b = [pg_cent_a + int(major_axes_length), pg_cent_b]  # lies horizontally
     div_line = LineString([a, b])
 
+    # turn this line based on the cue direction
+    div_line = rotate(div_line, cue_direction, origin=(pg_cent_a, pg_cent_b))
+
     # determine number of divisions
-    divisors, div_angle = get_divisor_lines(a, cue_direction, div_line, num_partitions)
+    divisors, div_angle = get_divisor_lines(a, div_line, num_partitions)
 
     div_coords = []
     for div in divisors:
@@ -176,16 +179,12 @@ def partition_single_cell_mask(
     return masks, polygons, contours
 
 
-def get_divisor_lines(
-    origin: List[int], cue_direction: int, div_line: LineString, num_partitions: int
-):
+def get_divisor_lines(origin: List[int], div_line: LineString, num_partitions: int):
     """Rotates a line from an origin point on the line based on a cue direction as often as specified.
 
     Args:
         origin:
             origin point on the line
-        cue_direction:
-            The orientation of the cue (e.g. flow)
         div_line:
             shapely line object
         num_partitions:
@@ -196,7 +195,7 @@ def get_divisor_lines(
 
     """
     div_angle = int(360 / num_partitions)
-    cumulative_angle = cue_direction + int(div_angle / 2)
+    cumulative_angle = int(div_angle / 2)
     divisors = []
     while cumulative_angle < 360:
         divisors.append(rotate(div_line, cumulative_angle, origin=origin))

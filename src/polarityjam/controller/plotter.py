@@ -11,6 +11,7 @@ import numpy as np
 import pandas
 import scipy.ndimage as ndi
 from matplotlib import pyplot as plt
+from shapely.affinity import rotate
 from shapely.geometry import LineString
 
 from polarityjam.compute.shape import get_divisor_lines
@@ -2182,12 +2183,15 @@ class Plotter:
             b = [x0 + row["cell_major_axis_length"], y0]  # lies horizontally
             ground_line = LineString([a, b])
 
-            d_lines, _ = get_divisor_lines(a, params.cue_direction, ground_line, 4)
+            # rotate ground line based on cue_direction
+            ground_line = rotate(ground_line, params.cue_direction, origin=a)
+
+            d_lines, _ = get_divisor_lines(a, ground_line, 4)
             for d_line in d_lines:
                 x1, y1 = (i[0] for i in d_line.boundary.centroid.coords.xy)
                 ax[1].plot((x0, x1), (y0, y1), "--r", linewidth=0.5)
 
-            d_lines, _ = get_divisor_lines(a, params.cue_direction, ground_line, 2)
+            d_lines, _ = get_divisor_lines(a, ground_line, 2)
             for d_line in d_lines:
                 x1, y1 = (i[0] for i in d_line.boundary.centroid.coords.xy)
                 ax[0].plot((x0, x1), (y0, y1), "--r", linewidth=0.5)

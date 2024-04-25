@@ -54,7 +54,7 @@ Online Service
 
 Once the feature extraction process is finished, the information can be statistically analysed to
 discover structural patterns. Easiest way to achieve this is to use our service, hosted at
-`www.polarityjam.com <https://www.polarityjam.com>`_, by simply uploading the ``.csv`` file from the feature
+`www.polarityjam.com <http://www.polarityjam.com>`_, by simply uploading the ``.csv`` file from the feature
 extraction process. Alternatively, the app can be executed locally.
 
 Security

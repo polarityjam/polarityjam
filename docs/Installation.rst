@@ -20,7 +20,7 @@ Manually install Polarity-JaM via:
 
 .. code-block:: console
 
-    micromamba create -y -n polarityjam python=3.8 pip
+    micromamba create -y -n polarityjam python=3.8 pip -c conda-forge
     micromamba activate polarityjam
     pip install polarityjam
 

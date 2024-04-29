@@ -11,6 +11,7 @@ import numpy as np
 import pandas
 import scipy.ndimage as ndi
 from matplotlib import pyplot as plt
+from shapely.affinity import rotate
 from shapely.geometry import LineString
 
 from polarityjam.compute.shape import get_divisor_lines
@@ -384,8 +385,14 @@ class Plotter:
         num_fig = len(channels)
         num_fig = num_fig + 2 if mask_nuclei is not None else num_fig + 1
 
+        mask_golgi_ = None
         if mask_golgi is not None:
             num_fig = num_fig + 1
+
+            mask_golgi_ = self._rand_labels(mask_golgi)
+
+            # ignore background
+            mask_golgi_ = np.where(mask_golgi_ > 0, mask_golgi_, np.nan)
 
         indx_nuc = num_fig - 1
 
@@ -435,7 +442,9 @@ class Plotter:
         # show golgi mask
         if mask_golgi is not None and seg_img_params.channel_organelle != -1:
             ax[-1].imshow(seg_img[seg_img_params.channel_organelle, :, :], cmap=cmap)
-            ax[-1].imshow(mask_golgi, cmap=plt.cm.gist_rainbow, alpha=self.params.alpha)
+            ax[-1].imshow(
+                mask_golgi_, cmap=plt.cm.gist_rainbow, alpha=self.params.alpha
+            )
             add_title(
                 ax[-1],
                 "segmentation golgi",
@@ -1943,24 +1952,47 @@ class Plotter:
                 cmap="gray_r",
             )
 
+
+        plot_title = "cell circularity"
+        if self.params.show_statistics:
+            cell_circularity_values = collection.get_properties_by_img_name(
+                img_name
+            )["cell_circularity"].values
+            cell_circularity_values = cell_circularity_values[~np.isnan(cell_circularity_values)]
+            plot_title += "\n N: " + str(len(cell_circularity_values)) + ", "
+            plot_title += "mean: " + str(np.round(np.mean(cell_circularity_values), 2)) + ", "
+            plot_title += "std: " + str(np.round(np.std(cell_circularity_values), 2))
+
         # set title and ax limits
         if inst_nuclei_mask is not None:
+            
             add_title(
                 ax[0],
-                "cell circularity",
+                plot_title,
                 im_junction.data,
                 self.params.show_graphics_axis,
             )
+
+            plot_title = "nuclei circularity"
+            if self.params.show_statistics:
+                cell_circularity_values = collection.get_properties_by_img_name(
+                    img_name
+                )["nuc_circularity"].values
+                cell_circularity_values = cell_circularity_values[~np.isnan(cell_circularity_values)]
+                plot_title += "\n N: " + str(len(cell_circularity_values)) + ", "
+                plot_title += "mean: " + str(np.round(np.mean(cell_circularity_values), 2)) + ", "
+                plot_title += "std: " + str(np.round(np.std(cell_circularity_values), 2))
+
             add_title(
                 ax[1],
-                "nuclei circularity",
+                plot_title,
                 im_junction.data,
                 self.params.show_graphics_axis,
             )
             axes = [ax[0], ax[1]]
         else:
             add_title(
-                ax, "cell circularity", im_junction.data, self.params.show_graphics_axis
+                ax, plot_title, im_junction.data, self.params.show_graphics_axis
             )
             axes = [ax]
 
@@ -2151,12 +2183,15 @@ class Plotter:
             b = [x0 + row["cell_major_axis_length"], y0]  # lies horizontally
             ground_line = LineString([a, b])
 
-            d_lines, _ = get_divisor_lines(a, params.cue_direction, ground_line, 4)
+            # rotate ground line based on cue_direction
+            ground_line = rotate(ground_line, params.cue_direction, origin=a)
+
+            d_lines, _ = get_divisor_lines(a, ground_line, 4)
             for d_line in d_lines:
                 x1, y1 = (i[0] for i in d_line.boundary.centroid.coords.xy)
                 ax[1].plot((x0, x1), (y0, y1), "--r", linewidth=0.5)
 
-            d_lines, _ = get_divisor_lines(a, params.cue_direction, ground_line, 2)
+            d_lines, _ = get_divisor_lines(a, ground_line, 2)
             for d_line in d_lines:
                 x1, y1 = (i[0] for i in d_line.boundary.centroid.coords.xy)
                 ax[0].plot((x0, x1), (y0, y1), "--r", linewidth=0.5)
@@ -2372,46 +2407,47 @@ class Plotter:
             )
 
         # plot major and minor axis
-        for _, row in collection.get_properties_by_img_name(img_name).iterrows():
-            if inst_nuclei_mask is not None:
-                # plot orientation degree
-                Plotter._add_single_cell_orientation_degree_axis(
-                    ax[0],
-                    row["cell_X"],
-                    row["cell_Y"],
-                    row["cell_shape_orientation_rad"],
-                    row["cell_major_axis_length"],
-                    row["cell_minor_axis_length"],
-                    self.params.fontsize_text_annotations,
-                    self.params.font_color,
-                    self.params.marker_size,
-                )
+        if self.params.show_polarity_angles:
+            for _, row in collection.get_properties_by_img_name(img_name).iterrows():
+                if inst_nuclei_mask is not None:
+                    # plot orientation degree
+                    Plotter._add_single_cell_orientation_degree_axis(
+                        ax[0],
+                        row["cell_X"],
+                        row["cell_Y"],
+                        row["cell_shape_orientation_rad"],
+                        row["cell_major_axis_length"],
+                        row["cell_minor_axis_length"],
+                        self.params.fontsize_text_annotations,
+                        self.params.font_color,
+                        self.params.marker_size,
+                    )
 
-                # plot orientation degree nucleus
-                Plotter._add_single_cell_orientation_degree_axis(
-                    ax[1],
-                    row["nuc_X"],
-                    row["nuc_Y"],
-                    row["nuc_shape_orientation_rad"],
-                    row["nuc_major_axis_length"],
-                    row["nuc_minor_axis_length"],
-                    self.params.fontsize_text_annotations,
-                    self.params.font_color,
-                    self.params.marker_size,
-                )
-            else:
-                # plot orientation degree
-                Plotter._add_single_cell_orientation_degree_axis(
-                    ax,
-                    row["cell_X"],
-                    row["cell_Y"],
-                    row["cell_shape_orientation_rad"],
-                    row["cell_major_axis_length"],
-                    row["cell_minor_axis_length"],
-                    self.params.fontsize_text_annotations,
-                    self.params.font_color,
-                    self.params.marker_size,
-                )
+                    # plot orientation degree nucleus
+                    Plotter._add_single_cell_orientation_degree_axis(
+                        ax[1],
+                        row["nuc_X"],
+                        row["nuc_Y"],
+                        row["nuc_shape_orientation_rad"],
+                        row["nuc_major_axis_length"],
+                        row["nuc_minor_axis_length"],
+                        self.params.fontsize_text_annotations,
+                        self.params.font_color,
+                        self.params.marker_size,
+                    )
+                else:
+                    # plot orientation degree
+                    Plotter._add_single_cell_orientation_degree_axis(
+                        ax,
+                        row["cell_X"],
+                        row["cell_Y"],
+                        row["cell_shape_orientation_rad"],
+                        row["cell_major_axis_length"],
+                        row["cell_minor_axis_length"],
+                        self.params.fontsize_text_annotations,
+                        self.params.font_color,
+                        self.params.marker_size,
+                    )
 
         plot_title = "cell shape orientation"
 

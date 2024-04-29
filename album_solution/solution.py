@@ -1,4 +1,5 @@
 """polarityjam album solution."""
+import pkg_resources
 from album.runner.api import get_args, setup
 
 env_file = """name: Polarityjam
@@ -9,8 +10,23 @@ dependencies:
   - python=3.8.13
   - pip
   - pip:
-     - polarityjam==0.2.0
+     - polarityjam==0.2.1
 """
+
+album_version = None
+installed_packages = pkg_resources.working_set
+for package in installed_packages:
+    if package.key == "album":
+        album_version = package.version
+        break
+
+if album_version is not None:
+    if str(album_version) != "0.10.3":
+        if str(album_version) != "0.10.4":
+            raise RuntimeError(
+                "This solution requires album version 0.10.3 or 0.10.4, found %s"
+                % album_version
+            )
 
 
 def run():
@@ -97,11 +113,22 @@ def test():
 setup(
     group="de.mdc-berlin",
     name="polarityjam",
-    version="0.1.0",
+    version="0.1.0",  # refers to the album solution version, not the polarityjam version
     title="A Solution to run the polarityjam feature extraction pipeline",
     description="A Solution to run the polarityjam Feature Extraction Pipeline.",
     solution_creators=["Lucas Rieckert", "Jan Philipp Albrecht"],
-    tags=["polarityjam", "test"],
+    tags=[
+        "polarityjam",
+        "cell polarity",
+        "circular statistics",
+        "endothelial cells",
+        "workflow",
+        "software",
+    ],
+    cite=[{
+        "text": "Polarity-JaM: An image analysis toolbox for cell polarity, junction and morphology quantification",
+        "doi": "10.1101/2024.01.24.577027"
+    }],
     license="MIT",
     documentation=["doc.md"],
     covers=[{"description": "Polarityjam cover image", "source": "cover.png"}],
@@ -111,9 +138,7 @@ setup(
             "name": "run_command",
             "type": "string",
             "default": "run",
-            "description": """How do you want to run polarityjam? run for single tiff file,
-            run-stack for a directory containing multiple tiff files, run-key for a csv
-            file containing a list of  directories containing tiff files or test for the test-suit""",
+            "description": "How do you want to run polarityjam? run for single tiff file, run-stack for a directory containing multiple tiff files, run-key for a csv file containing a list of directories containing tiff files or test for the test-suit",
             "required": True,
         },
         {

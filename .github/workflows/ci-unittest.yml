@@ -57,7 +57,7 @@ jobs:
           python -m unittest discover src/polarityjam/test/
 
   build_macos:
-    runs-on: macos-latest
+    runs-on: macos-12
     strategy:
       matrix:
         python-version: ["3.8"]

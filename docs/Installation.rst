@@ -37,6 +37,21 @@ Execute the following steps to manually install Polarity-JaM with a working cond
     conda activate polarityjam
     pip install polarityjam
 
+Manual installation of the napari plugin for polarityjam
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Make sure you have Polarity-JaM installed. Then execute the following steps:
+
+.. code-block:: console
+
+    micromamba activate polarityjam
+    pip install polarityjam-napari-plugin
+
+To start polarityjam with napari viewer execute:
+
+.. code-block:: console
+
+    polarityjam napari
+
 
 Automatic installation with album
 +++++++++++++++++++++++++++++++++

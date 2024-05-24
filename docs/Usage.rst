@@ -392,7 +392,7 @@ This will not keep the output on the disk. To look at the output of the tests sp
 
     polarityjam_test --target-folder=/tmp/mytarget
 
-Expected output is a folder structure as follows:
+Expected output is a folder structure as follows: ::
 
     mytarget
     ├── data

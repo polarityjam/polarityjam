@@ -10,7 +10,7 @@ dependencies:
   - python=3.8.13
   - pip
   - pip:
-     - polarityjam==0.2.1
+     - polarityjam==0.2.2
 """
 
 album_version = None
@@ -125,10 +125,12 @@ setup(
         "workflow",
         "software",
     ],
-    cite=[{
-        "text": "Polarity-JaM: An image analysis toolbox for cell polarity, junction and morphology quantification",
-        "doi": "10.1101/2024.01.24.577027"
-    }],
+    cite=[
+        {
+            "text": "Polarity-JaM: An image analysis toolbox for cell polarity, junction and morphology quantification",
+            "doi": "10.1101/2024.01.24.577027",
+        }
+    ],
     license="MIT",
     documentation=["doc.md"],
     covers=[{"description": "Polarityjam cover image", "source": "cover.png"}],
@@ -138,7 +140,7 @@ setup(
             "name": "run_command",
             "type": "string",
             "default": "run",
-            "description": "How do you want to run polarityjam? run for single tiff file, run-stack for a directory containing multiple tiff files, run-key for a csv file containing a list of directories containing tiff files or test for the test-suit",
+            "description": "How do you want to run polarityjam? run for single tiff file, run-stack for a directory containing multiple tiff files, run-key for a csv file containing a list of directories containing tiff files or test for the test-suit",  # noqa: E501
             "required": True,
         },
         {

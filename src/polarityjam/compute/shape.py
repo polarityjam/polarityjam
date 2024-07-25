@@ -1,6 +1,7 @@
 """Collection of functions involving cell shape operations."""
 from __future__ import annotations
 
+import itertools
 import warnings
 from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union
 
@@ -260,3 +261,100 @@ def _bounding_box(x_coordinates, y_coordinates):
         max(x_coordinates),
         max(y_coordinates),
     ]
+
+
+def mirror_along_cue_direction(
+    sc_mask: Union[np.ndarray, BioMedicalMask], cue_direction: int
+) -> np.ndarray:
+    """Mirror the single cell mask half along the cue direction."""
+
+    def _transform(new_x, new_y) -> int:
+        """Map the new coordinates to the old coordinates."""
+        frac_x = new_x % 1  # fractional part of the new x
+        frac_x_ = 1 - frac_x  # 1 - fractional part of the new x
+        frac_y = new_y % 1  # fractional part of the new y
+        frac_y_ = 1 - frac_y  # 1 - fractional part of the new y
+
+        weights_x = [
+            (frac_x_).reshape(*new_x.shape, 1),
+            (frac_x).reshape(*new_x.shape, 1),
+        ]  # weights for the x-axis are 1 - fractional part and fractional part of the new x
+        weights_y = [
+            (frac_y_).reshape(*new_x.shape, 1),
+            (frac_y).reshape(*new_x.shape, 1),
+        ]  # weights for the y-axis are 1 - fractional part and fractional part of the new y
+
+        start_x = np.floor(new_x)  # start x index
+        start_y = np.floor(new_y)  # start y index
+
+        max_index_x = sc_mask.shape[0] - 1
+        max_index_y = sc_mask.shape[1] - 1
+
+        # new image is the sum of the weighted values of the 4 points around the new point
+        return np.sum(
+            [
+                sc_mask[
+                    np.clip(np.floor(start_x + x), 0, max_index_x).astype("int"),
+                    np.clip(np.floor(start_y + y), 0, max_index_y).astype("int"),
+                ]
+                * weights_x[x]
+                * weights_y[y]
+                for x, y in itertools.product([0, 1], repeat=2)  # cartesian product
+            ]
+        )
+
+    if isinstance(sc_mask, BioMedicalMask):
+        sc_mask = sc_mask.data
+
+    contours = get_contour(sc_mask.astype(int))
+
+    pg = Polygon(contours)
+
+    pg_cent_a = int(pg.centroid.coords.xy[0][0])
+    pg_cent_b = int(pg.centroid.coords.xy[1][0])
+
+    origin = np.array([pg_cent_a, pg_cent_b], dtype="float")
+
+    unit_cue_x = np.sin(
+        np.deg2rad(cue_direction)
+    )  # correct for horizontally defined cue direction (e.g. sin)
+    unit_cue_y = np.cos(
+        np.deg2rad(cue_direction)
+    )  # correct for horizontally defined cue direction (e.g. cos)
+
+    b1 = np.array(
+        [unit_cue_x, unit_cue_y], dtype="float"
+    )  # unit vector of the cue direction
+    b2 = np.array(
+        [-unit_cue_y, unit_cue_x], dtype="float"
+    )  # unit vector orthogonal to the cue direction
+
+    points = np.moveaxis(np.indices(sc_mask.shape[:2]), 0, -1).reshape(
+        -1, 2
+    )  # get all points of the image as indices
+
+    list_origin = origin.reshape(1, 2)
+    c1 = (
+        points - list_origin
+    ) @ b1  # get the coefficient of the points in their new basis b1
+    c2 = (
+        points - list_origin
+    ) @ b2  # get the coefficient of the points in their new basis b2
+
+    reflect_coordinates_b1 = b1.reshape(2, 1) * np.abs(
+        c1
+    )  # calculate reflection of the points on the first axis
+    reflect_coordinates_b2 = (
+        b2.reshape(2, 1) * c2
+    )  # calculate the points on the second axis
+
+    # get the coordinates of the reflected points in the new basis by adding back the origin
+    reflection_coordinates = (
+        reflect_coordinates_b1 + reflect_coordinates_b2 + origin.reshape(2, 1)
+    )
+
+    transformed_image = _transform(*reflection_coordinates)
+    # transformed_image = np.array(list(map(_transform, reflection_coordinates[0, :], reflection_coordinates[1, :])))
+    transformed_image = transformed_image.reshape(*sc_mask.shape)
+
+    return transformed_image

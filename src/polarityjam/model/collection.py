@@ -246,6 +246,7 @@ class PropertiesCollection:
         self.dataset.at[self._index, "cell_corner_points"] = json.dumps(
             sc_props.cell_corner_points.tolist()
         )
+        self.dataset.at[self._index, "cell_asymmetry"] = sc_props.cell_asymmetry
 
     def add_sc_organelle_props(self, organelle_props: SingleCellOrganelleProps):
         """Add specific single cell organelle properties to the dataset.

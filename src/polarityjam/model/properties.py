@@ -17,6 +17,7 @@ from polarityjam.compute.compute import (
     straight_line_length,
 )
 from polarityjam.compute.corner import get_contour, get_corner
+from polarityjam.compute.shape import mirror_along_cue_direction
 from polarityjam.model.masks import BioMedicalMask
 
 if TYPE_CHECKING:
@@ -53,10 +54,39 @@ class SingleInstanceProps(RegionProperties):
 class SingleCellProps(SingleInstanceProps):
     """Class representing the properties of a single cell."""
 
-    def __init__(self, single_cell_mask: BioMedicalMask, dp_epsilon: int):
+    def __init__(
+        self,
+        single_cell_mask: BioMedicalMask,
+        single_cell_centered_mask: BioMedicalMask,
+        dp_epsilon: int,
+        cue_direction: int,
+    ):
         """Initialize the properties with the given mask and intensity."""
         self.dp_epsilon = dp_epsilon
+        self.cue_direction = cue_direction
+        self.single_cell_centered_mask = single_cell_centered_mask
         super().__init__(single_cell_mask)
+
+    @property
+    def cell_asymmetry(self):
+        """Return the asymmetry of the cell."""
+
+        mask_mirror_cue_direction_up = mirror_along_cue_direction(
+            self.single_cell_centered_mask.data, self.cue_direction
+        )
+        mask_mirror_cue_direction_down = mirror_along_cue_direction(
+            self.single_cell_centered_mask.data, self.cue_direction + 180
+        )
+
+        # calculate IoU between mask_mirror_cue_direction_up and mask_mirror_cue_direction_down
+        iou = np.sum(
+            np.logical_and(mask_mirror_cue_direction_up, mask_mirror_cue_direction_down)
+        ) / np.sum(
+            np.logical_or(mask_mirror_cue_direction_up, mask_mirror_cue_direction_down)
+        )
+
+        # todo: use Hausdorff distance?
+        return iou
 
     @property
     def cell_shape_orientation_rad(self):

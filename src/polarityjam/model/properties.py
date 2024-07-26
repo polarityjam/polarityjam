@@ -17,7 +17,7 @@ from polarityjam.compute.compute import (
     straight_line_length,
 )
 from polarityjam.compute.corner import get_contour, get_corner
-from polarityjam.compute.shape import mirror_along_cue_direction
+from polarityjam.compute.shape import mirror_flip_along_cue_direction
 from polarityjam.model.masks import BioMedicalMask
 from polarityjam.polarityjam_logging import get_logger
 
@@ -71,11 +71,10 @@ class SingleCellProps(SingleInstanceProps):
     @property
     def cell_asymmetry(self):
         """Return the asymmetry of the cell."""
-
-        mask_mirror_cue_direction_up = mirror_along_cue_direction(
+        mask_mirror_cue_direction_up = mirror_flip_along_cue_direction(
             self.single_cell_centered_mask.data, (self.cue_direction + 90) % 360
         )
-        mask_mirror_cue_direction_down = mirror_along_cue_direction(
+        mask_mirror_cue_direction_down = mirror_flip_along_cue_direction(
             self.single_cell_centered_mask.data, (self.cue_direction + 270) % 360
         )
 

@@ -263,7 +263,23 @@ def _bounding_box(x_coordinates, y_coordinates):
     ]
 
 
-def mirror_along_cue_direction(
+def zero_pad_quadratic(img_data: np.ndarray) -> np.ndarray:
+    """Pad the image with zeros to be quadratic."""
+    # pad image to be quadratic
+    if img_data.shape[0] != img_data.shape[1]:
+        max_dim = max(img_data.shape) + 2  # always pad 2 to avoid rounding issues
+        pad_d1 = (max_dim - img_data.shape[0]) // 2
+        pad_d2 = (max_dim - img_data.shape[1]) // 2
+        return np.pad(
+            img_data,
+            ((pad_d1, pad_d1), (pad_d2, pad_d2)),  # pad evenly on both sides
+            mode="constant",
+            constant_values=0,
+        )
+    return img_data
+
+
+def mirror_flip_along_cue_direction(
     img: Union[np.ndarray, BioMedicalMask],
     mirror_angle_in_deg: int,
     origin: Optional[np.ndarray] = None,
@@ -275,16 +291,7 @@ def mirror_along_cue_direction(
         img_data = img
 
     # pad image to be quadratic
-    if img_data.shape[0] != img_data.shape[1]:
-        max_dim = max(img_data.shape) + 2  # always pad 2 to avoid rounding issues
-        pad_d1 = (max_dim - img_data.shape[0]) // 2
-        pad_d2 = (max_dim - img_data.shape[1]) // 2
-        img_data = np.pad(
-            img_data,
-            ((pad_d1, pad_d1), (pad_d2, pad_d2)),  # pad evenly on both sides
-            mode="constant",
-            constant_values=0,
-        )
+    img_data = zero_pad_quadratic(img_data)
 
     # expand the mask to 3D if it is 2D
     if img_data.ndim == 2:
@@ -325,9 +332,14 @@ def mirror_along_cue_direction(
     reflect_coordinates_b1 = b1.reshape(2, 1) * np.abs(
         c1
     )  # calculate reflection of the points on the first axis
+
+    # conditional sign flip
+    flip_sign_matrix = np.ones(c1.shape)
+    flip_sign_matrix[c1 < 0] = -1
+
     reflect_coordinates_b2 = (
-        b2.reshape(2, 1) * c2
-    )  # calculate the points on the second axis
+        b2.reshape(2, 1) * flip_sign_matrix * c2
+    )  # calculate the points on the second axis conditionally flipped
 
     # get the coordinates of the reflected points in the new basis by adding back the origin
     reflection_coordinates = (

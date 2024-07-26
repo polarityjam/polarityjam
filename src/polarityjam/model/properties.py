@@ -19,6 +19,7 @@ from polarityjam.compute.compute import (
 from polarityjam.compute.corner import get_contour, get_corner
 from polarityjam.compute.shape import mirror_along_cue_direction
 from polarityjam.model.masks import BioMedicalMask
+from polarityjam.polarityjam_logging import get_logger
 
 if TYPE_CHECKING:
     from polarityjam.model.image import BioMedicalChannel
@@ -75,7 +76,7 @@ class SingleCellProps(SingleInstanceProps):
             self.single_cell_centered_mask.data, self.cue_direction
         )
         mask_mirror_cue_direction_down = mirror_along_cue_direction(
-            self.single_cell_centered_mask.data, self.cue_direction + 180
+            self.single_cell_centered_mask.data, (self.cue_direction + 180) % 360
         )
 
         # calculate IoU between mask_mirror_cue_direction_up and mask_mirror_cue_direction_down

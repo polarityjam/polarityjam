@@ -73,10 +73,10 @@ class SingleCellProps(SingleInstanceProps):
         """Return the asymmetry of the cell."""
 
         mask_mirror_cue_direction_up = mirror_along_cue_direction(
-            self.single_cell_centered_mask.data, self.cue_direction
+            self.single_cell_centered_mask.data, (self.cue_direction + 90) % 360
         )
         mask_mirror_cue_direction_down = mirror_along_cue_direction(
-            self.single_cell_centered_mask.data, (self.cue_direction + 180) % 360
+            self.single_cell_centered_mask.data, (self.cue_direction + 270) % 360
         )
 
         # calculate IoU between mask_mirror_cue_direction_up and mask_mirror_cue_direction_down

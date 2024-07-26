@@ -265,7 +265,7 @@ def _bounding_box(x_coordinates, y_coordinates):
 
 def mirror_along_cue_direction(
     img: Union[np.ndarray, BioMedicalMask],
-    cue_direction: int,
+    mirror_angle_in_deg: int,
     origin: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """Mirror the given image along the cue direction."""
@@ -300,12 +300,8 @@ def mirror_along_cue_direction(
 
         origin = np.array([pg_cent_b, pg_cent_a], dtype="float")
 
-    unit_cue_x = np.cos(
-        np.deg2rad(cue_direction)
-    )  # correct for horizontally defined cue direction (e.g. sin)
-    unit_cue_y = np.sin(
-        np.deg2rad(cue_direction)
-    )  # correct for horizontally defined cue direction (e.g. cos)
+    unit_cue_x = np.cos(np.deg2rad(mirror_angle_in_deg))
+    unit_cue_y = np.sin(np.deg2rad(mirror_angle_in_deg))
 
     b1 = np.array(
         [unit_cue_x, unit_cue_y], dtype="float"

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import itertools
-import warnings
 from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union
 
 import cv2
@@ -15,6 +14,7 @@ from shapely.ops import split
 from polarityjam.compute.compute import compute_ref_x_abs_angle_deg
 from polarityjam.compute.corner import get_contour
 from polarityjam.model.masks import BioMedicalMask
+from polarityjam.polarityjam_logging import get_logger
 
 if TYPE_CHECKING:
     from polarityjam.model.image import BioMedicalChannel
@@ -157,7 +157,7 @@ def partition_single_cell_mask(
     # TODO: check if this is sufficient to catch all cases
     for s in polygons:
         if s.geom_type != "Polygon":
-            warnings.warn("Partition of the cell is not a Polygon.")
+            get_logger().warn("Partition of the cell is not a Polygon.")
             continue
 
         c = s.exterior.coords.xy
@@ -171,7 +171,7 @@ def partition_single_cell_mask(
         masks.append((np.logical_and(convex_mask, sc_mask)).astype(np.uint8))
 
     if len(masks) != num_partitions:
-        warnings.warn(
+        get_logger().warn(
             "Number of partitions({}) does not match the number of created masks ({}). ".format(  # noqa: P101
                 num_partitions, len(masks)
             )
@@ -264,61 +264,46 @@ def _bounding_box(x_coordinates, y_coordinates):
 
 
 def mirror_along_cue_direction(
-    sc_mask: Union[np.ndarray, BioMedicalMask], cue_direction: int
+    img: Union[np.ndarray, BioMedicalMask],
+    cue_direction: int,
+    origin: Optional[np.ndarray] = None,
 ) -> np.ndarray:
-    """Mirror the single cell mask half along the cue direction."""
+    """Mirror the given image along the cue direction."""
+    if isinstance(img, BioMedicalMask):
+        img_data = img.data
+    else:
+        img_data = img
 
-    def _transform(new_x, new_y) -> int:
-        """Map the new coordinates to the old coordinates."""
-        frac_x = new_x % 1  # fractional part of the new x
-        frac_x_ = 1 - frac_x  # 1 - fractional part of the new x
-        frac_y = new_y % 1  # fractional part of the new y
-        frac_y_ = 1 - frac_y  # 1 - fractional part of the new y
-
-        weights_x = [
-            (frac_x_).reshape(*new_x.shape, 1),
-            (frac_x).reshape(*new_x.shape, 1),
-        ]  # weights for the x-axis are 1 - fractional part and fractional part of the new x
-        weights_y = [
-            (frac_y_).reshape(*new_x.shape, 1),
-            (frac_y).reshape(*new_x.shape, 1),
-        ]  # weights for the y-axis are 1 - fractional part and fractional part of the new y
-
-        start_x = np.floor(new_x)  # start x index
-        start_y = np.floor(new_y)  # start y index
-
-        max_index_x = sc_mask.shape[0] - 1
-        max_index_y = sc_mask.shape[1] - 1
-
-        # new image is the sum of the weighted values of the 4 points around the new point
-        return np.sum(
-            [
-                sc_mask[
-                    np.clip(np.floor(start_x + x), 0, max_index_x).astype("int"),
-                    np.clip(np.floor(start_y + y), 0, max_index_y).astype("int"),
-                ]
-                * weights_x[x]
-                * weights_y[y]
-                for x, y in itertools.product([0, 1], repeat=2)  # cartesian product
-            ]
+    # pad image to be quadratic
+    if img_data.shape[0] != img_data.shape[1]:
+        max_dim = max(img_data.shape) + 2  # always pad 2 to avoid rounding issues
+        pad_d1 = (max_dim - img_data.shape[0]) // 2
+        pad_d2 = (max_dim - img_data.shape[1]) // 2
+        img_data = np.pad(
+            img_data,
+            ((pad_d1, pad_d1), (pad_d2, pad_d2)),  # pad evenly on both sides
+            mode="constant",
+            constant_values=0,
         )
 
-    if isinstance(sc_mask, BioMedicalMask):
-        sc_mask = sc_mask.data
+    # expand the mask to 3D if it is 2D
+    if img_data.ndim == 2:
+        img_data = img_data[..., None]
 
-    contours = get_contour(sc_mask.astype(int))
+    if origin is None:
+        contours = get_contour(img_data.astype(int))
 
-    pg = Polygon(contours)
+        pg = Polygon(contours)  # swaps x and y
 
-    pg_cent_a = int(pg.centroid.coords.xy[0][0])
-    pg_cent_b = int(pg.centroid.coords.xy[1][0])
+        pg_cent_a = int(pg.centroid.coords.xy[0][0])
+        pg_cent_b = int(pg.centroid.coords.xy[1][0])
 
-    origin = np.array([pg_cent_a, pg_cent_b], dtype="float")
+        origin = np.array([pg_cent_b, pg_cent_a], dtype="float")
 
-    unit_cue_x = np.sin(
+    unit_cue_x = np.cos(
         np.deg2rad(cue_direction)
     )  # correct for horizontally defined cue direction (e.g. sin)
-    unit_cue_y = np.cos(
+    unit_cue_y = np.sin(
         np.deg2rad(cue_direction)
     )  # correct for horizontally defined cue direction (e.g. cos)
 
@@ -329,7 +314,7 @@ def mirror_along_cue_direction(
         [-unit_cue_y, unit_cue_x], dtype="float"
     )  # unit vector orthogonal to the cue direction
 
-    points = np.moveaxis(np.indices(sc_mask.shape[:2]), 0, -1).reshape(
+    points = np.moveaxis(np.indices(img_data.shape[:2]), 0, -1).reshape(
         -1, 2
     )  # get all points of the image as indices
 
@@ -353,8 +338,40 @@ def mirror_along_cue_direction(
         reflect_coordinates_b1 + reflect_coordinates_b2 + origin.reshape(2, 1)
     )
 
-    transformed_image = _transform(*reflection_coordinates)
-    # transformed_image = np.array(list(map(_transform, reflection_coordinates[0, :], reflection_coordinates[1, :])))
-    transformed_image = transformed_image.reshape(*sc_mask.shape)
+    # build fractional part of the new coordinates
+    frac_x = reflection_coordinates[0, :] % 1  # fractional part of the new x
+    frac_x_ = 1 - frac_x  # 1 - fractional part of the new x
+    frac_y = reflection_coordinates[1, :] % 1  # fractional part of the new y
+    frac_y_ = 1 - frac_y  # 1 - fractional part of the new y
 
-    return transformed_image
+    weights_x = [
+        (frac_x_).reshape(*reflection_coordinates[0, :].shape, 1),
+        (frac_x).reshape(*reflection_coordinates[0, :].shape, 1),
+    ]  # weights for the x-axis are 1 - fractional part and fractional part of the new x
+    weights_y = [
+        (frac_y_).reshape(*reflection_coordinates[1, :].shape, 1),
+        (frac_y).reshape(*reflection_coordinates[1, :].shape, 1),
+    ]  # weights for the y-axis are 1 - fractional part and fractional part of the new y
+
+    start_x = np.floor(reflection_coordinates[0, :])  # start x index
+    start_y = np.floor(reflection_coordinates[1, :])  # start y index
+
+    max_index_x = img_data.shape[0] - 1
+    max_index_y = img_data.shape[1] - 1
+
+    # new image is the sum of the weighted values of the 4 points around the new point
+    transformed_image = np.sum(
+        [
+            img_data[
+                np.clip(np.floor(start_x + x), 0, max_index_x).astype("int"),
+                np.clip(np.floor(start_y + y), 0, max_index_y).astype("int"),
+            ]
+            * weights_x[x]
+            * weights_y[y]
+            for x, y in itertools.product([0, 1], repeat=2)  # cartesian product
+        ],
+        axis=0,
+    )
+    transformed_image = transformed_image.reshape(*img_data.shape)
+
+    return transformed_image.squeeze()

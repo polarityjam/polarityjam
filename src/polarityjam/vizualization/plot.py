@@ -11,7 +11,7 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 
 def save_current_fig(
     graphics_output_format: List[str],
-    output_path: Path,
+    output_path: str,
     filename: str,
     filename_suffix: str,
     image: Optional[np.ndarray] = None,
@@ -23,7 +23,7 @@ def save_current_fig(
     filename = str(filename)
     filename_suffix = str(filename_suffix)
 
-    output_path.mkdir(parents=True, exist_ok=True)
+    Path(output_path).mkdir(parents=True, exist_ok=True)
 
     if "pdf" in graphics_output_format:
         plt.savefig(

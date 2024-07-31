@@ -270,9 +270,12 @@ def zero_pad_quadratic(img_data: np.ndarray) -> np.ndarray:
         max_dim = max(img_data.shape) + 2  # always pad 2 to avoid rounding issues
         pad_d1 = (max_dim - img_data.shape[0]) // 2
         pad_d2 = (max_dim - img_data.shape[1]) // 2
+
+        pad = ((pad_d1, pad_d1), (pad_d2, pad_d2), (0, 0))
+
         return np.pad(
             img_data,
-            ((pad_d1, pad_d1), (pad_d2, pad_d2)),  # pad evenly on both sides
+            pad,  # pad evenly on both sides
             mode="constant",
             constant_values=0,
         )
@@ -290,12 +293,12 @@ def mirror_flip_along_cue_direction(
     else:
         img_data = img
 
-    # pad image to be quadratic
-    img_data = zero_pad_quadratic(img_data)
-
     # expand the mask to 3D if it is 2D
     if img_data.ndim == 2:
         img_data = img_data[..., None]
+
+    # pad image to be quadratic
+    img_data = zero_pad_quadratic(img_data)
 
     if origin is None:
         contours = get_contour(img_data.astype(int))

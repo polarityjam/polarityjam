@@ -34,7 +34,6 @@ def get_logger():
 def get_log_file(out_folder):
     """Get a log file."""
     log_file = Path(out_folder).joinpath("%s.log" % get_doc_file_prefix())
-    log_file.touch()
 
     return log_file
 
@@ -56,6 +55,12 @@ def configure_logger(loglevel=None, logfile_name=None, formatter_string=None):
     logger.addHandler(ch)
 
     if logfile_name:
+        # ensure the parent folder exists
+        Path(logfile_name).parent.mkdir(parents=True, exist_ok=True)
+
+        # ensure the log file exists
+        Path(logfile_name).touch()
+
         ch = logging.FileHandler(logfile_name, mode="a", encoding=None, delay=False)
         ch.setLevel(loglevel)
         ch.setFormatter(formatter)

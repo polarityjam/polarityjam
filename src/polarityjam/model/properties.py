@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, List, Optional
 import numpy as np
 import skimage.measure
 from scipy import ndimage as ndi
+from shapely.geometry import Polygon
 from skimage.measure._regionprops import RegionProperties
 
 from polarityjam.compute.compute import (
@@ -17,7 +18,10 @@ from polarityjam.compute.compute import (
     straight_line_length,
 )
 from polarityjam.compute.corner import get_contour, get_corner
-from polarityjam.compute.shape import mirror_flip_along_cue_direction
+from polarityjam.compute.shape import (
+    get_shanon_estimated_pdf_center_distance,
+    mirror_along_cue_direction,
+)
 from polarityjam.model.masks import BioMedicalMask
 from polarityjam.polarityjam_logging import get_logger
 
@@ -69,12 +73,12 @@ class SingleCellProps(SingleInstanceProps):
         super().__init__(single_cell_mask)
 
     @property
-    def cell_asymmetry(self):
+    def cell_cue_direction_asymmetry(self):
         """Return the asymmetry of the cell."""
-        mask_mirror_cue_direction_up = mirror_flip_along_cue_direction(
+        mask_mirror_cue_direction_up = mirror_along_cue_direction(
             self.single_cell_centered_mask.data, (self.cue_direction + 90) % 360
         )
-        mask_mirror_cue_direction_down = mirror_flip_along_cue_direction(
+        mask_mirror_cue_direction_down = mirror_along_cue_direction(
             self.single_cell_centered_mask.data, (self.cue_direction + 270) % 360
         )
 
@@ -85,8 +89,24 @@ class SingleCellProps(SingleInstanceProps):
             np.logical_or(mask_mirror_cue_direction_up, mask_mirror_cue_direction_down)
         )
 
-        # todo: use Hausdorff distance?
         return iou
+
+    @property
+    def center_distance_entropy(self):
+        """Return the entropy of the distance of the cell center to the cell border."""
+        contours = get_contour(self.single_cell_centered_mask.data)
+
+        pg = Polygon(contours)  # swaps x and y
+
+        pg_cent_a = int(pg.centroid.coords.xy[0][0])
+        pg_cent_b = int(pg.centroid.coords.xy[1][0])
+
+        origin = np.array([pg_cent_b, pg_cent_a], dtype="float")
+
+        # calculate distance of each pixel to the center
+        e = get_shanon_estimated_pdf_center_distance(origin, contours)
+
+        return e
 
     @property
     def cell_shape_orientation_rad(self):

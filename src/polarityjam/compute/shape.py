@@ -10,11 +10,17 @@ from shapely.affinity import rotate
 from shapely.geometry import LineString
 from shapely.geometry.polygon import Polygon
 from shapely.ops import split
+from sklearn.neighbors import KernelDensity
 
-from polarityjam.compute.compute import compute_ref_x_abs_angle_deg
+from polarityjam.compute.compute import (
+    compute_marker_vector_norm,
+    compute_ref_x_abs_angle_deg,
+    compute_reference_target_orientation_rad,
+)
 from polarityjam.compute.corner import get_contour
 from polarityjam.model.masks import BioMedicalMask
 from polarityjam.polarityjam_logging import get_logger
+from polarityjam.utils.decorators import experimental
 
 if TYPE_CHECKING:
     from polarityjam.model.image import BioMedicalChannel
@@ -263,26 +269,24 @@ def _bounding_box(x_coordinates, y_coordinates):
     ]
 
 
-def zero_pad_quadratic(img_data: np.ndarray) -> np.ndarray:
+def prepare_mirroring(img_data: np.ndarray) -> np.ndarray:
     """Pad the image with zeros to be quadratic."""
     # pad image to be quadratic
-    if img_data.shape[0] != img_data.shape[1]:
-        max_dim = max(img_data.shape) + 2  # always pad 2 to avoid rounding issues
-        pad_d1 = (max_dim - img_data.shape[0]) // 2
-        pad_d2 = (max_dim - img_data.shape[1]) // 2
+    max_dim = max(img_data.shape) * 2
+    pad_d1 = (max_dim - img_data.shape[0]) // 2
+    pad_d2 = (max_dim - img_data.shape[1]) // 2
 
-        pad = ((pad_d1, pad_d1), (pad_d2, pad_d2), (0, 0))
+    pad = ((pad_d1, pad_d1), (pad_d2, pad_d2), (0, 0))
 
-        return np.pad(
-            img_data,
-            pad,  # pad evenly on both sides
-            mode="constant",
-            constant_values=0,
-        )
-    return img_data
+    return np.pad(
+        img_data,
+        pad,  # pad evenly on both sides
+        mode="constant",
+        constant_values=0,
+    )
 
 
-def mirror_flip_along_cue_direction(
+def mirror_along_cue_direction(
     img: Union[np.ndarray, BioMedicalMask],
     mirror_angle_in_deg: int,
     origin: Optional[np.ndarray] = None,
@@ -297,8 +301,8 @@ def mirror_flip_along_cue_direction(
     if img_data.ndim == 2:
         img_data = img_data[..., None]
 
-    # pad image to be quadratic
-    img_data = zero_pad_quadratic(img_data)
+    # pad image to ensure mirrored image does not leave the frame
+    img_data = prepare_mirroring(img_data)
 
     if origin is None:
         contours = get_contour(img_data.astype(int))
@@ -337,11 +341,11 @@ def mirror_flip_along_cue_direction(
     )  # calculate reflection of the points on the first axis
 
     # conditional sign flip
-    flip_sign_matrix = np.ones(c1.shape)
-    flip_sign_matrix[c1 < 0] = -1
+    # flip_sign_matrix = np.ones(c1.shape)
+    # flip_sign_matrix[c1 < 0] = 1
 
     reflect_coordinates_b2 = (
-        b2.reshape(2, 1) * flip_sign_matrix * c2
+        b2.reshape(2, 1) * c2
     )  # calculate the points on the second axis conditionally flipped
 
     # get the coordinates of the reflected points in the new basis by adding back the origin
@@ -386,3 +390,133 @@ def mirror_flip_along_cue_direction(
     transformed_image = transformed_image.reshape(*img_data.shape)
 
     return transformed_image.squeeze()
+
+
+def normalized_center_distance(origin: np.ndarray, points: np.ndarray) -> np.ndarray:
+    """Calculate the normalized distance of each point to the origin."""
+    _p = [
+        compute_marker_vector_norm(
+            origin[0],
+            origin[1],
+            p[0],
+            p[1],
+        )
+        for p in points
+    ]
+    return np.array(_p) / np.max(_p)
+
+
+def get_shanon_estimated_pdf_center_distance(
+    origin: np.ndarray,
+    points: np.ndarray,
+    bins: Union[int, str] = "auto",
+    plot: bool = False,
+) -> float:
+    """Calculate the distance probability density function of each point to the origin."""
+    n_center_dist = normalized_center_distance(origin, points)
+    h, bin_edges = np.histogram(n_center_dist, bins=bins, range=(0, 1))
+
+    # plot the histogram
+    if plot:
+        import matplotlib.pyplot as plt
+
+        plt.hist(n_center_dist, bins=bins, range=(0, 1))
+        plt.show()
+
+    # use kernel density estimation to get the pdf
+    kd_data1 = KernelDensity(kernel="gaussian", bandwidth=0.05).fit(
+        n_center_dist.reshape((-1, 1))
+    )
+
+    resolution = 18
+
+    x = np.linspace(min(n_center_dist), max(n_center_dist), np.power(2, resolution))[
+        :, np.newaxis
+    ]
+
+    # get the estimated density
+    kd_vals_data1 = np.exp(kd_data1.score_samples(x)) / np.power(2, resolution)
+
+    # plot the estimated density
+    if plot:
+        plt.plot(x, kd_vals_data1, markersize=4)
+        plt.show()
+
+    # calculate the shannon entropy
+    shannon_entropy = -np.sum(kd_vals_data1 * np.log2(kd_vals_data1))
+
+    return shannon_entropy
+
+
+@experimental
+def get_shanon_estimated_pdf_angle(
+    points: np.ndarray, bins: Union[int, str] = "auto", plot: bool = False
+) -> float:
+    """Calculate the angle probability density function of each point to the origin."""
+    angles = []
+    for i in points:
+        _neighbors = [
+            points[j] for j in range(len(points)) if not np.array_equal(points[j], i)
+        ]
+
+        # get the nearest neighbor of point i
+        nn_1 = min(
+            _neighbors, key=lambda x: compute_marker_vector_norm(i[0], i[1], x[0], x[1])
+        )
+
+        # remove the nearest neighbor from the ndarray
+        _neighbors = [
+            _neighbors[j]
+            for j in range(len(_neighbors))
+            if not np.array_equal(_neighbors[j], nn_1)
+        ]
+
+        # compute reference point
+        p0 = i[0] + (i[0] - nn_1[0])
+        p1 = i[1] + (i[1] - nn_1[1])
+
+        # search for the nearest point to the prediction point
+        nn_2 = min(
+            _neighbors, key=lambda x: compute_marker_vector_norm(p0, p1, x[0], x[1])
+        )
+
+        # point i serves as the origin
+        nn_1_o = [nn_1[0] - i[0], nn_1[1] - i[1]]
+        nn_2_o = [nn_2[0] - i[0], nn_2[1] - i[1]]
+
+        _angle = compute_reference_target_orientation_rad(
+            nn_1_o[0], nn_2_o[0], nn_1_o[1], nn_2_o[1]
+        )
+
+        angle = _angle if _angle <= np.pi else 2 * np.pi - _angle
+
+        # append the angle to the list
+        angles.append(angle)
+
+    if plot:
+        import matplotlib.pyplot as plt
+
+        plt.hist(angles, bins=bins)
+        plt.show()
+
+    # use kernel density estimation to get the pdf
+    kd_data1 = KernelDensity(kernel="gaussian", bandwidth=0.25).fit(
+        np.array(angles).reshape((-1, 1))
+    )
+
+    resolution = 18
+
+    x = np.linspace(0, np.pi, np.power(2, resolution))[:, np.newaxis]
+
+    # get the estimated density
+    kd_vals_data1 = np.exp(kd_data1.score_samples(x)) / np.power(2, resolution)
+
+    # plot the estimated density
+    if plot:
+        plt.plot(x, kd_vals_data1, markersize=4)
+        plt.show()
+
+    # calculate the shannon entropy
+    shannon_entropy = -np.sum(kd_vals_data1 * np.log2(kd_vals_data1))
+
+    return shannon_entropy

@@ -22,7 +22,7 @@ always extracted. These features can be organized into several categories:
     :align: center
 
 
-Identification & Localization
+Type: Identification & Localization
 -----------------------------
 
 .. image:: images/categories/identification.svg
@@ -33,7 +33,7 @@ Localization and identification features are used to identify and locate the obj
 These features are essential for the subsequent analysis of the image data.
 
 
-Morphology
+Type: Morphology
 ----------
 
 .. image:: images/categories/morphology.svg
@@ -45,7 +45,7 @@ These can be further classified into geometric features, which describe the obje
 which detail the internal structure; and ratio-based features,
 which involve calculations of various proportions.
 
-Polarity
+Type: Polarity
 --------
 
 .. image:: images/categories/polarity.svg
@@ -61,7 +61,7 @@ an object's asymmetry or the asymmetry of its intensity relative to a
 reference axis by calculating proportions.
 
 
-Intensity
+Type: Intensity
 ---------
 
 .. image:: images/categories/intensity.svg
@@ -71,7 +71,7 @@ Intensity
 Intensity features characterize the object's intensity and expression levels.
 The intensity within different regions can be summed, averaged, or compared using ratios or proportions.
 
-Topology
+Type: Topology
 --------
 
 

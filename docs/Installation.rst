@@ -11,7 +11,7 @@ corresponding feature values as columns. Additionally, plots will be created.
 These visualizations can be used for quality control but might also be suitable for a publication.
 
 
-Manual installation with additional segmentation options
+Manual installation
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 For additional support in segmentation, we suggest to install Polarity-JaM
 via micromamba and the conda-forge channel. For that, make sure you have
@@ -24,18 +24,6 @@ Manually install Polarity-JaM via:
     micromamba activate polarityjam
     pip install polarityjam
 
-
-Manual installation without additional segmentation options
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Make sure you have `conda <https://anaconda.com/>`_ installed.
-
-Execute the following steps to manually install Polarity-JaM with a working conda installation via:
-
-.. code-block:: console
-
-    conda create -y -n polarityjam python=3.8
-    conda activate polarityjam
-    pip install polarityjam
 
 Manual installation of the napari plugin for polarityjam
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -77,14 +65,14 @@ You can now run the pipeline with the following command:
 Manual installation from GitHub
 +++++++++++++++++++++++++++++++
 
-Make sure you have `conda <https://anaconda.com/>`_ installed.
+Make sure you have `micromamba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_ installed.
 
 Execute the following steps on the commandline:
 
 .. code-block:: console
 
-    conda create -y -n polarityjam python=3.8
-    conda activate polarityjam
+    micromamba create -y -n polarityjam python=3.8 -c conda-forge
+    micromamba activate polarityjam
     git clone https://github.com/polarityjam/polarityjam.git # via git or download via browser
     cd polarityjam
     pip install -e .
@@ -108,7 +96,7 @@ To get to know more about the statics continue reading or visit the :any:`Method
 Manual installation
 +++++++++++++++++++
 
-Make sure you have `conda <https://anaconda.com/>`_ installed.  Alternatively, you can also use
+Make sure you have `micromamba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_ installed.  Alternatively, you can also use
 micromamba. If you do so, replace ``conda`` with ``micromamba`` in the following commands.
 
 Execute the following steps on the commandline:
@@ -117,8 +105,8 @@ Execute the following steps on the commandline:
 
     git clone https://github.com/polarityjam/polarityjam-app.git # via git or download via browser
     cd polarityjam-app
-    conda env create -f polarityjam-app.yml
-    conda activate polarityjam-app
+    micromamba env create -f polarityjam-app.yml
+    micromamba activate polarityjam-app
     cd app
     Rscript app.R
 

@@ -12,6 +12,7 @@ Segmentation
 ++++++++++++
 
 Segmentation can currently be performed using the following methods:
+
 - Cellpose `cellpose <https://github.com/MouseLand/cellpose>`_
 - Segment Anything `segmentanything <https://segment-anything.com/>`_
 - Mesmer deepcell `mesmer deepcell <https://github.com/vanvalenlab/deepcell-tf/tree/master>`_
@@ -57,9 +58,14 @@ Other
 +++++
 
 Coding: `python <https://www.python.org/>`_ :raw-html:`<br />`
-Documentation: `sphinx <https://www.sphinx-doc.org/en/master/index.html>`_ :raw-html:`<br />`
+Documentation build: `sphinx <https://www.sphinx-doc.org/en/master/index.html>`_ :raw-html:`<br />`
+Documentation hosting: `readthedocs <https://readthedocs.org/>`_ :raw-html:`<br />`
 Calculations: `numpy <https://numpy.org/>`_ :raw-html:`<br />`
 Datasets: `pandas <https://pandas.pydata.org/>`_ :raw-html:`<br />`
 Plot: `matplotlib <https://matplotlib.org/>`_ and `cmocean <https://pypi.org/project/cmocean/>`_ :raw-html:`<br />`
 Logging: `python logging <https://docs.python.org/3/howto/logging.html>`_ :raw-html:`<br />`
 Testing: `python unittest <https://docs.python.org/3/library/unittest.html>`_ :raw-html:`<br />`
+Version control: `git <https://git-scm.com/>`_ :raw-html:`<br />`
+Continuous integration: `github actions <https://github.com/features/actions>`_ :raw-html:`<br />`
+Sketching: `inkscape <https://inkscape.org/>`_ :raw-html:`<br />`
+

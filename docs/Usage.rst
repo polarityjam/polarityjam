@@ -475,6 +475,6 @@ Hardware requirements are a minimum of 8GB RAM and 4 CPU cores.
 
 We tested our software on:
 
-macOS 12.7.4 (21H1123), Kernel Version: Darwin 21.6.0
-ubuntu 22.04.4 LTS, Kernel Version: 6.5.0-1018-azure
-Windows 10.0.20348 Build 2402 (without plot tests)
+* macOS 12.7.4 (21H1123), Kernel Version: Darwin 21.6.0
+* ubuntu 22.04.4 LTS, Kernel Version: 6.5.0-1018-azure
+* Windows 10.0.20348 Build 2402 (without plot tests)

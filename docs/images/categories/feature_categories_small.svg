@@ -2,13 +2,13 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="261.15945mm"
-   height="181.78883mm"
-   viewBox="0 0 261.15945 181.78883"
+   width="261.159mm"
+   height="200mm"
+   viewBox="0 0 261.15899 200"
    version="1.1"
    id="svg1"
    inkscape:version="1.3.1 (91b66b0, 2023-11-16)"
-   sodipodi:docname="feature_categories.svg"
+   sodipodi:docname="feature_categories_small.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -24,15 +24,15 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#505050"
      inkscape:document-units="mm"
-     inkscape:zoom="0.72693603"
-     inkscape:cx="432.6378"
-     inkscape:cy="273.75174"
-     inkscape:window-width="1846"
-     inkscape:window-height="1016"
-     inkscape:window-x="74"
-     inkscape:window-y="27"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="g8" />
+     inkscape:zoom="0.5140214"
+     inkscape:cx="268.47131"
+     inkscape:cy="330.72553"
+     inkscape:window-width="1452"
+     inkscape:window-height="752"
+     inkscape:window-x="272"
+     inkscape:window-y="153"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
   <defs
      id="defs1">
     <linearGradient
@@ -1053,7 +1053,7 @@
     <g
        id="g8"
        inkscape:label="B"
-       transform="matrix(0.35277777,0,0,0.35277777,-33.441561,-219.51883)">
+       transform="matrix(0.35277777,0,0,0.35277777,-33.322931,-210.57014)">
       <g
          id="g15"
          inkscape:label="topology"
@@ -1292,7 +1292,7 @@
                id="tspan14"
                style="stroke-width:1.37504"
                x="93.538956"
-               y="166.02176"></tspan></text>
+               y="166.02176" /></text>
         </g>
         <text
            id="text1765-20"

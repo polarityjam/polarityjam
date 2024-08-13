@@ -54,6 +54,7 @@ Welcome to polarityjam's documentation!
    notebooks/polarityjam-notebook_api.ipynb
    notebooks/polarityjam-notebook_seg.ipynb
    Methods
+   FAQs
    Contribute
    Cite
 

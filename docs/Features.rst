@@ -3,8 +3,9 @@ Features
 Polarity-JaM provides a wide range of features that can be extracted from your images. Depending on the input image
 and the configuration of the feature extraction, different features are calculated. Thereby the features can be
 categorized from two different viewpoints:
-- The target of the feature extraction (e.g. single cell, nucleus, organelle, junction, marker, marker nucleus, marker cytosol, cell neighborhood)
-- The category of the feature (e.g. identification, localization, polarity, morphology, topology)
+
+* The target of the feature extraction (e.g. single cell, nucleus, organelle, junction, marker, marker nucleus, marker cytosol, cell neighborhood)
+* The category of the feature (e.g. identification, localization, polarity, morphology, topology)
 
 Lets first look at the feature types before we dive into the individual features for each target.
 
@@ -16,10 +17,72 @@ Depending on your image and parameter configuration, the number of features may 
 Polarity-JaM extracts features based on the configured target, ensuring that all available feature categories are
 always extracted. These features can be organized into several categories:
 
-.. image:: images/features/feature_categories.svg
+.. image:: images/categories/feature_categories_small.svg
     :width: 800px
     :align: center
 
+
+Identification & Localization
+-----------------------------
+
+.. image:: images/categories/identification.svg
+    :width: 800px
+    :align: center
+
+Localization and identification features are used to identify and locate the object of interest in the image.
+These features are essential for the subsequent analysis of the image data.
+
+
+Morphology
+----------
+
+.. image:: images/categories/morphology.svg
+    :width: 800px
+    :align: center
+
+Morphological features characterize the shape and size of the object of interest.
+These can be further classified into geometric features, which describe the object's overall shape; structural features,
+which detail the internal structure; and ratio-based features,
+which involve calculations of various proportions.
+
+Polarity
+--------
+
+.. image:: images/categories/polarity.svg
+    :width: 800px
+    :align: center
+
+Polarity features characterize the orientation and asymmetry of the object
+of interest. Broadly, these can be divided into directional features,
+which describe the orientation of two objects relative to one another,
+and axial features, which define the orientation of an object relative to
+a reference axis. Additionally, predefined axial asymmetry features quantify
+an object's asymmetry or the asymmetry of its intensity relative to a
+reference axis by calculating proportions.
+
+
+Intensity
+---------
+
+.. image:: images/categories/intensity.svg
+    :width: 800px
+    :align: center
+
+Intensity features characterize the object's intensity and expression levels.
+The intensity within different regions can be summed, averaged, or compared using ratios or proportions.
+
+Topology
+--------
+
+
+.. image:: images/categories/topology.svg
+    :width: 800px
+    :align: center
+
+Topology features describe the spatial relationships between objects in an image. These features are useful for analyzing
+the distribution of objects and their interactions within the image.
+Specifically, we focus on the connectivity (neighborhood) and spatial
+arrangement properties of the objects.
 
 Targets
 -------
@@ -123,9 +186,9 @@ Target: Single cell
 +----------------------------+----------------+-----------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 | cell_perimeter             | morphology     | |cell_perimeter|            | The perimeter of the cell.                                                                                                             |
 +----------------------------+----------------+-----------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-| cell_circularity           | morphology     | |cell_circularity|          | Cell shape circularity computed from 4*pi*(area/perimeter^2), also see https://imagej.nih.gov/ij/plugins/circularity.html .            |
+| cell_circularity           | morphology     | |cell_circularity|          | Cell shape circularity computed from 4*pi*(area/perimeter^2), also see https://imagej.net/ij/plugins/circularity.html .                |
 +----------------------------+----------------+-----------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-| cell_shape_index           | morphology     | |cell_shape_index|          | Cell shape index computed from cell_perimeter / np.sqrt(cell_area), see for example https://doi.org/10.1038/nphys3471                  |
+| cell_shape_index           | morphology     | |cell_shape_index|          | Cell shape index computed from cell_perimeter / np.sqrt(cell_area), see for example https://doi.org/10.1038/nphys3471 .                |
 +----------------------------+----------------+-----------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -195,7 +258,7 @@ Target: Nucleus
 +-----------------------------------+----------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 | nuc_major_to_minor_ratio          | morphology     | |nuc_major_to_minor_ratio|     | Ratio between the major and the minor axis of the nucleus.                                                                                         |
 +-----------------------------------+----------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
-| nuc_circularity                   | morphology     | |nuc_circularity|              | Nucleus shape circularity computed from 4*pi*(area/perimeter^2), also see https://imagej.nih.gov/ij/plugins/circularity.html .                     |
+| nuc_circularity                   | morphology     | |nuc_circularity|              | Nucleus shape circularity computed from 4*pi*(area/perimeter^2), also see https://imagej.net/ij/plugins/circularity.html .                         |
 +-----------------------------------+----------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 | nuc_shape_index                   | morphology     | |nuc_shape_index|              | Nucleus shape index computed from cell_perimeter / np.sqrt(cell_area).                                                                             |
 +-----------------------------------+----------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+

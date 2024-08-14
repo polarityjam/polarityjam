@@ -18,15 +18,13 @@ image and should contain the segmentation labels with `0` indicating the backgro
 Please make sure your npy file has an item with the key `masks` that contains the segmentation labels.
 
 Here is a short code block to create a segmentation file:
-```python
-import numpy as np
+.. code-block:: python
+    import numpy as np
 
-# create a dummy mask
-masks = np.zeros((100, 100))
+    # create a dummy mask
+    masks = np.zeros((100, 100))
 
-np.save("path/to/your/seg.npy", {"masks": masks})
-
-```
+    np.save("path/to/your/seg.npy", {"masks": masks})
 
 How does such a segmentation file look?
 ---------------------------------------
@@ -34,15 +32,13 @@ You can look at an example `_seg.npy` file by first downloading our example data
 Extracting the zip file and looking at the `_seg.npy` files in the `data/golgi_nuclei/set1/` folder.
 
 Here is a short code block to load the segmentation file and visualize it:
-```python
-import numpy as np
-import matplotlib.pyplot as plt
+.. code-block:: python
+    import numpy as np
+    import matplotlib.pyplot as plt
 
-seg = np.load("path/to/your/seg.npy")
-plt.imshow(seg.item()["masks"])
-plt.show()
-
-```
+    seg = np.load("path/to/your/seg.npy")
+    plt.imshow(seg.item()["masks"])
+    plt.show()
 
 How to bring your own model?
 ----------------------------

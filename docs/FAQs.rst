@@ -17,6 +17,17 @@ image and should contain the segmentation labels with `0` indicating the backgro
 
 Please make sure your npy file has an item with the key `masks` that contains the segmentation labels.
 
+Here is a short code block to create a segmentation file:
+```python
+import numpy as np
+
+# create a dummy mask
+masks = np.zeros((100, 100))
+
+np.save("path/to/your/seg.npy", {"masks": masks})
+
+```
+
 How does such a segmentation file look?
 ---------------------------------------
 You can look at an example `_seg.npy` file by first downloading our example data `here <https://github.com/polarityjam/polarityjam/blob/main/src/polarityjam/test/resources/data.zip>`_.

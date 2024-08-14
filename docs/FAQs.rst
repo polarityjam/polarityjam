@@ -13,7 +13,25 @@ lives in the same folder as the images you want to process.
 So for example when your image is named `image.tif`, the segmentation file should be named `image_seg.npy`.
 
 The segmentation file should be a numpy array with the same shape as the
-image and should contain the segmentation labels in increasing order.
+image and should contain the segmentation labels with `0` indicating the background.
+
+Please make sure your npy file has an item with the key `masks` that contains the segmentation labels.
+
+How does such a segmentation file look?
+---------------------------------------
+You can look at an example `_seg.npy` file by first downloading our example data `here <https://github.com/polarityjam/polarityjam/blob/main/src/polarityjam/test/resources/data.zip>`_.
+Extracting the zip file and looking at the `_seg.npy` files in the `data/golgi_nuclei/set1/` folder.
+
+Here is a short code block to load the segmentation file and visualize it:
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+seg = np.load("path/to/your/seg.npy")
+plt.imshow(seg.item()["masks"])
+plt.show()
+
+```
 
 How to bring your own model?
 ----------------------------
@@ -61,6 +79,8 @@ A key file is a CSV file that defines the data structure of the input.
 It enables data migration without modifying the CSV itself, as the file paths
 are relative to a specified root folder (e.g., inputpath) that you provide
 along with the key file during input.
+
+The key file can be used with the `polarityjam` CLI option `run-key`.
 
 How does a key file look?
 -------------------------

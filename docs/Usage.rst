@@ -366,6 +366,13 @@ The corresponding output folder structure would be: ::
 .. warning::
     Using OS specific paths in the ``key-file.csv`` might hurt reproducibility! (e.g. windows paths are different than unix paths!)
 
+
+Napari Plugin
+-------------
+
+We are working on a short video here. Hang in tight.
+
+
 Web app
 --------
 

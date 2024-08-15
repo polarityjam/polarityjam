@@ -23,7 +23,7 @@ always extracted. These features can be organized into several categories:
 
 
 Type: Identification & Localization
------------------------------
+-----------------------------------
 
 .. image:: images/categories/identification.svg
     :width: 800px
@@ -34,7 +34,7 @@ These features are essential for the subsequent analysis of the image data.
 
 
 Type: Morphology
-----------
+----------------
 
 .. image:: images/categories/morphology.svg
     :width: 800px
@@ -46,7 +46,7 @@ which detail the internal structure; and ratio-based features,
 which involve calculations of various proportions.
 
 Type: Polarity
---------
+--------------
 
 .. image:: images/categories/polarity.svg
     :width: 800px
@@ -62,7 +62,7 @@ reference axis by calculating proportions.
 
 
 Type: Intensity
----------
+---------------
 
 .. image:: images/categories/intensity.svg
     :width: 800px
@@ -72,7 +72,7 @@ Intensity features characterize the object's intensity and expression levels.
 The intensity within different regions can be summed, averaged, or compared using ratios or proportions.
 
 Type: Topology
---------
+--------------
 
 
 .. image:: images/categories/topology.svg
@@ -87,33 +87,69 @@ arrangement properties of the objects.
 Targets
 -------
 
-The following shows how to extract the features for different targets and what configuration is required.:
+We offer features for extracting various targets and their combinations.
+The image below illustrates the different targets.
+
+.. image:: images/targets/targets_horizontal_large.svg
+    :width: 800px
+    :align: center
+
+
+
+The following demonstrates how to extract features from a multichannel image for different targets and the required configuration.
 
 .. image:: images/features/multichannel_image.svg
     :width: 800px
     :align: center
 
-+----------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Target               | Required configuration                               | Description                                                                                                                                                         |
-+======================+======================================================+=====================================================================================================================================================================+
-| single cell          | segmentation                                         | The general features extracted from the image.                                                                                                                      |
-+----------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| nucleus              | segmentation + nucleus channel                       | All features belonging to the nucleus of the cell.                                                                                                                  |
-+----------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| organelle            | segmentation + organelle + nucleus channel           | All features belonging to the organelle of a cell.                                                                                                                  |
-+----------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| junction             | segmentation + junction channel                      | All features belonging to the junctions of a cell                                                                                                                   |
-+----------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| marker               | segmentation + expression marker channel             | All features belonging to the expression marker                                                                                                                     |
-+----------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| marker nucleus       |  segmentation + expression marker + nucleus channel  | All features belonging to the expression marker and nucleus                                                                                                         |
-+----------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| marker cytosol       | segmentation + expression marker + nucleus channel   | All features belonging to the expression marker and cell without nucleus                                                                                            |
-+----------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| cell neighborhood    | segmentation + FOI                                   | Statistical properties of a feature of interest (FOI). Includes neighborhood statistics. Default FOI is "area".                                                     |
-+----------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| group                | segmentation + FOI                                   | Group properties. Image wise. Includes Morans I correlation analysis of the feature of interest (FOI). Default FOI is "area"                                        |
-+----------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+.. |cell| image:: images/targets/cell.svg
+    :width: 200px
+
+.. |nucleus| image:: images/targets/nucleus.svg
+    :width: 200px
+
+.. |organelle| image:: images/targets/organelle.svg
+    :width: 200px
+
+.. |junction| image:: images/targets/junction.svg
+    :width: 200px
+
+.. |marker| image:: images/targets/marker.svg
+    :width: 200px
+
+.. |marker_nuc| image:: images/targets/marker_nucleus.svg
+    :width: 200px
+
+.. |marker_cyt| image:: images/targets/marker_cytosol.svg
+    :width: 200px
+
+.. |cell_neighborhood| image:: images/targets/neighborhood.svg
+    :width: 200px
+
+.. |group| image:: images/targets/group.svg
+    :width: 200px
+
++----------------------+------------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Target               | _______Sketch_______   | Required configuration                               | Description                                                                                                                                                         |
++======================+========================+======================================================+=====================================================================================================================================================================+
+| single cell          | |cell|                 | segmentation                                         | The general features extracted from the image.                                                                                                                      |
++----------------------+------------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| nucleus              | |nucleus|              | segmentation + nucleus channel                       | All features belonging to the nucleus of the cell.                                                                                                                  |
++----------------------+------------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| organelle            | |organelle|            | segmentation + organelle + nucleus channel           | All features belonging to the organelle of a cell.                                                                                                                  |
++----------------------+------------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| junction             | |junction|             | segmentation + junction channel                      | All features belonging to the junctions of a cell                                                                                                                   |
++----------------------+------------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| marker               | |marker|               | segmentation + expression marker channel             | All features belonging to the expression marker                                                                                                                     |
++----------------------+------------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| marker nucleus       | |marker_nuc|           |  segmentation + expression marker + nucleus channel  | All features belonging to the expression marker and nucleus                                                                                                         |
++----------------------+------------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| marker cytosol       | |marker_cyt|           | segmentation + expression marker + nucleus channel   | All features belonging to the expression marker and cell without nucleus                                                                                            |
++----------------------+------------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| cell neighborhood    | |cell_neighborhood|    | segmentation + FOI                                   | Statistical properties of a feature of interest (FOI). Includes neighborhood statistics. Default FOI is "area".                                                     |
++----------------------+------------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| group                | |group|                | segmentation + FOI                                   | Group properties. Image wise. Includes Morans I correlation analysis of the feature of interest (FOI). Default FOI is "area"                                        |
++----------------------+------------------------+------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
 .. note::

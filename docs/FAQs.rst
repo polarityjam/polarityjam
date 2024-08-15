@@ -18,7 +18,7 @@ image and should contain the segmentation labels with `0` indicating the backgro
 Please make sure your npy file has an item with the key `masks` that contains the segmentation labels.
 
 Here is a short code block to create a segmentation file:
-.. code-block:: python
+.. code-block::
     import numpy as np
 
     # create a dummy mask
@@ -32,7 +32,7 @@ You can look at an example `_seg.npy` file by first downloading our example data
 Extracting the zip file and looking at the `_seg.npy` files in the `data/golgi_nuclei/set1/` folder.
 
 Here is a short code block to load the segmentation file and visualize it:
-.. code-block:: python
+.. code-block::
     import numpy as np
     import matplotlib.pyplot as plt
 
@@ -69,6 +69,7 @@ Make sure you load first before you change the parameters manually.
 How does a parameter file look?
 -------------------------------
 You can find our default parameter file `here: <https://github.com/polarityjam/polarityjam/blob/main/src/polarityjam/utils/resources/parameters.yml>`_.
+
 You find the segmentation parameter file for the algorithms we support here:
 
 - `cellpose <https://github.com/polarityjam/polarityjam/blob/main/src/polarityjam/segmentation/cellpose.yml>`_

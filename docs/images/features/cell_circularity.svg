@@ -9,7 +9,7 @@
    id="svg1192"
    inkscape:version="1.3.1 (91b66b0, 2023-11-16)"
    sodipodi:docname="cell_circularity.svg"
-   inkscape:export-filename="cell-major-axis.pdf"
+   inkscape:export-filename="cell_circularity.pdf"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96"
    xml:space="preserve"
@@ -295,7 +295,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="4.2379852"
-     inkscape:cx="80.344782"
+     inkscape:cx="80.108822"
      inkscape:cy="36.573983"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -304,11 +304,11 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:window-width="1846"
-     inkscape:window-height="1016"
-     inkscape:window-x="74"
-     inkscape:window-y="27"
-     inkscape:window-maximized="1"
+     inkscape:window-width="1452"
+     inkscape:window-height="752"
+     inkscape:window-x="99"
+     inkscape:window-y="114"
+     inkscape:window-maximized="0"
      inkscape:showpageshadow="0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#505050" /><metadata
@@ -383,7 +383,7 @@
        id="text6"><tspan
          sodipodi:role="line"
          id="tspan6"
-         style="stroke-width:0.475"></tspan></text><path
+         style="stroke-width:0.475" /></text><path
        id="path10772-6"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:442.279px;line-height:125%;font-family:'Linux Libertine G';-inkscape-font-specification:'Linux Libertine G';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.02631px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 69.334353,41.942802 0.05673,0.06167 q -0.133193,0.283653 -0.463712,0.283653 h -0.254052 q -0.0148,0.182525 -0.0148,1.287541 0,0.160326 0.037,0.234323 0.03947,0.074 0.125795,0.074 0.246655,0 0.453846,-0.207191 0.06907,0.0074 0.09126,0.0814 -0.108528,0.145527 -0.283654,0.273787 -0.172658,0.128261 -0.332984,0.128261 -0.239255,0 -0.325585,-0.108529 -0.08387,-0.110994 -0.08387,-0.404514 0,-0.582107 0.01973,-1.359071 h -0.626504 q 0,0.947156 -0.15786,1.410868 -0.155393,0.461246 -0.517976,0.461246 -0.0888,0 -0.143061,-0.04193 -0.05427,-0.04193 -0.05427,-0.128261 0,-0.07153 0.05427,-0.128261 0.05673,-0.0592 0.152927,-0.08386 0.05673,-0.01233 0.0888,-0.02467 0.03453,-0.01233 0.08387,-0.05179 0.04933,-0.03947 0.07647,-0.09866 0.02713,-0.0592 0.06167,-0.167725 0.03453,-0.108529 0.0518,-0.258989 0.01726,-0.150459 0.0296,-0.374915 0.01233,-0.224457 0.01233,-0.513044 h -0.09126 q -0.189925,0 -0.305854,0.09126 -0.113461,0.09126 -0.180058,0.305854 -0.04193,0.0148 -0.07893,0.0049 -0.037,-0.01233 -0.04193,-0.0444 0.01233,-0.09866 0.04193,-0.189925 0.0296,-0.09373 0.08387,-0.187458 0.05673,-0.0962 0.130727,-0.165259 0.07647,-0.07153 0.189925,-0.115928 0.113462,-0.04439 0.251588,-0.04439 z"

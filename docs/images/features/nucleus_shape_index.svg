@@ -9,7 +9,7 @@
    id="svg1192"
    inkscape:version="1.3.1 (91b66b0, 2023-11-16)"
    sodipodi:docname="nucleus_shape_index.svg"
-   inkscape:export-filename="cell-major-axis.pdf"
+   inkscape:export-filename="nucleus_shape_index.pdf"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96"
    xml:space="preserve"
@@ -295,7 +295,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="4.2379852"
-     inkscape:cx="65.597208"
+     inkscape:cx="65.479228"
      inkscape:cy="26.427652"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -331,7 +331,7 @@
        id="text6"><tspan
          sodipodi:role="line"
          id="tspan6"
-         style="stroke-width:0.475"></tspan></text><path
+         style="stroke-width:0.475" /></text><path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.39185;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 77.883899,44.667852 h 3.317176 l 1.197713,5.962585 3.010037,-12.73955 12.999867,0.0128"
        id="path3427"

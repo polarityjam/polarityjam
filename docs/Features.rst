@@ -98,7 +98,7 @@ The image below illustrates the different targets.
 
 The following demonstrates how to extract features from a multichannel image for different targets and the required configuration.
 
-.. image:: images/features/multichannel_image.svg
+.. image:: images/targets/multichannel_image.svg
     :width: 800px
     :align: center
 

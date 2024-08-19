@@ -248,7 +248,7 @@ class PropertiesCollection:
         )
         self.dataset.at[
             self._index, "cell_cue_direction_asymmetry"
-        ] = sc_props.cell_asymmetry
+        ] = sc_props.cell_cue_direction_asymmetry
         self.dataset.at[
             self._index, "center_distance_entropy"
         ] = sc_props.center_distance_entropy

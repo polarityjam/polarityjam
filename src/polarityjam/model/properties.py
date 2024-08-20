@@ -185,6 +185,10 @@ class SingleCellNucleusProps(SingleInstanceProps):
     @property
     def nuc_length_to_width_ratio(self):
         """Return the major to minor ratio of the nucleus."""
+        if self.minor_axis_length == 0:
+            get_logger().warning("Warning: Minor axis length is zero.", stacklevel=2)
+            return np.inf
+
         return self.major_axis_length / self.minor_axis_length
 
     @property

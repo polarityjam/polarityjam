@@ -85,9 +85,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.9967081"
-     inkscape:cx="65.905652"
-     inkscape:cy="43.714635"
+     inkscape:zoom="5.9934162"
+     inkscape:cx="79.921031"
+     inkscape:cy="48.052728"
      inkscape:document-units="mm"
      inkscape:current-layer="g1"
      showgrid="false"
@@ -142,25 +142,13 @@
            inkscape:connector-curvature="0" />
       </g>
       <path
-         id="path1"
-         style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.325553;stroke-linecap:round;stroke-miterlimit:8;stroke-dasharray:none"
-         d="m 96.802008,44.956238 a 2.4561822,2.5628477 10 0 1 0.0283,1.029529 2.4561822,2.5628477 10 0 1 -0.747941,1.426695 l 0.344531,0.128179 a 2.7893485,2.9104826 10 0 0 0.731192,-1.497076 2.7893485,2.9104826 10 0 0 -0.0037,-1.025027 z" />
-      <text
-         xml:space="preserve"
-         style="font-size:3.76901px;line-height:1;font-family:Sans;-inkscape-font-specification:Sans;text-align:center;text-anchor:middle;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.14156;stroke-linecap:round;stroke-miterlimit:8;stroke-dasharray:none"
-         x="105.00692"
-         y="30.646132"
-         id="text1"
-         transform="rotate(9.9999995)"><tspan
-           sodipodi:role="line"
-           id="tspan1"
-           style="stroke-width:0.14156"
-           x="105.00692"
-           y="30.646132">°</tspan></text>
-      <path
          id="path2"
          style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.518564;stroke-linecap:round;stroke-miterlimit:8;stroke-dasharray:none"
-         d="M 83.677941 42.645139 L 100.97765 49.305113 L 101.18459 48.793237 L 86.780201 43.248029 L 83.677941 42.645139 z "
+         d="m 85.442479,42.817798 -17.299703,-6.659974 -0.206951,0.511872 14.404384,5.545208 z" />
+      <path
+         id="path1"
+         style="fill:#ff0000;stroke-width:0.391146;stroke-linecap:round"
+         d="M 85.826721 35.317882 A 7.9792206 7.9792206 0 0 0 77.151733 40.010903 L 77.587929 40.087817 A 7.5476168 7.5476168 0 0 1 85.751682 35.743452 A 7.5476168 7.5476168 0 0 1 91.923703 44.154967 L 92.349273 44.230006 A 7.9792206 7.9792206 0 0 0 85.826721 35.317882 z "
          transform="translate(1.0625153e-6)" />
       <path
          style="fill:none;stroke:#000000;stroke-width:0.27352432;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Triangle);stroke-dasharray:none"
@@ -177,6 +165,18 @@
          cy="27.466742"
          r="0.76576495"
          transform="rotate(9.9999997)" />
+      <text
+         xml:space="preserve"
+         style="font-size:5.62277px;line-height:1.25;font-family:Sans;-inkscape-font-specification:Sans;text-align:center;text-anchor:middle;fill:#ff0000;stroke-width:0.391633;stroke-linecap:round"
+         x="82.123154"
+         y="21.927181"
+         id="text2"
+         transform="rotate(9.9999997)"><tspan
+           sodipodi:role="line"
+           id="tspan2"
+           style="fill:#ff0000;stroke-width:0.391633"
+           x="82.123154"
+           y="21.927181">Φ</tspan></text>
     </g>
   </g>
 </svg>

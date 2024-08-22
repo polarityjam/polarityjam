@@ -67,9 +67,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="34.857383"
-     inkscape:cx="17.5716"
-     inkscape:cy="10.901564"
+     inkscape:zoom="8.7143458"
+     inkscape:cx="16.63923"
+     inkscape:cy="3.3278459"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -145,21 +145,20 @@
        style="fill:none;stroke:#000000;stroke-width:0.0742979px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker3)"
        d="m 57.438136,21.590532 2e-6,5.298472"
        id="path859-8" />
-    <text
-       xml:space="preserve"
-       style="font-size:1.45592px;line-height:1;font-family:Sans;-inkscape-font-specification:Sans;text-align:center;text-anchor:middle;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.0546829;stroke-linecap:round;stroke-miterlimit:8;stroke-dasharray:none"
-       x="59.933113"
-       y="-22.91995"
-       id="text1"
-       transform="scale(1,-1)"><tspan
-         sodipodi:role="line"
-         id="tspan1"
-         style="stroke-width:0.0546829"
-         x="59.933113"
-         y="-22.91995">°</tspan></text>
     <path
        id="path2"
        style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.11807;stroke-linecap:round;stroke-miterlimit:8;stroke-dasharray:none"
        d="m 60.833794,22.802467 -3.395658,1.879472 v 0.119373 l 0.06046,-0.02325 3.40031,-1.881538 z" />
+    <text
+       xml:space="preserve"
+       style="font-size:1.13727px;line-height:1.25;font-family:Sans;-inkscape-font-specification:Sans;text-align:center;text-anchor:middle;fill:#ff0000;stroke-width:0.0792122;stroke-linecap:round"
+       x="60.124508"
+       y="24.497383"
+       id="text2"><tspan
+         sodipodi:role="line"
+         id="tspan2"
+         style="fill:#ff0000;stroke-width:0.0792122"
+         x="60.124508"
+         y="24.497383">Φ</tspan></text>
   </g>
 </svg>

@@ -2,11 +2,28 @@
 
 import logging
 import sys
+import time
 from pathlib import Path
 
-from polarityjam.utils.io import get_doc_file_prefix
-
 LOGGER_NAME = "polarityjam"
+CALL_TIME = None
+
+
+def get_doc_file_prefix() -> str:
+    """Get the time when the program was called.
+
+    Returns:
+        Time when the program was called.
+
+    """
+    global CALL_TIME
+
+    if not CALL_TIME:
+        CALL_TIME = time.strftime("%Y%m%d_%H-%M-%S")
+
+    call_time = CALL_TIME
+
+    return "run_%s" % call_time
 
 
 def get_logger():

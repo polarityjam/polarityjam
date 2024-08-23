@@ -85,9 +85,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="5.9934162"
-     inkscape:cx="79.921031"
-     inkscape:cy="48.052728"
+     inkscape:zoom="2.9967081"
+     inkscape:cx="40.878189"
+     inkscape:cy="23.692665"
      inkscape:document-units="mm"
      inkscape:current-layer="g1"
      showgrid="false"
@@ -142,22 +142,19 @@
            inkscape:connector-curvature="0" />
       </g>
       <path
-         id="path2"
-         style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.518564;stroke-linecap:round;stroke-miterlimit:8;stroke-dasharray:none"
-         d="m 85.442479,42.817798 -17.299703,-6.659974 -0.206951,0.511872 14.404384,5.545208 z" />
-      <path
-         id="path1"
-         style="fill:#ff0000;stroke-width:0.391146;stroke-linecap:round"
-         d="M 85.826721 35.317882 A 7.9792206 7.9792206 0 0 0 77.151733 40.010903 L 77.587929 40.087817 A 7.5476168 7.5476168 0 0 1 85.751682 35.743452 A 7.5476168 7.5476168 0 0 1 91.923703 44.154967 L 92.349273 44.230006 A 7.9792206 7.9792206 0 0 0 85.826721 35.317882 z "
-         transform="translate(1.0625153e-6)" />
-      <path
          style="fill:none;stroke:#000000;stroke-width:0.27352432;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Triangle);stroke-dasharray:none"
          d="m 64.659366,39.347609 39.080604,6.890957"
          id="path859" />
       <path
          style="fill:none;stroke:#000000;stroke-width:0.257729px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker3)"
          d="M 86.318526,32.529197 83.13056,50.609099"
-         id="path859-8" />
+         id="path859-8"
+         transform="translate(1.0625153e-6)" />
+      <path
+         id="path1"
+         style="fill:#ff0000;stroke-width:0.302217;stroke-linecap:round"
+         d="m 85.451678,36.905236 a 6.1651024,6.1651024 0 0 0 -6.702684,3.626037 l 0.337025,0.05942 a 5.8316261,5.8316261 0 0 1 6.30768,-3.356651 5.8316261,5.8316261 0 0 1 4.76878,6.499113 l 0.328814,0.05798 a 6.1651024,6.1651024 0 0 0 -5.039615,-6.885906 z"
+         transform="translate(1.0625153e-6)" />
       <circle
          style="fill:#00ff00;fill-opacity:1;stroke:#000000;stroke-width:0.156708;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
          id="path883"
@@ -168,15 +165,15 @@
       <text
          xml:space="preserve"
          style="font-size:5.62277px;line-height:1.25;font-family:Sans;-inkscape-font-specification:Sans;text-align:center;text-anchor:middle;fill:#ff0000;stroke-width:0.391633;stroke-linecap:round"
-         x="82.123154"
-         y="21.927181"
+         x="85.585007"
+         y="22.444248"
          id="text2"
          transform="rotate(9.9999997)"><tspan
            sodipodi:role="line"
            id="tspan2"
            style="fill:#ff0000;stroke-width:0.391633"
-           x="82.123154"
-           y="21.927181">Φ</tspan></text>
+           x="85.585007"
+           y="22.444248">Φ</tspan></text>
     </g>
   </g>
 </svg>

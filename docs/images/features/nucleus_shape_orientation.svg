@@ -67,9 +67,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="8.1234933"
-     inkscape:cx="54.040791"
-     inkscape:cy="39.63812"
+     inkscape:zoom="4.0617467"
+     inkscape:cx="40.746017"
+     inkscape:cy="35.945127"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -129,10 +129,6 @@
          id="path668"
          inkscape:connector-curvature="0" />
     </g>
-    <path
-       id="rect1"
-       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.467159;stroke-linecap:round;stroke-miterlimit:8;stroke-opacity:0.991289"
-       d="m 79.697039,41.411529 10e-7,-0.541569 -5.477185,-2.191081 -0.171566,0.472323 z" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.124434px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker3)"
        d="m 79.69704,36.250215 4e-6,8.86385"

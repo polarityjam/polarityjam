@@ -150,7 +150,7 @@ def run():
         for file in files:
             output_name = segmentation(args, file, file)
 
-    print("Recent segmentation saved to:", output_name.resolve())
+    print("Recent segmentation saved to:", Path(output_name).resolve())
     return
 
 

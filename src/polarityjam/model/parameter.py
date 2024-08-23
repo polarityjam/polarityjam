@@ -262,7 +262,7 @@ def read_parameters(parameter_file: str) -> dict:
 def _load_dynamic_segmenter():
     m = import_module(Settings.dynamic_loading_prefix.value)
     path = Path(os.path.abspath(m.__file__)).parent
-    for yml_spec in list_files_recursively(path, endswith=".yml"):
+    for yml_spec in list_files_recursively(path, endswith=".yml", recursive=False):
         spec_dict = get_dict_from_yml(yml_spec)
         name = spec_dict["path"].split(".")[-1]
         value = "{}.{}".format(  # noqa: P101

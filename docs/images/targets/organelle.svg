@@ -29,12 +29,13 @@
      inkscape:zoom="2.0560856"
      inkscape:cx="177.76497"
      inkscape:cy="109.9176"
-     inkscape:window-width="1452"
-     inkscape:window-height="752"
-     inkscape:window-x="185"
-     inkscape:window-y="157"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="layer1" />
+     inkscape:window-width="1846"
+     inkscape:window-height="1016"
+     inkscape:window-x="74"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     showgrid="false" />
   <defs
      id="defs1" />
   <g
@@ -55,7 +56,7 @@
        inkscape:label="junction" />
     <path
        d="m 91.238515,119.86993 c 0.601441,-1.25772 0.624438,-3.01488 -0.145051,-4.17826 -0.442235,-0.66807 -1.458197,-0.66099 -2.176389,-1.01597 -1.202291,-0.59141 -2.241246,-1.66753 -3.567952,-1.85621 -1.768944,-0.25355 -3.766075,0.0578 -5.253753,1.04368 -0.6038,0.40037 -0.954052,1.12623 -1.218802,1.79843 -0.280673,0.72114 -0.529501,1.54135 -0.347891,2.29433 0.271826,1.12387 1.168089,2.0455 2.031922,2.8144 0.951103,0.84556 2.13983,1.42577 3.337401,1.85681 0.647436,0.23232 1.344987,0.45344 2.031337,0.37737 0.951689,-0.10554 1.810801,-0.65392 2.639847,-1.13271 0.962896,-0.55545 2.188178,-0.99769 2.669331,-2.00187 z"
-       style="opacity:0.1;fill:#83cfcb;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.353;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="opacity:0.3;fill:#83cfcb;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.353;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path478-9-4-2-3-9"
        inkscape:connector-curvature="0"
        inkscape:label="nucleus" />

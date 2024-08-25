@@ -60,6 +60,25 @@ a reference axis. Additionally, predefined axial asymmetry features quantify
 an object's asymmetry or the asymmetry of its intensity relative to a
 reference axis by calculating proportions.
 
+It is not straightforward to understand the difference of axial and directed polarity.
+Directed polarity can have values between 0 and 360 degrees, while axial polarity is a value between 0 and 180 degrees.
+
+See the following two illustrations to understand the difference:
+
+.. |cso| image:: images/gifs/cell_shape_orientation/output.gif
+    :width: 45%
+
+.. |ngo| image:: images/gifs/nuc_golgi_orientation/output.gif
+    :width: 45%
+
+.. rst-class:: center
+
+    axial polarity (left) and directed polarity (right)
+
+|cso| |ngo|
+
+
+
 
 Type: Intensity
 ---------------

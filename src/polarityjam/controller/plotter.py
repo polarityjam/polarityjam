@@ -1498,6 +1498,7 @@ class Plotter:
                 whether to close the figure after saving
 
         """
+        # todo: fix me
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
@@ -1530,8 +1531,13 @@ class Plotter:
 
         # add cell (and nuclei) eccentricity to the figure
         if inst_nuclei_mask is not None:
-            Plotter._add_cell_circularity(
-                fig, ax[0], im_junction, cell_eccentricity, self.params.alpha
+            Plotter._add_values_0_1(
+                fig,
+                ax[0],
+                im_junction,
+                cell_eccentricity,
+                self.params.alpha,
+                "eccentricity",
             )
             # get nuclei eccentricity
             nuclei_eccentricity_vec = collection.get_properties_by_img_name(img_name)[
@@ -1548,13 +1554,23 @@ class Plotter:
                 % str(np.min(nuclei_eccentricity.data))
             )
 
-            Plotter._add_nuclei_circularity(
-                fig, ax[1], im_junction, nuclei_eccentricity, self.params.alpha
+            Plotter._add_values_0_1(
+                fig,
+                ax[1],
+                im_junction,
+                nuclei_eccentricity,
+                self.params.alpha,
+                "eccentricity",
             )
 
         else:
-            Plotter._add_cell_circularity(
-                fig, ax, im_junction, cell_eccentricity, self.params.alpha
+            Plotter._add_values_0_1(
+                fig,
+                ax,
+                im_junction,
+                cell_eccentricity,
+                self.params.alpha,
+                "eccentricity",
             )
 
         # plot major and minor axis
@@ -1917,8 +1933,13 @@ class Plotter:
 
         # add cell (and nuclei) circularity to the figure
         if inst_nuclei_mask is not None:
-            Plotter._add_cell_circularity(
-                fig, ax[0], im_junction, cell_circularity, self.params.alpha
+            Plotter._add_values_0_1(
+                fig,
+                ax[0],
+                im_junction,
+                cell_circularity,
+                self.params.alpha,
+                "circularity",
             )
             # get nuclei circularity
             nuclei_circularity_vec = collection.get_properties_by_img_name(img_name)[
@@ -1933,16 +1954,21 @@ class Plotter:
                 "Minimal nuclei circularity: %s" % str(np.min(nuclei_circularity.data))
             )
 
-            Plotter._add_nuclei_circularity(
-                fig, ax[1], im_junction, nuclei_circularity, self.params.alpha
+            Plotter._add_values_0_1(
+                fig,
+                ax[1],
+                im_junction,
+                nuclei_circularity,
+                self.params.alpha,
+                "circularity",
             )
             # show cell outlines
             outline = self._masked_cell_outlines(im_junction, segmentation_mask)
             ax[0].imshow(outline, alpha=self.params.alpha_cell_outline, cmap="gray_r")
             ax[1].imshow(outline, alpha=self.params.alpha_cell_outline, cmap="gray_r")
         else:
-            Plotter._add_cell_circularity(
-                fig, ax, im_junction, cell_circularity, self.params.alpha
+            Plotter._add_values_0_1(
+                fig, ax, im_junction, cell_circularity, self.params.alpha, "circularity"
             )
 
             # show cell outlines
@@ -2351,8 +2377,13 @@ class Plotter:
             cell_cue_direction_asymmetry_vec
         )
 
-        Plotter._add_cell_circularity(
-            fig, ax, im_junction, cell_cue_direction_asymmetry, self.params.alpha
+        Plotter._add_values_0_1(
+            fig,
+            ax,
+            im_junction,
+            cell_cue_direction_asymmetry,
+            self.params.alpha,
+            "asymmetry",
         )
 
         # show cell outlines
@@ -3040,38 +3071,13 @@ class Plotter:
         ]
 
     @staticmethod
-    def _add_nuclei_circularity(
-        fig,
-        ax,
-        im_junction: BioMedicalChannel,
-        nuclei_circularity: BioMedicalInstanceSegmentationMask,
-        alpha,
-    ):
-        v_min = 0.0
-        v_max = 1.0
-        yticks = [0.0, 0.5, 1.0]
-
-        ax.imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
-
-        # show nuclei eccentricity everywhere but background label
-        cax_1 = ax.imshow(
-            nuclei_circularity.mask_background().data,
-            cmap=plt.cm.bwr,
-            vmin=v_min,
-            vmax=v_max,
-            alpha=alpha,
-        )
-
-        # colorbar
-        add_colorbar(fig, cax_1, ax, yticks, "circularity")
-
-    @staticmethod
-    def _add_cell_circularity(
+    def _add_values_0_1(
         fig,
         ax,
         im_junction: BioMedicalChannel,
         cell_circularity: BioMedicalInstanceSegmentationMask,
         alpha,
+        label,
     ):
         v_min = 0.0
         v_max = 1.0
@@ -3089,7 +3095,7 @@ class Plotter:
         )
 
         # colorbar
-        add_colorbar(fig, cax_0, ax, yticks, "circularity")
+        add_colorbar(fig, cax_0, ax, yticks, label)
 
     @staticmethod
     def _add_single_cell_length_to_width_ratio_axis(

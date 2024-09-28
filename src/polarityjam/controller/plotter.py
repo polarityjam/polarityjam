@@ -2310,6 +2310,86 @@ class Plotter:
 
         return fig, ax
 
+    def plot_asymmetry(
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
+    ):
+        """Plot the asymmetry of a specific image in the collection.
+
+        Args:
+            collection:
+                The collection containing the features
+            img_name:
+                The name of the image to plot
+            close:
+                whether to close the figure after saving
+
+        """
+        img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+        assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
+
+        im_junction = img.junction
+        segmentation_mask = img.segmentation.segmentation_mask_connected
+        pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
+
+        get_logger().info("Plotting: asymmetry")
+
+        # figure and axes
+        number_sub_figs = 1
+
+        fig, ax = self._get_figure(number_sub_figs)
+
+        # get cell_cue_direction_asymmetry
+        cell_cue_direction_asymmetry_vec = collection.get_properties_by_img_name(
+            img_name
+        )["cell_cue_direction_asymmetry"].values
+        cell_cue_direction_asymmetry = segmentation_mask.relabel(
+            cell_cue_direction_asymmetry_vec
+        )
+
+        Plotter._add_cell_circularity(
+            fig, ax, im_junction, cell_cue_direction_asymmetry, self.params.alpha
+        )
+
+        # show cell outlines
+        ax.imshow(
+            self._masked_cell_outlines(im_junction, segmentation_mask),
+            alpha=self.params.alpha_cell_outline,
+            cmap="gray_r",
+        )
+
+        plot_title = "cell asymmetry"
+        if self.params.show_statistics:
+            cell_cue_direction_asymmetry_val = cell_cue_direction_asymmetry_vec[
+                ~np.isnan(cell_cue_direction_asymmetry_vec)
+            ]
+            plot_title += "\n N: " + str(len(cell_cue_direction_asymmetry_val)) + ", "
+            plot_title += (
+                "mean: "
+                + str(np.round(np.mean(cell_cue_direction_asymmetry_val), 2))
+                + ", "
+            )
+            plot_title += "std: " + str(
+                np.round(np.std(cell_cue_direction_asymmetry_val), 2)
+            )
+
+        add_title(ax, plot_title, im_junction.data, self.params.show_graphics_axis)
+        axes = [ax]
+
+        self._finish_plot(
+            fig,
+            collection.get_out_path_by_name(img_name),
+            img_name,
+            "_asymmetry",
+            axes,
+            pixel_to_micron_ratio,
+            close,
+        )
+
     def plot_shape_orientation(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):

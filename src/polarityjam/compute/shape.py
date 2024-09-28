@@ -428,7 +428,7 @@ def get_shanon_estimated_pdf_center_distance(
         n_center_dist.reshape((-1, 1))
     )
 
-    resolution = 18
+    resolution = 14
 
     x = np.linspace(min(n_center_dist), max(n_center_dist), np.power(2, resolution))[
         :, np.newaxis

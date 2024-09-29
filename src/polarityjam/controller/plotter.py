@@ -1642,20 +1642,23 @@ class Plotter:
         if inst_nuclei_mask is not None:
             add_title(
                 ax[0],
-                "cell elongation",
+                "cell eccentricity",
                 im_junction.data,
                 self.params.show_graphics_axis,
             )
             add_title(
                 ax[1],
-                "nuclei elongation",
+                "nuclei eccentricity",
                 im_junction.data,
                 self.params.show_graphics_axis,
             )
             axes = [ax[0], ax[1]]
         else:
             add_title(
-                ax, "cell elongation", im_junction.data, self.params.show_graphics_axis
+                ax,
+                "cell eccentricity",
+                im_junction.data,
+                self.params.show_graphics_axis,
             )
             axes = [ax]
 
@@ -1663,7 +1666,7 @@ class Plotter:
             fig,
             collection.get_out_path_by_name(img_name),
             img_name,
-            "_elongation",
+            "_eccentricity",
             axes,
             pixel_to_micron_ratio,
             close,
@@ -1706,6 +1709,8 @@ class Plotter:
             inst_nuclei_mask = img.segmentation.segmentation_mask_nuclei
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
+
+        get_logger().info("Plotting: length to width ratio (elongation)")
 
         # figure and axes
         number_sub_figs = 1

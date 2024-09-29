@@ -39,6 +39,7 @@ plot_circularity: True
 plot_marker: True
 plot_ratio_method: True
 plot_shape_orientation: True
+plot_asymmetry: True
 plot_foi: True
 plot_processed_masks: True
 plot_sc_image: False

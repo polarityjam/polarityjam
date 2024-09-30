@@ -1731,7 +1731,7 @@ class Plotter:
             # plot the figure of interest
             m = np.copy(inst_nuclei_mask.data)
             for _, row in single_cell_dataset.iterrows():
-                LWR_val = row[("nucl_length_to_width_ratio")]
+                LWR_val = row[("nuc_length_to_width_ratio")]
                 label = row["label"]
 
                 m = np.where(inst_nuclei_mask.data == label, LWR_val, m)

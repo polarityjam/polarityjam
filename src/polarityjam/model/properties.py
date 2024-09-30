@@ -71,7 +71,7 @@ class SingleCellProps(SingleInstanceProps):
         return compute_angle_deg(self.cell_shape_orientation_rad)
 
     @property
-    def cell_major_to_minor_ratio(self):
+    def cell_length_to_width_ratio(self):
         """Return the major to minor ratio of the cell."""
         return self.major_axis_length / self.minor_axis_length
 
@@ -117,7 +117,7 @@ class SingleCellNucleusProps(SingleInstanceProps):
         return compute_angle_deg(self.nuc_shape_orientation_rad)
 
     @property
-    def nuc_major_to_minor_ratio(self):
+    def nuc_length_to_width_ratio(self):
         """Return the major to minor ratio of the nucleus."""
         return self.major_axis_length / self.minor_axis_length
 
@@ -250,7 +250,8 @@ class SingleCellMarkerProps(SingleInstanceProps):
             ).mask_background()
         else:
             warnings.warn(
-                "Warning: Number of partitions(2) does not match the number of created masks (1):"
+                "Warning: Number of partitions(2) does not match the number of created masks (1):",
+                stacklevel=2,
             )
             return np.nan
 
@@ -294,7 +295,8 @@ class SingleCellMarkerProps(SingleInstanceProps):
             ).mask_background()
         else:
             warnings.warn(
-                "Warning: Number of partitions(4) does not match the number of created masks (3):"
+                "Warning: Number of partitions(4) does not match the number of created masks (3):",
+                stacklevel=2,
             )
             return np.nan
 
@@ -543,7 +545,8 @@ class SingleCellJunctionProps:
             )
         else:
             warnings.warn(
-                "Warning: Number of partitions(2) does not match the number of created masks (1):"
+                "Warning: Number of partitions(2) does not match the number of created masks (1):",
+                stacklevel=2,
             )
             return np.nan
 
@@ -603,7 +606,8 @@ class SingleCellJunctionProps:
             )
         else:
             warnings.warn(
-                "Warning: Number of partitions(4) does not match the number of created masks (3):"
+                "Warning: Number of partitions(4) does not match the number of created masks (3):",
+                stacklevel=2,
             )
             return np.nan
 

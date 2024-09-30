@@ -1688,8 +1688,6 @@ class Plotter:
                 whether to close the figure after saving
 
         """
-        get_logger().info("Plotting: length to width ratio")
-
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"

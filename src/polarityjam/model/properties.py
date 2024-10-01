@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import warnings
 from typing import TYPE_CHECKING, List, Optional
-from warnings import deprecated  # type: ignore
 
 import numpy as np
 import skimage.measure
@@ -72,9 +71,11 @@ class SingleCellProps(SingleInstanceProps):
         return compute_angle_deg(self.cell_shape_orientation_rad)
 
     @property
-    @deprecated("Use cell_length_to_width_ratio instead.")
     def cell_major_to_minor_ratio(self):
         """Return the major to minor ratio of the cell."""
+        warnings.warn(
+            "Use cell_length_to_width_ratio instead.", DeprecationWarning, stacklevel=2
+        )
         return self.cell_length_to_width_ratio
 
     @property
@@ -124,9 +125,11 @@ class SingleCellNucleusProps(SingleInstanceProps):
         return compute_angle_deg(self.nuc_shape_orientation_rad)
 
     @property
-    @deprecated("Use nuc_length_to_width_ratio instead.")
     def nuc_major_to_minor_ratio(self):
         """Return the major to minor ratio of the nucleus."""
+        warnings.warn(
+            "Use nuc_length_to_width_ratio instead.", DeprecationWarning, stacklevel=2
+        )
         return self.nuc_length_to_width_ratio
 
     @property

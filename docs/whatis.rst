@@ -11,6 +11,7 @@ The `PolarityJaM <https://doi.org/10.1101/2024.01.24.577027>`_ suite is a softwa
 .. image:: images/sketch-data-analysis-organization-v5_.png
 
 At the heart lies your data that you wish to explore. That usually involves three steps:
+
 (1) extracting relevant features from your data,
 (2) analyzing the features and
 (3) visualizing the results.

@@ -96,8 +96,7 @@ To get to know more about the statics continue reading or visit the :any:`Method
 Manual installation
 +++++++++++++++++++
 
-Make sure you have `micromamba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_ installed.  Alternatively, you can also use
-micromamba. If you do so, replace ``conda`` with ``micromamba`` in the following commands.
+Make sure you have `micromamba <https://mamba.readthedocs.io/en/latest/user_guide/micromamba.html>`_ installed.
 
 Execute the following steps on the commandline:
 

@@ -53,6 +53,7 @@ Welcome to polarityjam's documentation!
    notebooks/polarityjam-notebook.ipynb
    notebooks/polarityjam-notebook_api.ipynb
    notebooks/polarityjam-notebook_seg.ipynb
+   notebooks/polarityjam-notebook_omero.ipynb
    Methods
    FAQs
    Contribute

@@ -15,9 +15,13 @@ So for example when your image is named `image.tif`, the segmentation file shoul
 The segmentation file should be a numpy array with the same shape as the
 image and should contain the segmentation labels with `0` indicating the background.
 
-Please make sure your npy file has an item with the key `masks` that contains the segmentation labels.
 
-Here is a short code block to create a segmentation file:
+You could create such a file by using the `cellpose GUI <https://cellpose.readthedocs.io/en/latest/index.html>`_ and saving the segmentation.
+
+When you bring your segmentation from other sources - or create them on your own, please make sure your npy file
+has an item with the key `masks` that contains the segmentation labels.
+
+Here is a short code block to create a dummy segmentation file:
 .. code-block::
     import numpy as np
 
@@ -25,6 +29,15 @@ Here is a short code block to create a segmentation file:
     masks = np.zeros((100, 100))
 
     np.save("path/to/your/seg.npy", {"masks": masks})
+
+Can I bring my own nuclei segmentation?
+---------------------------------------
+Yes, you can bring your own nuclei segmentation.
+To do so, you need to provide a `_seg_nuc.npy` file that contains the nuclei segmentation.
+It looks the same as the `_seg.npy` file but only contains the nuclei segmentation.
+
+You could create such a file by using the `cellpose GUI <https://cellpose.readthedocs.io/en/latest/index.html>`_ and saving the nuclei segmentation.
+
 
 How does such a segmentation file look?
 ---------------------------------------

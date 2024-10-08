@@ -2396,6 +2396,27 @@ class Plotter:
             cmap="gray_r",
         )
 
+        # add cue_direction orientation
+        params = collection.get_runtime_params_by_img_name(img_name)
+        for _, row in collection.get_properties_by_img_name(img_name).iterrows():
+            x0 = row["cell_X"]
+            y0 = row["cell_Y"]
+
+            # plot center of cell
+            ax.plot(x0, y0, ".b", markersize=5)
+
+            a = [x0, y0]
+            b = [x0 + row["cell_major_axis_length"], y0]  # lies horizontally
+            ground_line = LineString([a, b])
+
+            # rotate ground line based on cue_direction
+            ground_line = rotate(ground_line, params.cue_direction, origin=a)
+
+            d_lines, _ = get_divisor_lines(a, ground_line, 2)
+            for d_line in d_lines:
+                x1, y1 = (i[0] for i in d_line.boundary.centroid.coords.xy)
+                ax.plot((x0, x1), (y0, y1), "--r", linewidth=0.5)
+
         plot_title = "cell asymmetry"
         if self.params.show_statistics:
             cell_cue_direction_asymmetry_val = cell_cue_direction_asymmetry_vec[
@@ -2927,6 +2948,9 @@ class Plotter:
             if self.params.plot_elongation:
                 self.plot_length_to_width_ratio(collection, key, close)
                 # self.plot_eccentricity(collection, key, close)
+
+            if self.params.plot_asymmetry:
+                self.plot_asymmetry(collection, key, close)
 
             if self.params.plot_circularity:
                 self.plot_circularity(collection, key, close)

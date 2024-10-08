@@ -60,6 +60,7 @@ Other
 Coding: `python <https://www.python.org/>`_ :raw-html:`<br />`
 Documentation build: `sphinx <https://www.sphinx-doc.org/en/master/index.html>`_ :raw-html:`<br />`
 Documentation hosting: `readthedocs <https://readthedocs.org/>`_ :raw-html:`<br />`
+Jupyter notebooks: `jupyter <https://jupyter.org/>`_ :raw-html:`<br />`
 Calculations: `numpy <https://numpy.org/>`_ :raw-html:`<br />`
 Datasets: `pandas <https://pandas.pydata.org/>`_ :raw-html:`<br />`
 Plot: `matplotlib <https://matplotlib.org/>`_ and `cmocean <https://pypi.org/project/cmocean/>`_ :raw-html:`<br />`
@@ -68,4 +69,5 @@ Testing: `python unittest <https://docs.python.org/3/library/unittest.html>`_ :r
 Version control: `git <https://git-scm.com/>`_ :raw-html:`<br />`
 Continuous integration: `github actions <https://github.com/features/actions>`_ :raw-html:`<br />`
 Sketching: `inkscape <https://inkscape.org/>`_ :raw-html:`<br />`
+Data Management: `omero <https://www.openmicroscopy.org/omero/>`_ :raw-html:`<br />`
 

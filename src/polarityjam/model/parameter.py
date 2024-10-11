@@ -193,7 +193,7 @@ class PlotParameter(Parameter):
         self.plot_circularity = None
         self.plot_marker = None
         self.plot_ratio_method = None
-        self.plot_asymmetry = None
+        self.plot_symmetry = None
         self.plot_shape_orientation = None
         self.plot_foi = None
         self.plot_sc_image = None

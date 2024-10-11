@@ -38,6 +38,12 @@ It looks the same as the `_seg.npy` file but only contains the nuclei segmentati
 
 You could create such a file by using the `cellpose GUI <https://cellpose.readthedocs.io/en/latest/index.html>`_ and saving the nuclei segmentation.
 
+How can I correct my segmentation?
+----------------------------------
+When you have a segmentation file, you can correct it using the `cellpose GUI <https://cellpose.readthedocs.io/en/latest/index.html>`_.
+Where you can manually correct the segmentation and save the corrected segmentation, again as a `_seg.npy` file.
+
+You then proceed in polarityjam as if you brought your own segmentation.
 
 How does such a segmentation file look?
 ---------------------------------------

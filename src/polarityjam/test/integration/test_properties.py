@@ -8,6 +8,7 @@ from polarityjam import (
     RuntimeParameter,
 )
 from polarityjam.compute.corner import get_contour
+from polarityjam.compute.shape import mirror_along_cue_direction
 from polarityjam.model.image import SingleCellImage
 from polarityjam.test.test_common import TestCommon
 
@@ -324,3 +325,70 @@ class TestSingleCellProps(TestCommon):
             0.5,
             delta=0.05,
         )
+
+    def test_flow_asymmetry(self):
+        def iou(m0, m180):
+            return np.sum(np.logical_and(m0, m180)) / np.sum(np.logical_or(m0, m180))
+
+        cone = np.load(self.get_test_asymmetry("sc_cone.npy"))
+        r_round = np.load(self.get_test_asymmetry("sc_round.npy"))
+        oval = np.load(self.get_test_asymmetry("sc_oval.npy"))
+
+        cue_direction = 90
+
+        m0_cone = mirror_along_cue_direction(cone, cue_direction)
+        m180_cone = mirror_along_cue_direction(cone, cue_direction + 180)
+
+        m0_round = mirror_along_cue_direction(r_round, cue_direction)
+        m180_round = mirror_along_cue_direction(r_round, cue_direction + 180)
+
+        m0_ovale = mirror_along_cue_direction(oval, cue_direction)
+        m180_oval = mirror_along_cue_direction(oval, cue_direction + 180)
+
+        iou_cone = iou(m0_cone, m180_cone)
+        iou_round = iou(m0_round, m180_round)
+        iou_oval = iou(m0_ovale, m180_oval)
+
+        self.assertAlmostEqual(iou_cone, 0.62, delta=0.01)
+        self.assertGreater(iou_round, 0.99)
+        self.assertGreater(iou_oval, 0.97)
+
+        # change cue direction to 90 degrees
+        cue_direction = 0
+
+        m0_cone = mirror_along_cue_direction(cone, cue_direction)
+        m180_cone = mirror_along_cue_direction(cone, cue_direction + 180)
+
+        m0_round = mirror_along_cue_direction(r_round, cue_direction)
+        m180_round = mirror_along_cue_direction(r_round, cue_direction + 180)
+
+        m0_ovale = mirror_along_cue_direction(oval, cue_direction)
+        m180_oval = mirror_along_cue_direction(oval, cue_direction + 180)
+
+        iou_cone = iou(m0_cone, m180_cone)
+        iou_round = iou(m0_round, m180_round)
+        iou_oval = iou(m0_ovale, m180_oval)
+
+        self.assertAlmostEqual(iou_cone, 0.86, delta=0.01)
+        self.assertGreater(iou_round, 0.98)
+        self.assertGreater(iou_oval, 0.98)
+
+        # change cue direction to 45 degrees
+        cue_direction = 45
+
+        m0_cone = mirror_along_cue_direction(cone, cue_direction)
+        m180_cone = mirror_along_cue_direction(cone, cue_direction + 180)
+
+        m0_round = mirror_along_cue_direction(r_round, cue_direction)
+        m180_round = mirror_along_cue_direction(r_round, cue_direction + 180)
+
+        m0_ovale = mirror_along_cue_direction(oval, cue_direction)
+        m180_oval = mirror_along_cue_direction(oval, cue_direction + 180)
+
+        iou_cone = iou(m0_cone, m180_cone)
+        iou_round = iou(m0_round, m180_round)
+        iou_oval = iou(m0_ovale, m180_oval)
+
+        self.assertAlmostEqual(iou_cone, 0.37, delta=0.01)
+        self.assertGreater(iou_round, 0.99)
+        self.assertAlmostEqual(iou_oval, 0.37, delta=0.01)

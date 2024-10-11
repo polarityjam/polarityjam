@@ -2339,7 +2339,7 @@ class Plotter:
 
         return fig, ax
 
-    def plot_asymmetry(
+    def plot_symmetry(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
         """Plot the asymmetry of a specific image in the collection.
@@ -2365,7 +2365,7 @@ class Plotter:
         segmentation_mask = img.segmentation.segmentation_mask_connected
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
-        get_logger().info("Plotting: asymmetry")
+        get_logger().info("Plotting: symmetry")
 
         # figure and axes
         number_sub_figs = 1
@@ -2375,7 +2375,7 @@ class Plotter:
         # get cell_cue_direction_asymmetry
         cell_cue_direction_asymmetry_vec = collection.get_properties_by_img_name(
             img_name
-        )["cell_cue_direction_asymmetry"].values
+        )["cell_cue_direction_symmetry"].values
         cell_cue_direction_asymmetry = segmentation_mask.relabel(
             cell_cue_direction_asymmetry_vec
         )
@@ -2386,7 +2386,7 @@ class Plotter:
             im_junction,
             cell_cue_direction_asymmetry,
             self.params.alpha,
-            "asymmetry",
+            "symmetry",
         )
 
         # show cell outlines
@@ -2417,7 +2417,7 @@ class Plotter:
                 x1, y1 = (i[0] for i in d_line.boundary.centroid.coords.xy)
                 ax.plot((x0, x1), (y0, y1), "--r", linewidth=0.5)
 
-        plot_title = "cell asymmetry"
+        plot_title = "cell symmetry"
         if self.params.show_statistics:
             cell_cue_direction_asymmetry_val = cell_cue_direction_asymmetry_vec[
                 ~np.isnan(cell_cue_direction_asymmetry_vec)
@@ -2439,7 +2439,7 @@ class Plotter:
             fig,
             collection.get_out_path_by_name(img_name),
             img_name,
-            "_asymmetry",
+            "_symmetry",
             axes,
             pixel_to_micron_ratio,
             close,
@@ -2949,8 +2949,8 @@ class Plotter:
                 self.plot_length_to_width_ratio(collection, key, close)
                 # self.plot_eccentricity(collection, key, close)
 
-            if self.params.plot_asymmetry:
-                self.plot_asymmetry(collection, key, close)
+            if self.params.plot_symmetry:
+                self.plot_symmetry(collection, key, close)
 
             if self.params.plot_circularity:
                 self.plot_circularity(collection, key, close)

@@ -73,7 +73,7 @@ class SingleCellProps(SingleInstanceProps):
         super().__init__(single_cell_mask)
 
     @property
-    def cell_cue_direction_asymmetry(self):
+    def cell_cue_direction_symmetry(self):
         """Return the asymmetry of the cell."""
         mask_mirror_cue_direction_up = mirror_along_cue_direction(
             self.single_cell_centered_mask.data, (self.cue_direction + 90) % 360

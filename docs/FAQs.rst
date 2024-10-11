@@ -114,13 +114,17 @@ How does a key file look?
 
 A key file is a CSV file with the following columns:
 
-+--------------+-------------+
-| folder_name  | short_name  |
-+==============+=============+
-| set_1        | cond_1      |
-+--------------+-------------+
-| set_2        | cond_2      |
-+--------------+-------------+
++--------------+-------------+-----------+
+| folder_name  | short_name  | replicate |
++==============+=============+===========+
+| set_1        | cond_1      | 1         |
++--------------+-------------+-----------+
+| set_2        | cond_1      | 2         |
++--------------+-------------+-----------+
+| set_3        | cond_2      | 1         |
++--------------+-------------+-----------+
+| set_4        | cond_2      | 2         |
++--------------+-------------+-----------+
 
 Specify a short_name different to the folder_name to rename each folder in the output.
 

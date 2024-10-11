@@ -209,7 +209,7 @@ The following demonstrates how to extract features from a multichannel image for
 .. |cell_shape_index| image:: images/features/cell_shape_index.svg
     :width: 200px
 
-.. |cell_cue_d_asymmetry| image:: images/features/cell_cue_direction_asymmetry.svg
+.. |cell_cue_d_symmetry| image:: images/features/cell_cue_direction_symmetry.svg
     :width: 200px
 
 Target: Single cell
@@ -247,7 +247,7 @@ Target: Single cell
 +------------------------------+----------------+-----------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 | cell_shape_index             | morphology     | |cell_shape_index|          | Cell shape index computed from cell_perimeter / np.sqrt(cell_area), see for example https://doi.org/10.1038/nphys3471 .                |
 +------------------------------+----------------+-----------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
-| cell_cue_direction_asymmetry | polarity       | |cell_cue_d_asymmetry|      | The asymmetry of the cell in the direction of the cue. A value close to 1 indicates a high symmetry.                                   |
+| cell_cue_direction_symmetry  | polarity       | |cell_cue_d_symmetry|      | The symmetry of the cell in the direction of the cue. A value close to 1 indicates a high symmetry. A value close to 0 low symmetry     |
 +------------------------------+----------------+-----------------------------+----------------------------------------------------------------------------------------------------------------------------------------+
 
 

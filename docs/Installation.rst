@@ -40,6 +40,8 @@ To start polarityjam with napari viewer execute:
 
     polarityjam napari
 
+We provide a video tutorial on how to install and use the napari plugin on the usage section: :ref:`usage`.
+
 
 Automatic installation with album
 +++++++++++++++++++++++++++++++++

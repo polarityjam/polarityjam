@@ -3,6 +3,18 @@
 Usage
 =====
 
+Napari-Plugin
+-------------
+The following video shows how to install and use the polarityjam napari plugin:
+
+.. raw:: html
+
+    <a href="https://syncandshare.desy.de/index.php/s/MjiYQJ4WdLCiX3c" target="_blank">View Video</a>
+
+
+Unfortunately, embedding is not possible at the moment. Please click on the link above to view the video.
+
+
 Run options
 -----------
 To start the feature extraction process, make sure you followed the manual installation

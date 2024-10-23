@@ -19,10 +19,9 @@ from polarityjam.model.parameter import (
     RuntimeParameter,
     read_parameters,
 )
-from polarityjam.polarityjam_logging import get_logger
+from polarityjam.polarityjam_logging import get_doc_file_prefix, get_logger
 from polarityjam.utils.io import (
     create_path_recursively,
-    get_doc_file_prefix,
     get_tif_list,
     read_image,
     read_key_file,
@@ -274,7 +273,10 @@ def run_key(args):
 
     condition_cols = parameters["keyfile_condition_cols"]
     if len(condition_cols) == 0:
-        raise ValueError("No condition columns specified in parameter file! Please set 'keyfile_condition_cols' in the parameter file.")
+        raise ValueError(
+            "No condition columns specified in parameter file! "
+            "Please set 'keyfile_condition_cols' in the parameter file."
+        )
     unique_condition_identifier = condition_cols[0]
 
     # empty DF summarizing overall results
@@ -297,12 +299,8 @@ def run_key(args):
         merged_properties_df = pd.DataFrame()
 
         file_list = get_tif_list(input_path)
-        get_logger().info(
-            "Search for images in folder: %s" % (str(input_path))
-        )
-        get_logger().info(
-            "Image list: %s" % file_list
-        )
+        get_logger().info("Search for images in folder: %s" % (str(input_path)))
+        get_logger().info("Image list: %s" % file_list)
         for file_index, filepath in enumerate(file_list):
             filepath = Path(filepath)
             filename = filepath.stem + filepath.suffix
@@ -332,7 +330,9 @@ def run_key(args):
                 )
 
             merged_file = str(
-                output_path.joinpath("merged_table_%s" % row[unique_condition_identifier] + ".csv")
+                output_path.joinpath(
+                    "merged_table_%s" % row[unique_condition_identifier] + ".csv"
+                )
             )
             get_logger().info("Writing merged features to disk: %s" % merged_file)
             merged_properties_df.to_csv(merged_file, index=False)

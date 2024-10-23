@@ -2,8 +2,6 @@
 import glob
 import os
 import shutil
-import time
-import warnings
 import zipfile
 from pathlib import Path
 from typing import List, Optional, Union
@@ -12,6 +10,8 @@ import numpy as np
 import pandas as pd
 import skimage.io
 import yaml  # type: ignore
+
+from polarityjam.polarityjam_logging import get_logger
 
 # Global variable to save program call time.
 CALL_TIME = None
@@ -33,7 +33,7 @@ def read_image(filename: Union[Path, str]) -> np.ndarray:
         img_ = np.array([img_, img_])
 
     if img_.shape[0] < min(img_.shape[1], img_.shape[2]):
-        warnings.warn("Image has channels on first position. Swapping axis.")
+        get_logger().warning("Image has channels on first position. Swapping axis.")
         img = np.swapaxes(np.swapaxes(img_, 0, 2), 0, 1)
     else:
         img = img_
@@ -129,6 +129,7 @@ def list_files_recursively(
     root: Optional[Union[Path]] = None,
     relative: bool = False,
     endswith: Optional[str] = None,
+    recursive: bool = True,
 ) -> List[Path]:
     """List all files in a repository recursively."""
     if not root:
@@ -139,9 +140,10 @@ def list_files_recursively(
         cur_root = str(Path(cur_root))
 
         for d in dirs:
-            files_list += list_files_recursively(
-                Path(cur_root).joinpath(d), root, relative, endswith
-            )
+            if recursive:
+                files_list += list_files_recursively(
+                    Path(cur_root).joinpath(d), root, relative, endswith
+                )
         for fi in files:
             if endswith:
                 if not fi.endswith(endswith):
@@ -153,23 +155,6 @@ def list_files_recursively(
         break
 
     return files_list
-
-
-def get_doc_file_prefix() -> str:
-    """Get the time when the program was called.
-
-    Returns:
-        Time when the program was called.
-
-    """
-    global CALL_TIME
-
-    if not CALL_TIME:
-        CALL_TIME = time.strftime("%Y%m%d_%H-%M-%S")
-
-    call_time = CALL_TIME
-
-    return "run_%s" % call_time
 
 
 def copy(file: Union[str, Path], path_to: Union[str, Path]) -> Path:

@@ -13,3 +13,4 @@ estimated_nucleus_diameter: 30 # estimated nuclei diameter in pixels
 flow_threshold: 0.4 # default cellpose value
 cellprob_threshold: 0.0 # default cellpose value
 use_gpu: False
+niter: 0

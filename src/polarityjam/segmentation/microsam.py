@@ -1,5 +1,5 @@
 """Module holding the SAM segmentation solution."""
-from album.runner.api import get_args, get_cache_path, setup
+from album.runner.api import get_active_logger, get_args, get_cache_path, setup
 
 # DO NOT IMPORT ANYTHING OTHER THAN FROM RUNNER API HERE
 
@@ -44,6 +44,14 @@ def run():
 
     import os
 
+    # inline backend from jupyter notebook does ot work
+    _mpl_backend = os.environ.get("MPLBACKEND")
+    if "backend_inline" in _mpl_backend:
+        os.environ["MPLBACKEND"] = "qtagg"
+        get_active_logger().info(
+            f"Set MPLBACKEND from {_mpl_backend} to qtagg. Interactive needs to be disabled."
+        )
+
     import numpy as np
     import tifffile
     from micro_sam import instance_segmentation, util
@@ -84,6 +92,10 @@ def run():
     # save masks
     out_file = os.path.join(args.output_path, "mask.npy")
     np.save(out_file, instances_amg, allow_pickle=True)
+
+    if _mpl_backend is not None:
+        os.environ["MPLBACKEND"] = _mpl_backend
+        get_active_logger().info(f"Set MPLBACKEND back to {_mpl_backend}")
 
 
 setup(

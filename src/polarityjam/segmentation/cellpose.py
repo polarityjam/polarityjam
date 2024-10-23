@@ -115,7 +115,9 @@ class CellposeSegmenter(Segmenter):
         channel_cell_segmentation = img_parameter.channel_junction
         if self.params.channel_cell_segmentation != "":
             try:
-                channel_cell_segmentation = img_parameter.__getattribute__(self.params.channel_cell_segmentation)
+                channel_cell_segmentation = img_parameter.__getattribute__(
+                    self.params.channel_cell_segmentation
+                )
             except AttributeError:
                 get_logger().error(
                     "Channel %s does not exist! Wrong segmentation configuration!"
@@ -126,7 +128,9 @@ class CellposeSegmenter(Segmenter):
         channel_nuclei_segmentation = img_parameter.channel_nucleus
         if self.params.channel_nuclei_segmentation != "":
             try:
-                channel_nuclei_segmentation = img_parameter.__getattribute__(self.params.channel_nuclei_segmentation)
+                channel_nuclei_segmentation = img_parameter.__getattribute__(
+                    self.params.channel_nuclei_segmentation
+                )
             except AttributeError:
                 get_logger().error(
                     "Channel %s does not exist! Wrong segmentation configuration!"
@@ -139,7 +143,9 @@ class CellposeSegmenter(Segmenter):
                 % str(channel_cell_segmentation)
             )
             im_junction = img[:, :, channel_cell_segmentation]
-            params_prep_img.channel_junction = 0  # might be called junction channel, but content depends on config
+            params_prep_img.channel_junction = (
+                0  # might be called junction channel, but content depends on config
+            )
 
         if channel_nuclei_segmentation >= 0:
             get_logger().info(
@@ -147,7 +153,9 @@ class CellposeSegmenter(Segmenter):
                 % str(channel_nuclei_segmentation)
             )
             im_nucleus = img[:, :, channel_nuclei_segmentation]
-            params_prep_img.channel_nucleus = 1  # might be called nuclei channel, but content depends on config
+            params_prep_img.channel_nucleus = (
+                1  # might be called nuclei channel, but content depends on config
+            )
 
         if im_nucleus is not None:
             return np.array([im_junction, im_nucleus]), params_prep_img
@@ -189,12 +197,14 @@ class CellposeSegmenter(Segmenter):
             % seg_type
         )
         get_logger().info(
-            "Using model type '%s' with estimated cell diameter %s, cellprob_threshold %s and flow threshold %s"
+            "Using model type '%s' with estimated cell diameter %s, cellprob_threshold %s,"
+            " flow threshold %s, and number of iterations %s."
             % (
                 model_type,
                 estimated_cell_diameter,
                 self.params.cellprob_threshold,
                 self.params.flow_threshold,
+                self.params.niter,
             )
         )
         model = self._get_cellpose_model(cells)
@@ -212,6 +222,7 @@ class CellposeSegmenter(Segmenter):
                 diameter=estimated_cell_diameter,
                 flow_threshold=self.params.flow_threshold,
                 cellprob_threshold=self.params.cellprob_threshold,
+                niter=self.params.niter,
                 channels=channels,
             )
         else:
@@ -220,6 +231,7 @@ class CellposeSegmenter(Segmenter):
                 diameter=estimated_cell_diameter,
                 flow_threshold=self.params.flow_threshold,
                 cellprob_threshold=self.params.cellprob_threshold,
+                niter=self.params.niter,
                 channels=channels,
             )
 

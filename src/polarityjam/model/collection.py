@@ -181,8 +181,8 @@ class PropertiesCollection:
         self.dataset.at[self._index, "nuc_perimeter"] = nucleus_props.perimeter
         self.dataset.at[self._index, "nuc_eccentricity"] = nucleus_props.eccentricity
         self.dataset.at[
-            self._index, "nuc_major_to_minor_ratio"
-        ] = nucleus_props.nuc_major_to_minor_ratio
+            self._index, "nuc_length_to_width_ratio"
+        ] = nucleus_props.nuc_length_to_width_ratio
         self.dataset.at[self._index, "nuc_circularity"] = (
             4.0 * np.pi * nucleus_props.area / (nucleus_props.perimeter**2)
         )
@@ -233,8 +233,8 @@ class PropertiesCollection:
         ] = sc_props.minor_axis_length
         self.dataset.at[self._index, "cell_eccentricity"] = sc_props.eccentricity
         self.dataset.at[
-            self._index, "cell_major_to_minor_ratio"
-        ] = sc_props.cell_major_to_minor_ratio
+            self._index, "cell_length_to_width_ratio"
+        ] = sc_props.cell_length_to_width_ratio
         self.dataset.at[self._index, "cell_area"] = sc_props.area
         self.dataset.at[self._index, "cell_perimeter"] = sc_props.perimeter
         self.dataset.at[self._index, "cell_circularity"] = (
@@ -246,6 +246,12 @@ class PropertiesCollection:
         self.dataset.at[self._index, "cell_corner_points"] = json.dumps(
             sc_props.cell_corner_points.tolist()
         )
+        self.dataset.at[
+            self._index, "cell_cue_direction_symmetry"
+        ] = sc_props.cell_cue_direction_symmetry
+        self.dataset.at[
+            self._index, "center_distance_entropy"
+        ] = sc_props.center_distance_entropy
 
     def add_sc_organelle_props(self, organelle_props: SingleCellOrganelleProps):
         """Add specific single cell organelle properties to the dataset.

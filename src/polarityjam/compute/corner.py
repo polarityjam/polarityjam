@@ -1,5 +1,6 @@
+"""Module for corner detection in single cell images."""
 import math
-from typing import Tuple, List
+from typing import List, Tuple
 
 import cv2
 import numpy as np
@@ -16,7 +17,19 @@ def get_contour(sc_img: np.ndarray) -> np.ndarray:
         The contour coordinates of the single cell
 
     """
-    contours, _ = cv2.findContours(sc_img.astype(bool).astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+    contours, hierarchy = cv2.findContours(
+        sc_img.astype(bool).astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE
+    )
+    # hierarchy: [next, previous, first child, parent]
+    # The next index refers to the next contour in this contours hierarchy level, while the previous index
+    # refers to the previous contour in this contour's hierarchy level. The first child index refers to the first
+    # contour that is contained inside this contour. The parent index refers to the contour containing this contour.
+    # In all cases, a value of -1 indicates that there is no next, previous, first child,
+    # or parent contour, as appropriate.
+
+    # get only countours without children
+    contours = [c for c, h in zip(contours, hierarchy[0]) if h[2] == -1]
+
     idx_l = 0
     len_l = 0
     if len(contours) > 1:
@@ -65,7 +78,7 @@ def douglas_peucker(points: np.ndarray, epsilon: int) -> np.ndarray:
             points to be considered a corner.
 
     Returns:
-
+        The corner points of the shape.
     """
     if len(points) < 3:
         return points
@@ -82,10 +95,12 @@ def douglas_peucker(points: np.ndarray, epsilon: int) -> np.ndarray:
             dmax = d
 
     if dmax > epsilon:
-        rec_result1 = douglas_peucker(points[0:index + 1], epsilon)
+        rec_result1 = douglas_peucker(points[0 : index + 1], epsilon)  # noqa: E203
         rec_result2 = douglas_peucker(points[index:], epsilon)
 
-        result = np.concatenate((rec_result1[0:len(rec_result1) - 1], rec_result2), axis=0)
+        result = np.concatenate(
+            (rec_result1[0 : len(rec_result1) - 1], rec_result2), axis=0  # noqa: E203
+        )
 
         return result
 
@@ -94,7 +109,7 @@ def douglas_peucker(points: np.ndarray, epsilon: int) -> np.ndarray:
 
 
 def perpendicular_distance(p, p1, p2):
-    """Calculates the perpendicular distance between a point and a line.
+    """Calculate the perpendicular distance between a point and a line.
 
     Args:
         p:
@@ -114,6 +129,8 @@ def perpendicular_distance(p, p1, p2):
         slope = (p2[1] - p1[1]) / (p2[0] - p1[0])
         intercept = p1[1] - (slope * p1[0])
 
-        result = abs(slope * p[0] - p[1] + intercept) / math.sqrt(math.pow(slope, 2) + 1)
+        result = abs(slope * p[0] - p[1] + intercept) / math.sqrt(
+            math.pow(slope, 2) + 1
+        )
 
     return result

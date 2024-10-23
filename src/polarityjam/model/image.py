@@ -565,7 +565,12 @@ class SingleCellImage(AbstractBioMedicalImage):
             The properties of the single cell.
 
         """
-        return SingleCellProps(self.cell_mask, param.dp_epsilon)
+        return SingleCellProps(
+            self.cell_mask,
+            self.center_mask(self.cell_mask),
+            param.dp_epsilon,
+            param.cue_direction,
+        )
 
     def get_nucleus_properties(self, param: RuntimeParameter) -> SingleCellNucleusProps:
         """Get the properties of the single cell nucleus.

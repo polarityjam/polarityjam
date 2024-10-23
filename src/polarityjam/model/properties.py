@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, List, Optional
 import numpy as np
 import skimage.measure
 from scipy import ndimage as ndi
+from shapely.geometry import Polygon
 from skimage.measure._regionprops import RegionProperties
 
 from polarityjam.compute.compute import (
@@ -17,7 +18,12 @@ from polarityjam.compute.compute import (
     straight_line_length,
 )
 from polarityjam.compute.corner import get_contour, get_corner
+from polarityjam.compute.shape import (
+    get_shanon_estimated_pdf_center_distance,
+    mirror_along_cue_direction,
+)
 from polarityjam.model.masks import BioMedicalMask
+from polarityjam.polarityjam_logging import get_logger
 
 if TYPE_CHECKING:
     from polarityjam.model.image import BioMedicalChannel
@@ -53,10 +59,54 @@ class SingleInstanceProps(RegionProperties):
 class SingleCellProps(SingleInstanceProps):
     """Class representing the properties of a single cell."""
 
-    def __init__(self, single_cell_mask: BioMedicalMask, dp_epsilon: int):
+    def __init__(
+        self,
+        single_cell_mask: BioMedicalMask,
+        single_cell_centered_mask: BioMedicalMask,
+        dp_epsilon: int,
+        cue_direction: int,
+    ):
         """Initialize the properties with the given mask and intensity."""
         self.dp_epsilon = dp_epsilon
+        self.cue_direction = cue_direction
+        self.single_cell_centered_mask = single_cell_centered_mask
         super().__init__(single_cell_mask)
+
+    @property
+    def cell_cue_direction_symmetry(self):
+        """Return the asymmetry of the cell."""
+        mask_mirror_cue_direction_up = mirror_along_cue_direction(
+            self.single_cell_centered_mask.data, (self.cue_direction + 90) % 360
+        )
+        mask_mirror_cue_direction_down = mirror_along_cue_direction(
+            self.single_cell_centered_mask.data, (self.cue_direction + 270) % 360
+        )
+
+        # calculate IoU between mask_mirror_cue_direction_up and mask_mirror_cue_direction_down
+        iou = np.sum(
+            np.logical_and(mask_mirror_cue_direction_up, mask_mirror_cue_direction_down)
+        ) / np.sum(
+            np.logical_or(mask_mirror_cue_direction_up, mask_mirror_cue_direction_down)
+        )
+
+        return iou
+
+    @property
+    def center_distance_entropy(self):
+        """Return the entropy of the distance of the cell center to the cell border."""
+        contours = get_contour(self.single_cell_centered_mask.data)
+
+        pg = Polygon(contours)  # swaps x and y
+
+        pg_cent_a = int(pg.centroid.coords.xy[0][0])
+        pg_cent_b = int(pg.centroid.coords.xy[1][0])
+
+        origin = np.array([pg_cent_b, pg_cent_a], dtype="float")
+
+        # calculate distance of each pixel to the center
+        e = get_shanon_estimated_pdf_center_distance(origin, contours)
+
+        return e
 
     @property
     def cell_shape_orientation_rad(self):
@@ -135,6 +185,10 @@ class SingleCellNucleusProps(SingleInstanceProps):
     @property
     def nuc_length_to_width_ratio(self):
         """Return the major to minor ratio of the nucleus."""
+        if self.minor_axis_length == 0:
+            get_logger().warning("Warning: Minor axis length is zero.", stacklevel=2)
+            return np.inf
+
         return self.major_axis_length / self.minor_axis_length
 
     @property

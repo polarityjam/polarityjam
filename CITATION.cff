@@ -7,7 +7,7 @@ authors:
   - family-names: Giese
     given-names: Wolfgang
     orcid: https://orcid.org/0000-0003-0872-0929
-title: "PolarityJaM"
+title: "Polarity-JaM"
 abstract: A software package that lets you study cell polarity, junctions and morphology.
 license: MIT
 version: 0.1.6

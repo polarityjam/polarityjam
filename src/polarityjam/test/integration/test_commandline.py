@@ -7,8 +7,8 @@ from pathlib import Path
 import pandas as pd
 
 from polarityjam.argument_parsing import startup
+from polarityjam.polarityjam_logging import get_doc_file_prefix
 from polarityjam.test.test_common import TestCommon
-from polarityjam.utils.io import get_doc_file_prefix
 
 
 class TestIntegration(TestCommon):
@@ -58,7 +58,7 @@ class TestIntegration(TestCommon):
         self.assertAlmostEqual(df.shape[0], 97, delta=10)
 
         # number of features should not change
-        self.assertEqual(77, df.shape[1])
+        self.assertEqual(79, df.shape[1])
 
         # only one csv file in output
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))
@@ -89,8 +89,8 @@ class TestIntegration(TestCommon):
         self.assertAlmostEqual(99, df2.shape[0], delta=10)
 
         # number of features should not change
-        self.assertEqual(77, df1.shape[1])
-        self.assertEqual(77, df2.shape[1])
+        self.assertEqual(79, df1.shape[1])
+        self.assertEqual(79, df2.shape[1])
 
         # two csv file in output
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))
@@ -129,9 +129,9 @@ class TestIntegration(TestCommon):
         self.assertAlmostEqual(58, df3.shape[0], delta=7)
 
         # number of features should not change
-        self.assertEqual(72, df1.shape[1])
-        self.assertEqual(72, df2.shape[1])
-        self.assertEqual(72, df3.shape[1])
+        self.assertEqual(74, df1.shape[1])
+        self.assertEqual(74, df2.shape[1])
+        self.assertEqual(74, df3.shape[1])
         # three csv file in output
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))
         self.assertEqual(4, num_csv)
@@ -177,9 +177,9 @@ class TestIntegration(TestCommon):
         self.assertAlmostEqual(29, df3.shape[0], delta=4)
 
         # number of features should not change
-        self.assertEqual(51, df1.shape[1])
-        self.assertEqual(51, df2.shape[1])
-        self.assertEqual(51, df3.shape[1])
+        self.assertEqual(53, df1.shape[1])
+        self.assertEqual(53, df2.shape[1])
+        self.assertEqual(53, df3.shape[1])
 
         # three csv file in output
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))

@@ -1498,6 +1498,7 @@ class Plotter:
                 whether to close the figure after saving
 
         """
+        # todo: fix me
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
@@ -1530,8 +1531,13 @@ class Plotter:
 
         # add cell (and nuclei) eccentricity to the figure
         if inst_nuclei_mask is not None:
-            Plotter._add_cell_circularity(
-                fig, ax[0], im_junction, cell_eccentricity, self.params.alpha
+            Plotter._add_values_0_1(
+                fig,
+                ax[0],
+                im_junction,
+                cell_eccentricity,
+                self.params.alpha,
+                "eccentricity",
             )
             # get nuclei eccentricity
             nuclei_eccentricity_vec = collection.get_properties_by_img_name(img_name)[
@@ -1548,20 +1554,30 @@ class Plotter:
                 % str(np.min(nuclei_eccentricity.data))
             )
 
-            Plotter._add_nuclei_circularity(
-                fig, ax[1], im_junction, nuclei_eccentricity, self.params.alpha
+            Plotter._add_values_0_1(
+                fig,
+                ax[1],
+                im_junction,
+                nuclei_eccentricity,
+                self.params.alpha,
+                "eccentricity",
             )
 
         else:
-            Plotter._add_cell_circularity(
-                fig, ax, im_junction, cell_eccentricity, self.params.alpha
+            Plotter._add_values_0_1(
+                fig,
+                ax,
+                im_junction,
+                cell_eccentricity,
+                self.params.alpha,
+                "eccentricity",
             )
 
         # plot major and minor axis
         for _, row in collection.get_properties_by_img_name(img_name).iterrows():
             if inst_nuclei_mask is not None:
                 # plot orientation degree
-                Plotter._add_single_cell_major_minor_axis(
+                Plotter._add_single_cell_length_to_width_ratio_axis(
                     ax[0],
                     row["cell_X"],
                     row["cell_Y"],
@@ -1575,7 +1591,7 @@ class Plotter:
                 )
 
                 # plot orientation degree nucleus
-                Plotter._add_single_cell_major_minor_axis(
+                Plotter._add_single_cell_length_to_width_ratio_axis(
                     ax[1],
                     row["nuc_X"],
                     row["nuc_Y"],
@@ -1588,7 +1604,7 @@ class Plotter:
                     self.params.marker_size,
                 )
             else:
-                Plotter._add_single_cell_major_minor_axis(
+                Plotter._add_single_cell_length_to_width_ratio_axis(
                     ax,
                     row["cell_X"],
                     row["cell_Y"],
@@ -1626,20 +1642,23 @@ class Plotter:
         if inst_nuclei_mask is not None:
             add_title(
                 ax[0],
-                "cell elongation",
+                "cell eccentricity",
                 im_junction.data,
                 self.params.show_graphics_axis,
             )
             add_title(
                 ax[1],
-                "nuclei elongation",
+                "nuclei eccentricity",
                 im_junction.data,
                 self.params.show_graphics_axis,
             )
             axes = [ax[0], ax[1]]
         else:
             add_title(
-                ax, "cell elongation", im_junction.data, self.params.show_graphics_axis
+                ax,
+                "cell eccentricity",
+                im_junction.data,
+                self.params.show_graphics_axis,
             )
             axes = [ax]
 
@@ -1647,7 +1666,7 @@ class Plotter:
             fig,
             collection.get_out_path_by_name(img_name),
             img_name,
-            "_elongation",
+            "_eccentricity",
             axes,
             pixel_to_micron_ratio,
             close,
@@ -1655,7 +1674,7 @@ class Plotter:
 
         return fig, axes
 
-    def plot_length_width_ratio(
+    def plot_length_to_width_ratio(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
     ):
         """Plot the length to width ratio of cells (and nuclei) in a specific image in the collection.
@@ -1669,8 +1688,6 @@ class Plotter:
                 whether to close the figure after saving
 
         """
-        get_logger().info("Plotting: length to width ratio")
-
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
@@ -1691,6 +1708,8 @@ class Plotter:
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
+        get_logger().info("Plotting: length to width ratio (elongation)")
+
         # figure and axes
         number_sub_figs = 1
         if inst_nuclei_mask is not None:
@@ -1707,11 +1726,11 @@ class Plotter:
         if inst_nuclei_mask is not None:
             ax[0].imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
 
-            LWR_values = single_cell_dataset["cell_major_to_minor_ratio"]
+            LWR_values = single_cell_dataset["cell_length_to_width_ratio"]
             # plot the figure of interest
             m = np.copy(segmentation_mask.data)
             for _, row in single_cell_dataset.iterrows():
-                LWR_val = row["cell_major_to_minor_ratio"]
+                LWR_val = row["cell_length_to_width_ratio"]
                 label = row["label"]
 
                 m = np.where(segmentation_mask.data == label, LWR_val, m)
@@ -1727,11 +1746,11 @@ class Plotter:
 
             ax[1].imshow(im_junction.data, cmap=plt.cm.gray, alpha=1)
 
-            nuc_LWR_values = single_cell_dataset["nuc_major_to_minor_ratio"]
+            nuc_LWR_values = single_cell_dataset["nuc_length_to_width_ratio"]
             # plot the figure of interest
             m = np.copy(inst_nuclei_mask.data)
             for _, row in single_cell_dataset.iterrows():
-                LWR_val = row[("nuc_major_to_minor_ratio")]
+                LWR_val = row[("nuc_length_to_width_ratio")]
                 label = row["label"]
 
                 m = np.where(inst_nuclei_mask.data == label, LWR_val, m)
@@ -1762,11 +1781,11 @@ class Plotter:
         else:
             ax.imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
 
-            LWR_values = single_cell_dataset["cell_major_to_minor_ratio"]
+            LWR_values = single_cell_dataset["cell_length_to_width_ratio"]
             # plot the figure of interest
             m = np.copy(segmentation_mask.data)
             for _, row in single_cell_dataset.iterrows():
-                LWR_val = row["cell_major_to_minor_ratio"]
+                LWR_val = row["cell_length_to_width_ratio"]
                 label = row["label"]
 
                 m = np.where(segmentation_mask.data == label, LWR_val, m)
@@ -1791,14 +1810,14 @@ class Plotter:
         for _, row in collection.get_properties_by_img_name(img_name).iterrows():
             if inst_nuclei_mask is not None:
                 # plot orientation degree
-                Plotter._add_single_cell_major_minor_axis(
+                Plotter._add_single_cell_length_to_width_ratio_axis(
                     ax[0],
                     row["cell_X"],
                     row["cell_Y"],
                     row["cell_shape_orientation_rad"],
                     row["cell_major_axis_length"],
                     row["cell_minor_axis_length"],
-                    row["cell_major_to_minor_ratio"],
+                    row["cell_length_to_width_ratio"],
                     self.params.fontsize_text_annotations,
                     self.params.font_color,
                     self.params.marker_size,
@@ -1806,28 +1825,28 @@ class Plotter:
                 )
 
                 # plot orientation degree nucleus
-                Plotter._add_single_cell_major_minor_axis(
+                Plotter._add_single_cell_length_to_width_ratio_axis(
                     ax[1],
                     row["nuc_X"],
                     row["nuc_Y"],
                     row["nuc_shape_orientation_rad"],
                     row["nuc_major_axis_length"],
                     row["nuc_minor_axis_length"],
-                    row["nuc_major_to_minor_ratio"],
+                    row["cell_length_to_width_ratio"],
                     self.params.fontsize_text_annotations,
                     self.params.font_color,
                     self.params.marker_size,
                     decimals=1,
                 )
             else:
-                Plotter._add_single_cell_major_minor_axis(
+                Plotter._add_single_cell_length_to_width_ratio_axis(
                     ax,
                     row["cell_X"],
                     row["cell_Y"],
                     row["cell_shape_orientation_rad"],
                     row["cell_major_axis_length"],
                     row["cell_minor_axis_length"],
-                    row["cell_major_to_minor_ratio"],
+                    row["cell_length_to_width_ratio"],
                     self.params.fontsize_text_annotations,
                     self.params.font_color,
                     self.params.marker_size,
@@ -1917,8 +1936,13 @@ class Plotter:
 
         # add cell (and nuclei) circularity to the figure
         if inst_nuclei_mask is not None:
-            Plotter._add_cell_circularity(
-                fig, ax[0], im_junction, cell_circularity, self.params.alpha
+            Plotter._add_values_0_1(
+                fig,
+                ax[0],
+                im_junction,
+                cell_circularity,
+                self.params.alpha,
+                "circularity",
             )
             # get nuclei circularity
             nuclei_circularity_vec = collection.get_properties_by_img_name(img_name)[
@@ -1933,16 +1957,21 @@ class Plotter:
                 "Minimal nuclei circularity: %s" % str(np.min(nuclei_circularity.data))
             )
 
-            Plotter._add_nuclei_circularity(
-                fig, ax[1], im_junction, nuclei_circularity, self.params.alpha
+            Plotter._add_values_0_1(
+                fig,
+                ax[1],
+                im_junction,
+                nuclei_circularity,
+                self.params.alpha,
+                "circularity",
             )
             # show cell outlines
             outline = self._masked_cell_outlines(im_junction, segmentation_mask)
             ax[0].imshow(outline, alpha=self.params.alpha_cell_outline, cmap="gray_r")
             ax[1].imshow(outline, alpha=self.params.alpha_cell_outline, cmap="gray_r")
         else:
-            Plotter._add_cell_circularity(
-                fig, ax, im_junction, cell_circularity, self.params.alpha
+            Plotter._add_values_0_1(
+                fig, ax, im_junction, cell_circularity, self.params.alpha, "circularity"
             )
 
             # show cell outlines
@@ -1952,20 +1981,23 @@ class Plotter:
                 cmap="gray_r",
             )
 
-
         plot_title = "cell circularity"
         if self.params.show_statistics:
-            cell_circularity_values = collection.get_properties_by_img_name(
-                img_name
-            )["cell_circularity"].values
-            cell_circularity_values = cell_circularity_values[~np.isnan(cell_circularity_values)]
+            cell_circularity_values = collection.get_properties_by_img_name(img_name)[
+                "cell_circularity"
+            ].values
+            cell_circularity_values = cell_circularity_values[
+                ~np.isnan(cell_circularity_values)
+            ]
             plot_title += "\n N: " + str(len(cell_circularity_values)) + ", "
-            plot_title += "mean: " + str(np.round(np.mean(cell_circularity_values), 2)) + ", "
+            plot_title += (
+                "mean: " + str(np.round(np.mean(cell_circularity_values), 2)) + ", "
+            )
             plot_title += "std: " + str(np.round(np.std(cell_circularity_values), 2))
 
         # set title and ax limits
         if inst_nuclei_mask is not None:
-            
+
             add_title(
                 ax[0],
                 plot_title,
@@ -1978,10 +2010,16 @@ class Plotter:
                 cell_circularity_values = collection.get_properties_by_img_name(
                     img_name
                 )["nuc_circularity"].values
-                cell_circularity_values = cell_circularity_values[~np.isnan(cell_circularity_values)]
+                cell_circularity_values = cell_circularity_values[
+                    ~np.isnan(cell_circularity_values)
+                ]
                 plot_title += "\n N: " + str(len(cell_circularity_values)) + ", "
-                plot_title += "mean: " + str(np.round(np.mean(cell_circularity_values), 2)) + ", "
-                plot_title += "std: " + str(np.round(np.std(cell_circularity_values), 2))
+                plot_title += (
+                    "mean: " + str(np.round(np.mean(cell_circularity_values), 2)) + ", "
+                )
+                plot_title += "std: " + str(
+                    np.round(np.std(cell_circularity_values), 2)
+                )
 
             add_title(
                 ax[1],
@@ -1991,9 +2029,7 @@ class Plotter:
             )
             axes = [ax[0], ax[1]]
         else:
-            add_title(
-                ax, plot_title, im_junction.data, self.params.show_graphics_axis
-            )
+            add_title(ax, plot_title, im_junction.data, self.params.show_graphics_axis)
             axes = [ax]
 
         self._finish_plot(
@@ -2302,6 +2338,112 @@ class Plotter:
         )
 
         return fig, ax
+
+    def plot_symmetry(
+        self, collection: PropertiesCollection, img_name: str, close: bool = False
+    ):
+        """Plot the asymmetry of a specific image in the collection.
+
+        Args:
+            collection:
+                The collection containing the features
+            img_name:
+                The name of the image to plot
+            close:
+                whether to close the figure after saving
+
+        """
+        img = collection.get_image_by_img_name(img_name)
+        assert img.segmentation is not None, "Segmentation is not available"
+        assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
+
+        im_junction = img.junction
+        segmentation_mask = img.segmentation.segmentation_mask_connected
+        pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
+
+        get_logger().info("Plotting: symmetry")
+
+        # figure and axes
+        number_sub_figs = 1
+
+        fig, ax = self._get_figure(number_sub_figs)
+
+        # get cell_cue_direction_asymmetry
+        cell_cue_direction_asymmetry_vec = collection.get_properties_by_img_name(
+            img_name
+        )["cell_cue_direction_symmetry"].values
+        cell_cue_direction_asymmetry = segmentation_mask.relabel(
+            cell_cue_direction_asymmetry_vec
+        )
+
+        Plotter._add_values_0_1(
+            fig,
+            ax,
+            im_junction,
+            cell_cue_direction_asymmetry,
+            self.params.alpha,
+            "symmetry",
+        )
+
+        # show cell outlines
+        ax.imshow(
+            self._masked_cell_outlines(im_junction, segmentation_mask),
+            alpha=self.params.alpha_cell_outline,
+            cmap="gray_r",
+        )
+
+        # add cue_direction orientation
+        params = collection.get_runtime_params_by_img_name(img_name)
+        for _, row in collection.get_properties_by_img_name(img_name).iterrows():
+            x0 = row["cell_X"]
+            y0 = row["cell_Y"]
+
+            # plot center of cell
+            ax.plot(x0, y0, ".b", markersize=5)
+
+            a = [x0, y0]
+            b = [x0 + row["cell_major_axis_length"], y0]  # lies horizontally
+            ground_line = LineString([a, b])
+
+            # rotate ground line based on cue_direction
+            ground_line = rotate(ground_line, params.cue_direction, origin=a)
+
+            d_lines, _ = get_divisor_lines(a, ground_line, 2)
+            for d_line in d_lines:
+                x1, y1 = (i[0] for i in d_line.boundary.centroid.coords.xy)
+                ax.plot((x0, x1), (y0, y1), "--r", linewidth=0.5)
+
+        plot_title = "cell symmetry"
+        if self.params.show_statistics:
+            cell_cue_direction_asymmetry_val = cell_cue_direction_asymmetry_vec[
+                ~np.isnan(cell_cue_direction_asymmetry_vec)
+            ]
+            plot_title += "\n N: " + str(len(cell_cue_direction_asymmetry_val)) + ", "
+            plot_title += (
+                "mean: "
+                + str(np.round(np.mean(cell_cue_direction_asymmetry_val), 2))
+                + ", "
+            )
+            plot_title += "std: " + str(
+                np.round(np.std(cell_cue_direction_asymmetry_val), 2)
+            )
+
+        add_title(ax, plot_title, im_junction.data, self.params.show_graphics_axis)
+        axes = [ax]
+
+        self._finish_plot(
+            fig,
+            collection.get_out_path_by_name(img_name),
+            img_name,
+            "_symmetry",
+            axes,
+            pixel_to_micron_ratio,
+            close,
+        )
 
     def plot_shape_orientation(
         self, collection: PropertiesCollection, img_name: str, close: bool = False
@@ -2804,8 +2946,11 @@ class Plotter:
                 self.plot_corners(collection, key, close)
 
             if self.params.plot_elongation:
-                self.plot_length_width_ratio(collection, key, close)
+                self.plot_length_to_width_ratio(collection, key, close)
                 # self.plot_eccentricity(collection, key, close)
+
+            if self.params.plot_symmetry:
+                self.plot_symmetry(collection, key, close)
 
             if self.params.plot_circularity:
                 self.plot_circularity(collection, key, close)
@@ -2953,38 +3098,13 @@ class Plotter:
         ]
 
     @staticmethod
-    def _add_nuclei_circularity(
-        fig,
-        ax,
-        im_junction: BioMedicalChannel,
-        nuclei_circularity: BioMedicalInstanceSegmentationMask,
-        alpha,
-    ):
-        v_min = 0.0
-        v_max = 1.0
-        yticks = [0.0, 0.5, 1.0]
-
-        ax.imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)
-
-        # show nuclei eccentricity everywhere but background label
-        cax_1 = ax.imshow(
-            nuclei_circularity.mask_background().data,
-            cmap=plt.cm.bwr,
-            vmin=v_min,
-            vmax=v_max,
-            alpha=alpha,
-        )
-
-        # colorbar
-        add_colorbar(fig, cax_1, ax, yticks, "circularity")
-
-    @staticmethod
-    def _add_cell_circularity(
+    def _add_values_0_1(
         fig,
         ax,
         im_junction: BioMedicalChannel,
         cell_circularity: BioMedicalInstanceSegmentationMask,
         alpha,
+        label,
     ):
         v_min = 0.0
         v_max = 1.0
@@ -3002,10 +3122,10 @@ class Plotter:
         )
 
         # colorbar
-        add_colorbar(fig, cax_0, ax, yticks, "circularity")
+        add_colorbar(fig, cax_0, ax, yticks, label)
 
     @staticmethod
-    def _add_single_cell_major_minor_axis(
+    def _add_single_cell_length_to_width_ratio_axis(
         ax,
         y0,
         x0,

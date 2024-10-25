@@ -5,12 +5,11 @@ from album.runner.api import get_args, setup
 env_file = """name: Polarityjam
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python=3.8.13
   - pip
   - pip:
-     - polarityjam==0.2.2
+     - polarityjam==0.3.0
 """
 
 album_version = None

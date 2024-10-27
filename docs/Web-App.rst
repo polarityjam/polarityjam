@@ -3,7 +3,8 @@ Web-App
 
 We provide a simple means for statistical analysis of circular data that supports both exploratory analysis and the
 generation of graphs for publication. The App is based on the R Shiny inteface and can be started locally on you
-computer or on an web service provided by the Max-Delbrück-Center for MolecularMedicine.
+computer or on an web service provided by the Max-Delbrück-Center for Molecular Medicine: 
+`Polarity-JaM Web-App <https://application.posit.mdc-berlin.de/polarityjam/>`_.
 
 Circular statistics
 -------------------
@@ -29,9 +30,8 @@ Panel: Data preparation
 
 The first panel allows upload of single csv files. The file must contain a sample column (default: "label"),
 which is numeric and contains whole numbers. Feature columns can have any name, but must contain numeric values,
-meaning integers or floats.
-any name. Additionally, a column for grouping conditions must be specified, it must contain a limited amount
-categorical values, so no numeric values.
+meaning integers or floats. Additionally, a column for grouping conditions must be specified, it must contain 
+categorical values, for example filename, folder_name or any descriptor for the condition.
 
 The data can be can be filtered by removing samples of a certain condition in the field "Identifier of conditions".
 Furthermore, numeric values can be filtered by setting and upper and lower threshold based on a column containing
@@ -132,13 +132,10 @@ deviation, which is not further discussed here.
 Panel: Correlation analysis
 ---------------------------
 
-Hang in tight. We are working on an update on the documentation here.
-
-
-Panel: Compare
---------------
-
-Hang in tight. We are working on an update on the documentation here.
+The correlation analysis panel allows the user to compute the correlation between two feature columns.
+Here the user can compute correlations between directional-directional, directional-axial, axial-axial, directional-linear,
+axial-linear and the common linear-linear data, each is computed with a different formula, see :cite:t:`jammalamadaka2001topics` or 
+:cite:t:`berens2009circstat`. for more information.
 
 Further literature
 ------------------
@@ -146,6 +143,3 @@ Further literature
 For further reading we recommend:
 
 .. bibliography::
-
-.. note::
-    This documentation is still under development and will be extended later!

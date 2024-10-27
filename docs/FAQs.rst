@@ -22,7 +22,9 @@ When you bring your segmentation from other sources - or create them on your own
 has an item with the key `masks` that contains the segmentation labels.
 
 Here is a short code block to create a dummy segmentation file:
-.. code-block::
+
+.. code-block:: python
+
     import numpy as np
 
     # create a dummy mask
@@ -51,7 +53,9 @@ You can look at an example `_seg.npy` file by first downloading our example data
 Extracting the zip file and looking at the `_seg.npy` files in the `data/golgi_nuclei/set1/` folder.
 
 Here is a short code block to load the segmentation file and visualize it:
-.. code-block::
+
+.. code-block:: python
+
     import numpy as np
     import matplotlib.pyplot as plt
 

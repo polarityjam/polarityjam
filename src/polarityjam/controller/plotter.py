@@ -259,8 +259,9 @@ class Plotter:
         filename, _ = os.path.splitext(os.path.basename(filename))
 
         # swap channels if channel last
-        if seg_img.shape[0] > seg_img.shape[-1]:
-            seg_img = np.einsum("ijk->kij", seg_img)
+        if len(seg_img) > 2:
+            if seg_img.shape[0] > seg_img.shape[-1]:
+                seg_img = np.einsum("ijk->kij", seg_img)
 
         channel_names, channels = self._get_available_channels(seg_img_params)
 
@@ -377,8 +378,9 @@ class Plotter:
             mask_nuclei_ = np.where(mask_nuclei > 0, mask_nuclei_, np.nan)
 
         # swap channels if channel last
-        if seg_img.shape[0] > seg_img.shape[-1]:
-            seg_img = np.einsum("ijc->cij", seg_img)
+        if len(seg_img.shape) > 2:
+            if seg_img.shape[0] > seg_img.shape[-1]:
+                seg_img = np.einsum("ijc->cij", seg_img)
 
         channel_names, channels = self._get_available_channels(seg_img_params)
 

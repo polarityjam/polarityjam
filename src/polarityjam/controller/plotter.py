@@ -488,6 +488,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "organelle_orientation_deg" in list(collection.dataset.columns), (
+            "Feature %s not available." % "organelle_orientation_deg"
+        )
 
         im_junction = img.junction.data
         con_inst_seg_mask = img.segmentation.segmentation_mask_connected
@@ -632,6 +636,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "nuc_displacement_orientation_deg" in list(collection.dataset.columns), (
+            "Feature %s not available." % "nuc_displacement_orientation_deg"
+        )
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
         r_params = collection.get_runtime_params_by_img_name(img_name)
@@ -763,6 +771,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "marker_mean_expression" in list(collection.dataset.columns), (
+            "Feature %s not available." % "marker_mean_expression"
+        )
 
         im_marker = img.marker
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -926,6 +938,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "marker_centroid_orientation_deg" in list(collection.dataset.columns), (
+            "Feature %s not available." % "marker_centroid_orientation_deg"
+        )
 
         im_marker = img.marker
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -1056,6 +1072,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "marker_nucleus_orientation_deg" in list(collection.dataset.columns), (
+            "Feature %s not available." % "marker_nucleus_orientation_deg"
+        )
 
         im_junction = img.junction.data
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -1194,6 +1214,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "junction_interface_occupancy" in list(
+            collection.dataset.columns
+        ), "Junction features %s not available."
 
         im_junction = img.junction
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -1340,6 +1364,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "junction_centroid_orientation_deg" in list(
+            collection.dataset.columns
+        ), ("Features %s not available." % "junction_centroid_orientation_deg")
 
         im_junction = img.junction
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -1448,6 +1476,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "cell_corner_points" in list(collection.dataset.columns), (
+            "Features %s not available." % "cell_corner_points"
+        )
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -1500,10 +1532,17 @@ class Plotter:
                 whether to close the figure after saving
 
         """
-        # todo: fix me
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "cell_eccentricity" in list(collection.dataset.columns), (
+            "Features %s not available." % "cell_eccentricity"
+        )
 
         im_junction = img.junction
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -1697,6 +1736,14 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "cell_length_to_width_ratio" in list(collection.dataset.columns), (
+            "Features %s not available." % "cell_length_to_width_ratio"
+        )
+        assert "cell_shape_orientation_rad" in list(collection.dataset.columns), (
+            "Features %s not available."
+            % "cell_shape_orientation_rad. Needed for orientation of the major axis."
+        )
 
         im_junction = img.junction
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -1909,6 +1956,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "cell_circularity" in list(collection.dataset.columns), (
+            "Features %s not available." % "cell_circularity"
+        )
 
         im_junction = img.junction
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -2070,6 +2121,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "marker_cue_directional_intensity_ratio" in list(
+            collection.dataset.columns
+        ), ("Features %s not available." % "marker_cue_directional_intensity_ratio")
 
         params = collection.get_runtime_params_by_img_name(img_name)
 
@@ -2136,6 +2191,14 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "junction_cue_directional_intensity_ratio" in list(
+            collection.dataset.columns
+        ), ("Features %s not available." % "junction_cue_directional_intensity_ratio")
 
         params = collection.get_runtime_params_by_img_name(img_name)
 
@@ -2286,6 +2349,11 @@ class Plotter:
         foi_name = collection.get_runtime_params_by_img_name(
             img_name
         ).feature_of_interest
+        # assert feature
+        assert foi_name in list(single_cell_dataset.columns), (
+            "Features %s not available." % foi_name
+        )
+
         foi = single_cell_dataset[foi_name]
 
         # figure and axes

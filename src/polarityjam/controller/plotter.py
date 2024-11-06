@@ -3023,11 +3023,13 @@ class Plotter:
                     self.plot_corners(collection, key, close)
 
             if self.params.plot_elongation:
-                if (
-                    r_params.extract_morphology_features
-                    and r_params.extract_polarity_features
-                ):
-                    self.plot_length_to_width_ratio(collection, key, close)
+                if r_params.extract_morphology_features:
+                    if r_params.extract_polarity_features:
+                        self.plot_length_to_width_ratio(collection, key, close)
+                    else:
+                        get_logger().warning(
+                            "Cannot plot elongation without polarity features."
+                        )
                 # self.plot_eccentricity(collection, key, close)
 
             if self.params.plot_symmetry and r_params.extract_polarity_features:

@@ -190,7 +190,7 @@ class TestIntegration(TestCommon):
                 elif line.startswith(replace_cell_pattern2):
                     print(
                         'path_to_yml = Path("%s")'
-                        % self.get_test_parameter_file("parameters_golgi_nuclei.yml")
+                        % self.get_test_file("parameters_golgi_nuclei.yml")
                     )
                     while not next(myiter, "None").startswith(replace_cell_pattern2):
                         print("")

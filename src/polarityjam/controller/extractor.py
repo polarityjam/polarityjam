@@ -342,6 +342,11 @@ class Extractor:
             img, img_params, segmentation=bio_med_segmentation
         )
 
+        # add all necessary information to the collection
+        PropertyCollector.add_out_path(collection, filename_prefix, output_path)
+        PropertyCollector.add_runtime_params(collection, filename_prefix, self.params)
+        PropertyCollector.add_img(collection, filename_prefix, bio_med_image)
+
         self.extract_cell_features(collection, bio_med_image, filename_prefix)
 
         if self.params.extract_group_features:
@@ -351,9 +356,6 @@ class Extractor:
 
         # mark the beginning of a new image that is potentially extracted
         PropertyCollector.set_reset_index(collection)
-        PropertyCollector.add_out_path(collection, filename_prefix, output_path)
-        PropertyCollector.add_runtime_params(collection, filename_prefix, self.params)
-        PropertyCollector.add_img(collection, filename_prefix, bio_med_image)
 
         get_logger().info("Done feature extraction for file: %s" % str(filename_prefix))
 

@@ -3002,33 +3002,47 @@ class Plotter:
                     self.plot_nuc_displacement_orientation(collection, key, close)
 
             if self.params.plot_marker and img.has_marker():
-                self.plot_marker_expression(collection, key, close)
-                self.plot_marker_polarity(collection, key, close)
-                if img.has_nuclei():
+                if r_params.extract_intensity_features:
+                    self.plot_marker_expression(collection, key, close)
+
+                if r_params.extract_polarity_features:
+                    self.plot_marker_polarity(collection, key, close)
+
+                if img.has_nuclei() and r_params.extract_polarity_features:
                     self.plot_marker_nucleus_orientation(collection, key, close)
 
-                if self.params.plot_ratio_method:
+                if self.params.plot_ratio_method and r_params.extract_polarity_features:
                     self.plot_marker_cue_intensity_ratio(collection, key, close)
 
             if self.params.plot_junctions and img.has_junction():
-                self.plot_junction_features(collection, key, close)
-                self.plot_junction_polarity(collection, key, close)
-                self.plot_corners(collection, key, close)
+                if r_params.extract_morphology_features:
+                    self.plot_junction_features(collection, key, close)
+
+                if r_params.extract_polarity_features:
+                    self.plot_junction_polarity(collection, key, close)
+                    self.plot_corners(collection, key, close)
 
             if self.params.plot_elongation:
-                self.plot_length_to_width_ratio(collection, key, close)
+                if (
+                    r_params.extract_morphology_features
+                    and r_params.extract_polarity_features
+                ):
+                    self.plot_length_to_width_ratio(collection, key, close)
                 # self.plot_eccentricity(collection, key, close)
 
-            if self.params.plot_symmetry:
+            if self.params.plot_symmetry and r_params.extract_polarity_features:
                 self.plot_symmetry(collection, key, close)
 
-            if self.params.plot_circularity:
+            if self.params.plot_circularity and r_params.extract_morphology_features:
                 self.plot_circularity(collection, key, close)
 
-            if self.params.plot_ratio_method:
+            if self.params.plot_ratio_method and r_params.extract_polarity_features:
                 self.plot_junction_cue_intensity_ratio(collection, key, close)
 
-            if self.params.plot_shape_orientation:
+            if (
+                self.params.plot_shape_orientation
+                and r_params.extract_polarity_features
+            ):
                 self.plot_shape_orientation(collection, key, close)
 
             if self.params.plot_foi:

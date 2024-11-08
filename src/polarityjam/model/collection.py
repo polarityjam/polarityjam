@@ -1,6 +1,7 @@
 """Module for the property collection."""
 import json
 import pickle
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -38,7 +39,7 @@ class PropertiesCollection:
         """Return the length of the collection."""
         return len(self.dataset)
 
-    def save(self, path: str):
+    def save(self, path: Path):
         """Save the dataset to a csv file.
 
         Args:
@@ -46,7 +47,7 @@ class PropertiesCollection:
 
         """
         # pickle the python object
-        with open(path, "wb") as file:
+        with open(str(path), "wb") as file:
             pickle.dump(self, file)
 
     @classmethod
@@ -136,12 +137,16 @@ class PropertiesCollection:
         """
         return self.out_path_dict[img_name]
 
-    def add_sc_marker_polarity_props(self, sc_marker_props: SingleCellMarkerProps):
+    def add_sc_marker_polarity_props(
+        self, sc_marker_props: SingleCellMarkerProps, runtime_params: RuntimeParameter
+    ):
         """Add specific single cell marker props to the dataset.
 
         Args:
             sc_marker_props:
                 The single cell marker properties
+            runtime_params:
+                The runtime parameters
 
         """
         # localization features are always extracted
@@ -154,7 +159,7 @@ class PropertiesCollection:
             self._index, "marker_centroid_Y"
         ] = sc_marker_props.weighted_centroid[0]
 
-        if self.runtime_params_dict["extract_polarity_features"]:
+        if runtime_params.extract_polarity_features:
             self.dataset.at[
                 self._index, "marker_centroid_orientation_rad"
             ] = sc_marker_props.marker_centroid_orientation_rad
@@ -169,7 +174,7 @@ class PropertiesCollection:
                 self._index, "marker_cue_axial_intensity_ratio"
             ] = sc_marker_props.marker_cue_axial_intensity_ratio
 
-        if self.runtime_params_dict["extract_intensity_features"]:
+        if runtime_params.extract_intensity_features:
             self.dataset.at[
                 self._index, "marker_mean_expression"
             ] = sc_marker_props.mean_intensity
@@ -177,12 +182,16 @@ class PropertiesCollection:
                 self._index, "marker_sum_expression"
             ] = sc_marker_props.marker_sum_expression
 
-    def add_sc_nucleus_props(self, nucleus_props: SingleCellNucleusProps):
+    def add_sc_nucleus_props(
+        self, nucleus_props: SingleCellNucleusProps, runtime_params: RuntimeParameter
+    ):
         """Add specific single cell nucleus properties to the dataset.
 
         Args:
             nucleus_props:
                 The single cell nucleus properties
+            runtime_params:
+                The runtime parameters
 
         """
         # localization features are always extracted
@@ -191,7 +200,7 @@ class PropertiesCollection:
         ]  # x is second index
         self.dataset.at[self._index, "nuc_Y"] = nucleus_props.centroid[0]
 
-        if self.runtime_params_dict["extract_polarity_features"]:
+        if runtime_params.extract_polarity_features:
             self.dataset.at[
                 self._index, "nuc_displacement_orientation_rad"
             ] = nucleus_props.nuc_displacement_orientation_rad
@@ -205,7 +214,7 @@ class PropertiesCollection:
                 self._index, "nuc_shape_orientation_deg"
             ] = nucleus_props.nuc_shape_orientation_deg
 
-        if self.runtime_params_dict["extract_morphology_features"]:
+        if runtime_params.extract_morphology_features:
             self.dataset.at[
                 self._index, "nuc_major_axis_length"
             ] = nucleus_props.major_axis_length
@@ -233,6 +242,7 @@ class PropertiesCollection:
         img_hash: str,
         connected_component_label: int,
         sc_props: SingleCellProps,
+        runtime_params: RuntimeParameter,
     ):
         """Add general single cell properties to the dataset.
 
@@ -247,6 +257,8 @@ class PropertiesCollection:
                 The connected component label of the single cell
             sc_props:
                 The single cell properties
+            runtime_params:
+                The runtime parameters
 
         """
         # localization features are always extracted
@@ -258,7 +270,7 @@ class PropertiesCollection:
         ]  # x is second index
         self.dataset.at[self._index, "cell_Y"] = sc_props.centroid[0]
 
-        if self.runtime_params_dict["extract_polarity_features"]:
+        if runtime_params.extract_polarity_features:
             self.dataset.at[
                 self._index, "cell_shape_orientation_rad"
             ] = sc_props.cell_shape_orientation_rad
@@ -269,7 +281,7 @@ class PropertiesCollection:
                 self._index, "cell_cue_direction_symmetry"
             ] = sc_props.cell_cue_direction_symmetry
 
-        if self.runtime_params_dict["extract_morphology_features"]:
+        if runtime_params.extract_morphology_features:
             self.dataset.at[
                 self._index, "cell_major_axis_length"
             ] = sc_props.major_axis_length
@@ -295,12 +307,18 @@ class PropertiesCollection:
                 self._index, "center_distance_entropy"
             ] = sc_props.center_distance_entropy
 
-    def add_sc_organelle_props(self, organelle_props: SingleCellOrganelleProps):
+    def add_sc_organelle_props(
+        self,
+        organelle_props: SingleCellOrganelleProps,
+        runtime_params: RuntimeParameter,
+    ):
         """Add specific single cell organelle properties to the dataset.
 
         Args:
             organelle_props:
                 The single cell organelle properties
+            runtime_params:
+                The runtime parameters
 
         """
         # localization features are always extracted
@@ -309,7 +327,7 @@ class PropertiesCollection:
         ]  # x-axis is the second index
         self.dataset.at[self._index, "organelle_Y"] = organelle_props.centroid[0]
 
-        if self.runtime_params_dict["extract_polarity_features"]:
+        if runtime_params.extract_polarity_features:
             self.dataset.at[
                 self._index, "organelle_orientation_rad"
             ] = organelle_props.organelle_orientation_rad
@@ -317,20 +335,26 @@ class PropertiesCollection:
                 self._index, "organelle_orientation_deg"
             ] = organelle_props.organelle_orientation_deg
 
-        if self.runtime_params_dict["extract_morphology_features"]:
+        if runtime_params.extract_morphology_features:
             self.dataset.at[
                 self._index, "nuc_organelle_distance"
             ] = organelle_props.nuc_organelle_distance
 
-    def add_sc_marker_nuclei_props(self, marker_nuc_props: SingleCellMarkerNucleiProps):
+    def add_sc_marker_nuclei_props(
+        self,
+        marker_nuc_props: SingleCellMarkerNucleiProps,
+        runtime_params: RuntimeParameter,
+    ):
         """Add specific single cell marker-nuclei properties to the dataset.
 
         Args:
             marker_nuc_props:
                 The single cell marker-nuclei properties
+            runtime_params:
+                The runtime parameters
 
         """
-        if self.runtime_params_dict["extract_intensity_features"]:
+        if runtime_params.extract_intensity_features:
             self.dataset.at[
                 self._index, "marker_mean_expression_nuc"
             ] = marker_nuc_props.mean_intensity
@@ -348,6 +372,7 @@ class PropertiesCollection:
         self,
         marker_nuc_cyt_props: SingleCellMarkerCytosolProps,
         marker_nuc_props: SingleCellMarkerNucleiProps,
+        runtime_params: RuntimeParameter,
     ):
         """Add specific single cell marker-nuclei-cytosol properties to the dataset.
 
@@ -356,9 +381,11 @@ class PropertiesCollection:
                 The single cell marker-nuclei-cytosol properties
             marker_nuc_props:
                 The single cell marker-nuclei properties
+            runtime_params:
+                The runtime parameters
 
         """
-        if self.runtime_params_dict["extract_intensity_features"]:
+        if runtime_params.extract_intensity_features:
             self.dataset.at[
                 self._index, "marker_mean_expression_cyt"
             ] = marker_nuc_cyt_props.mean_intensity
@@ -376,7 +403,7 @@ class PropertiesCollection:
                 marker_nuc_props.mean_intensity / marker_nuc_cyt_props.mean_intensity
             )
 
-        if self.runtime_params_dict["extract_polarity_features"]:
+        if runtime_params.extract_polarity_features:
             self.dataset.at[
                 self._index, "marker_nucleus_orientation_rad"
             ] = marker_nuc_props.marker_nucleus_orientation_rad
@@ -385,16 +412,20 @@ class PropertiesCollection:
             ] = marker_nuc_props.marker_nucleus_orientation_deg
 
     def add_sc_marker_membrane_props(
-        self, marker_membrane_props: SingleCellMarkerMembraneProps
+        self,
+        marker_membrane_props: SingleCellMarkerMembraneProps,
+        runtime_params: RuntimeParameter,
     ):
         """Add specific single cell marker-membrane properties to the dataset.
 
         Args:
             marker_membrane_props:
                 The single cell marker-membrane properties
+            runtime_params:
+                The runtime parameters
 
         """
-        if self.runtime_params_dict["extract_intensity_features"]:
+        if runtime_params.extract_intensity_features:
             self.dataset.at[
                 self._index, "marker_mean_expression_mem"
             ] = marker_membrane_props.mean_intensity
@@ -402,12 +433,18 @@ class PropertiesCollection:
                 self._index, "marker_sum_expression_mem"
             ] = marker_membrane_props.marker_sum_expression_mem
 
-    def add_sc_junction_props(self, sc_junction_props: SingleCellJunctionProps):
+    def add_sc_junction_props(
+        self,
+        sc_junction_props: SingleCellJunctionProps,
+        runtime_params: RuntimeParameter,
+    ):
         """Add specific single cell junction properties to the dataset.
 
         Args:
             sc_junction_props:
                 The single cell junction properties
+            runtime_params:
+                The runtime parameters
 
         """
         (
@@ -421,7 +458,7 @@ class PropertiesCollection:
         ] = j_centroid_second  # x-axis is the second index
         self.dataset.at[self._index, "junction_centroid_Y"] = j_centroid_first
 
-        if self.runtime_params_dict["extract_morphology_features"]:
+        if runtime_params.extract_morphology_features:
             self.dataset.at[
                 self._index, "junction_perimeter"
             ] = sc_junction_props.interface_perimeter
@@ -441,7 +478,7 @@ class PropertiesCollection:
                 self._index, "junction_cluster_density"
             ] = sc_junction_props.junction_cluster_density
 
-        if self.runtime_params_dict["extract_polarity_features"]:
+        if runtime_params.extract_polarity_features:
             self.dataset.at[
                 self._index, "junction_centroid_orientation_rad"
             ] = sc_junction_props.junction_centroid_orientation_rad
@@ -455,7 +492,7 @@ class PropertiesCollection:
                 self._index, "junction_cue_axial_intensity_ratio"
             ] = sc_junction_props.junction_cue_axial_intensity_ratio
 
-        if self.runtime_params_dict["extract_intensity_features"]:
+        if runtime_params.extract_intensity_features:
             # dataset.at[index, "junction_fragmented_perimeter"] = sc_junction_props.junction_fragmented_perimeter
             self.dataset.at[
                 self._index, "junction_mean_expression"
@@ -464,53 +501,61 @@ class PropertiesCollection:
                 self._index, "junction_protein_intensity"
             ] = sc_junction_props.junction_protein_intensity
 
-    def add_morans_i_props(self, morans_i: Moran):
+    def add_morans_i_props(self, morans_i: Moran, runtime_params: RuntimeParameter):
         """Add Moran's I value to the dataset.
 
         Args:
             morans_i:
                 Moran's I object
+            runtime_params:
+                The runtime parameters
 
         """
-        self.dataset.at[self._index, "morans_i"] = morans_i.I
-        self.dataset.at[self._index, "morans_p_norm"] = morans_i.p_norm
+        if runtime_params.extract_group_features:
+            self.dataset.at[self._index, "morans_i"] = morans_i.I
+            self.dataset.at[self._index, "morans_p_norm"] = morans_i.p_norm
 
-    def add_neighborhood_props(self, neighborhood_props: NeighborhoodProps):
+    def add_neighborhood_props(
+        self, neighborhood_props: NeighborhoodProps, runtime_params: RuntimeParameter
+    ):
         """Add neighborhood properties to the dataset.
 
         Args:
             neighborhood_props:
                 The neighborhood properties
+            runtime_params:
+                The runtime parameters
 
         """
-        self.dataset.at[
-            self._index, "neighbors_cell"
-        ] = neighborhood_props.num_neighbours
+        if runtime_params.extract_group_features:
+            self.dataset.at[
+                self._index, "neighbors_cell"
+            ] = neighborhood_props.num_neighbours
 
-        # fill properties for first nearest neighbors
-        self.dataset.at[
-            self._index, "neighbors_mean_dif_1st"
-        ] = neighborhood_props.mean_dif_first_neighbors
-        self.dataset.at[
-            self._index, "neighbors_median_dif_1st"
-        ] = neighborhood_props.median_dif_first_neighbors
-        self.dataset.at[
-            self._index, "neighbors_stddev_dif_1st"
-        ] = neighborhood_props.var_dif_first_neighbors
-        self.dataset.at[
-            self._index, "neighbors_range_dif_1st"
-        ] = neighborhood_props.range_dif_first_neighbors
+            # fill properties for first nearest neighbors
+            self.dataset.at[
+                self._index, "neighbors_mean_dif_1st"
+            ] = neighborhood_props.mean_dif_first_neighbors
+            self.dataset.at[
+                self._index, "neighbors_median_dif_1st"
+            ] = neighborhood_props.median_dif_first_neighbors
+            self.dataset.at[
+                self._index, "neighbors_stddev_dif_1st"
+            ] = neighborhood_props.var_dif_first_neighbors
+            self.dataset.at[
+                self._index, "neighbors_range_dif_1st"
+            ] = neighborhood_props.range_dif_first_neighbors
 
-        # fill properties for second-nearest neighbors
-        self.dataset.at[
-            self._index, "neighbors_mean_dif_2nd"
-        ] = neighborhood_props.mean_dif_second_neighbors
-        self.dataset.at[
-            self._index, "neighbors_median_dif_2nd"
-        ] = neighborhood_props.median_dif_second_neighbors
-        self.dataset.at[
-            self._index, "neighbors_stddev_dif_2nd"
-        ] = neighborhood_props.var_dif_second_neighbors
-        self.dataset.at[
-            self._index, "neighbors_range_dif_2nd"
-        ] = neighborhood_props.range_dif_second_neighbors
+            # fill properties for second-nearest neighbors
+            self.dataset.at[
+                self._index, "neighbors_mean_dif_2nd"
+            ] = neighborhood_props.mean_dif_second_neighbors
+            self.dataset.at[
+                self._index, "neighbors_median_dif_2nd"
+            ] = neighborhood_props.median_dif_second_neighbors
+            self.dataset.at[
+                self._index, "neighbors_stddev_dif_2nd"
+            ] = neighborhood_props.var_dif_second_neighbors
+            self.dataset.at[
+                self._index, "neighbors_range_dif_2nd"
+            ] = neighborhood_props.range_dif_second_neighbors

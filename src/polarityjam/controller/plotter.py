@@ -2997,9 +2997,11 @@ class Plotter:
                 self.plot_threshold_segmentation_mask(collection, key, close)
 
             if self.params.plot_polarity and img.has_nuclei() and img.has_organelle():
-                self.plot_organelle_polarity(collection, key, close)
-                if img.has_nuclei():
-                    self.plot_nuc_displacement_orientation(collection, key, close)
+                if r_params.extract_polarity_features:
+                    self.plot_organelle_polarity(collection, key, close)
+                    if img.has_nuclei():
+
+                        self.plot_nuc_displacement_orientation(collection, key, close)
 
             if self.params.plot_marker and img.has_marker():
                 if r_params.extract_intensity_features:
@@ -3012,15 +3014,20 @@ class Plotter:
                     self.plot_marker_nucleus_orientation(collection, key, close)
 
                 if self.params.plot_ratio_method and r_params.extract_polarity_features:
-                    self.plot_marker_cue_intensity_ratio(collection, key, close)
+                    if r_params.extract_morphology_features:
+                        self.plot_marker_cue_intensity_ratio(collection, key, close)
+                    else:
+                        get_logger().warning(
+                            "Cannot cue intensity ratio without morphology features."
+                        )
 
             if self.params.plot_junctions and img.has_junction():
                 if r_params.extract_morphology_features:
                     self.plot_junction_features(collection, key, close)
+                    self.plot_corners(collection, key, close)
 
                 if r_params.extract_polarity_features:
                     self.plot_junction_polarity(collection, key, close)
-                    self.plot_corners(collection, key, close)
 
             if self.params.plot_elongation:
                 if r_params.extract_morphology_features:
@@ -3033,23 +3040,46 @@ class Plotter:
                 # self.plot_eccentricity(collection, key, close)
 
             if self.params.plot_symmetry and r_params.extract_polarity_features:
-                self.plot_symmetry(collection, key, close)
+                if r_params.extract_morphology_features:
+                    self.plot_symmetry(collection, key, close)
+                else:
+                    get_logger().warning(
+                        "Cannot plot elongation without morphology features."
+                    )
 
             if self.params.plot_circularity and r_params.extract_morphology_features:
                 self.plot_circularity(collection, key, close)
 
             if self.params.plot_ratio_method and r_params.extract_polarity_features:
-                self.plot_junction_cue_intensity_ratio(collection, key, close)
+                if r_params.extract_morphology_features:
+                    self.plot_junction_cue_intensity_ratio(collection, key, close)
+                else:
+                    get_logger().warning(
+                        "Cannot plot cue intensity ratio without morphology features."
+                    )
 
             if (
                 self.params.plot_shape_orientation
                 and r_params.extract_polarity_features
             ):
-                self.plot_shape_orientation(collection, key, close)
+                if r_params.extract_morphology_features:
+                    self.plot_shape_orientation(collection, key, close)
+                else:
+                    get_logger().warning(
+                        "Cannot plot shape orientation without morphology features."
+                    )
 
             if self.params.plot_foi:
                 if r_params.extract_group_features:
-                    self.plot_foi(collection, key, close)
+                    # check if feature of interest is available
+                    if r_params.feature_of_interest in collection.dataset.columns:
+                        self.plot_foi(collection, key, close)
+                    else:
+                        get_logger().warning(
+                            'Cannot plot feature of interest "%s". '
+                            "Did you enable the respective feature class for extraction?"
+                            % r_params.feature_of_interest
+                        )
 
             if self.params.plot_sc_image:
                 self.plot_single_cell_centered_masks(collection, key, close)

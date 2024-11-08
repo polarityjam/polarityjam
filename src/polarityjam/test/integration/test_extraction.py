@@ -31,7 +31,8 @@ class TestExtractionOptions(TestCommon):
 
         # assert
         df = pd.read_csv(Path(out_path).joinpath("myfile.csv"))
-        self.assertEqual(df.shape[0], 97)
+        self.assertEqual(df.shape[0], 2)  # 2 cells
+        self.assertEqual(df.shape[1], 79)  # 79 features
 
     def test_no_polarity_extraction(self):
         # create parameter file
@@ -53,11 +54,12 @@ class TestExtractionOptions(TestCommon):
 
         # assert
         df = pd.read_csv(Path(out_path).joinpath("myfile.csv"))
-        self.assertEqual(df.shape[0], 97)
+        self.assertEqual(df.shape[0], 2)  # 2 cells
+        self.assertEqual(df.shape[1], 62)  # 62 features (no polarity)
 
     def test_no_morphology_extraction(self):
         # create parameter file
-        param_file = str(self.get_test_file("parameters_no_morphology.yml"))
+        param_file = str(self.get_test_file("parameters_extract_no_morphology.yml"))
         in_file = str(self.get_test_file("060721_EGM2_18dyn_02_small.tif"))
         out_path = str(self.output_path.joinpath("run_small"))
 
@@ -75,11 +77,12 @@ class TestExtractionOptions(TestCommon):
 
         # assert
         df = pd.read_csv(Path(out_path).joinpath("myfile.csv"))
-        self.assertEqual(df.shape[0], 97)
+        self.assertEqual(df.shape[0], 2)  # 2 cells
+        self.assertEqual(df.shape[1], 54)  # 54 features (no morphology)
 
     def test_no_intensity_extraction(self):
         # create parameter file
-        param_file = str(self.get_test_file("parameters_no_intensity.yml"))
+        param_file = str(self.get_test_file("parameters_extract_no_intensity.yml"))
         in_file = str(self.get_test_file("060721_EGM2_18dyn_02_small.tif"))
         out_path = str(self.output_path.joinpath("run_small"))
 
@@ -97,11 +100,12 @@ class TestExtractionOptions(TestCommon):
 
         # assert
         df = pd.read_csv(Path(out_path).joinpath("myfile.csv"))
-        self.assertEqual(df.shape[0], 97)
+        self.assertEqual(df.shape[0], 2)  # 2 cells
+        self.assertEqual(df.shape[1], 68)  # 35 features (no intensity)
 
     def test_no_topology_extraction(self):
         # create parameter file
-        param_file = str(self.get_test_file("parameters_no_topology.yml"))
+        param_file = str(self.get_test_file("parameters_extract_no_topology.yml"))
         in_file = str(self.get_test_file("060721_EGM2_18dyn_02_small.tif"))
         out_path = str(self.output_path.joinpath("run_small"))
 
@@ -119,4 +123,5 @@ class TestExtractionOptions(TestCommon):
 
         # assert
         df = pd.read_csv(Path(out_path).joinpath("myfile.csv"))
-        self.assertEqual(df.shape[0], 97)
+        self.assertEqual(df.shape[0], 2)  # 2 cells
+        self.assertEqual(df.shape[1], 68)  # 68 features (no topology)

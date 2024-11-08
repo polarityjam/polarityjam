@@ -15,7 +15,7 @@ clear_border: true
 # PlotParameter
 dpi: 50
 estimated_cell_diameter: 100
-feature_of_interest: cell_area
+feature_of_interest: cell_shape_orientation_deg
 graphics_output_format:
   - png
 graphics_width: 7

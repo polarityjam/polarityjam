@@ -34,7 +34,7 @@ class TestIntegration(TestCommon):
     def test_run(self):
         # prepare
         in_file = str(self.get_test_image_path("060721_EGM2_18dyn_01.tif"))
-        param_file = str(self.get_test_parameter_file("parameters_golgi_nuclei.yml"))
+        param_file = str(self.get_test_file("parameters_golgi_nuclei.yml"))
         out_path = str(self.output_path.joinpath("run"))
 
         # build arguments
@@ -70,7 +70,7 @@ class TestIntegration(TestCommon):
     )
     def test_run_stack(self):
         in_path = str(self.get_test_image_folder("gn").joinpath("set_2"))
-        param_file = str(self.get_test_parameter_file("parameters_golgi_nuclei.yml"))
+        param_file = str(self.get_test_file("parameters_golgi_nuclei.yml"))
         out_path = str(self.output_path.joinpath("run_stack"))
 
         # build arguments
@@ -102,7 +102,7 @@ class TestIntegration(TestCommon):
     )
     def test_run_stack_no_golgi(self):
         in_path = str(self.get_test_image_folder("g"))
-        param_file = str(self.get_test_parameter_file("parameters_no_golgi.yml"))
+        param_file = str(self.get_test_file("parameters_no_golgi.yml"))
         out_path = str(self.output_path.joinpath("run_stack_no_golgi"))
 
         # build arguments
@@ -142,7 +142,7 @@ class TestIntegration(TestCommon):
     )
     def test_run_stack_no_nuclei(self):
         in_path = str(self.get_test_image_folder("n"))
-        param_file = str(self.get_test_parameter_file("parameters_no_nuclei.yml"))
+        param_file = str(self.get_test_file("parameters_no_nuclei.yml"))
         out_path = str(self.output_path.joinpath("run_stack_no_nuclei"))
 
         # build arguments
@@ -192,7 +192,7 @@ class TestIntegration(TestCommon):
     def test_run_key(self):
         in_path = str(self.get_test_image_folder("gn"))
         in_key = str(self.get_test_key_file())
-        param_file = str(self.get_test_parameter_file("parameters_golgi_nuclei.yml"))
+        param_file = str(self.get_test_file("parameters_golgi_nuclei.yml"))
         out_path = str(self.output_path.joinpath("run_key"))
 
         # build arguments

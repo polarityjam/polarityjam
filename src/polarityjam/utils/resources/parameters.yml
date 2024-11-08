@@ -19,6 +19,9 @@ min_cell_size: 50 # minimum area of cell in pixel^2, will be removed otherwise
 min_nucleus_size: 10 # minimum area of nucleus in pixel^2, will be removed otherwise
 min_organelle_size: 10 # minimum area of organelle in pixel^2, will be removed otherwise
 extract_group_features: False
+extract_morphology_features: True
+extract_polarity_features: True
+extract_intensity_features: True
 membrane_thickness: 5
 junction_threshold: -1 # -1 means no manual thresholding, but otsu thresholding
 feature_of_interest: "cell_area"

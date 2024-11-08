@@ -166,6 +166,9 @@ def _run(
     # write output
     fileout_base, _ = os.path.splitext(fileout_name)
     fileout_path = Path(output_path).joinpath(fileout_base + ".csv")
+    collection_out_path = Path(output_path).joinpath(fileout_base + ".pkl")
+    get_logger().info("Writing collection to disk: %s" % fileout_path)
+    c.save(collection_out_path)
     get_logger().info("Writing features to disk: %s" % fileout_path)
     c.dataset.to_csv(str(fileout_path), index=False)
 

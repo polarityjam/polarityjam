@@ -28,6 +28,7 @@ class PropertyCollector:
         filename: str,
         img_hash: str,
         connected_component_label: int,
+        runtime_params: RuntimeParameter,
     ):
         """Collect single cell properties."""
         props_collection.add_sc_general_props(
@@ -35,22 +36,27 @@ class PropertyCollector:
             img_hash,
             connected_component_label,
             sc_prop_collection.single_cell_props,
+            runtime_params,
         )
 
         if sc_prop_collection.marker_props:
             props_collection.add_sc_marker_polarity_props(
-                sc_prop_collection.marker_props
+                sc_prop_collection.marker_props, runtime_params
             )
 
         if sc_prop_collection.nucleus_props:
-            props_collection.add_sc_nucleus_props(sc_prop_collection.nucleus_props)
+            props_collection.add_sc_nucleus_props(
+                sc_prop_collection.nucleus_props, runtime_params
+            )
 
         if sc_prop_collection.organelle_props:
-            props_collection.add_sc_organelle_props(sc_prop_collection.organelle_props)
+            props_collection.add_sc_organelle_props(
+                sc_prop_collection.organelle_props, runtime_params
+            )
 
         if sc_prop_collection.marker_nuc_props:
             props_collection.add_sc_marker_nuclei_props(
-                sc_prop_collection.marker_nuc_props
+                sc_prop_collection.marker_nuc_props, runtime_params
             )
 
         if (
@@ -60,37 +66,44 @@ class PropertyCollector:
             props_collection.add_sc_marker_nuclei_cytosol_props(
                 sc_prop_collection.marker_nuc_cyt_props,
                 sc_prop_collection.marker_nuc_props,
+                runtime_params,
             )
 
         if sc_prop_collection.marker_membrane_props:
             props_collection.add_sc_marker_membrane_props(
-                sc_prop_collection.marker_membrane_props
+                sc_prop_collection.marker_membrane_props, runtime_params
             )
 
         if sc_prop_collection.junction_props:
-            props_collection.add_sc_junction_props(sc_prop_collection.junction_props)
+            props_collection.add_sc_junction_props(
+                sc_prop_collection.junction_props, runtime_params
+            )
 
         props_collection.increase_index()
 
     @staticmethod
     def collect_group_statistic(
-        props_collection: PropertiesCollection, morans_i: Moran, length: int
+        props_collection: PropertiesCollection,
+        morans_i: Moran,
+        length: int,
+        runtime_params: RuntimeParameter,
     ):
         """Collect group statistic."""
         props_collection.reset_index()
         for _ in range(1, length):
-            props_collection.add_morans_i_props(morans_i)
+            props_collection.add_morans_i_props(morans_i, runtime_params)
             props_collection.increase_index()
 
     @staticmethod
     def collect_neighborhood_props(
         props_collection: PropertiesCollection,
         neighborhood_props_list: List[NeighborhoodProps],
+        runtime_params: RuntimeParameter,
     ):
         """Collect neighborhood properties."""
         props_collection.reset_index()
         for neighborhood_props in neighborhood_props_list:
-            props_collection.add_neighborhood_props(neighborhood_props)
+            props_collection.add_neighborhood_props(neighborhood_props, runtime_params)
             props_collection.increase_index()
 
     @staticmethod
@@ -169,7 +182,7 @@ class SingleCellPropertyCollector:
     """Static class, responsible for collecting single cell properties."""
 
     @staticmethod
-    def calc_sc_props(
+    def get_sc_props(
         sc_image: SingleCellImage,
         params: RuntimeParameter,
     ) -> SingleCellPropertiesCollection:

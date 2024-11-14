@@ -2290,7 +2290,7 @@ class Plotter:
 
         # normalize for length_unit (e.g. microns)
         if self.params.length_unit == "microns":
-            foi = foi / pixel_to_micron_ratio
+            foi = foi * pixel_to_micron_ratio
 
         # figure and axes
         fig, ax = self._get_figure(1)

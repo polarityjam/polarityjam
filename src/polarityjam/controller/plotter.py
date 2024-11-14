@@ -2288,6 +2288,10 @@ class Plotter:
         ).feature_of_interest
         foi = single_cell_dataset[foi_name]
 
+        # normalize for length_unit (e.g. microns)
+        if self.params.length_unit == "microns":
+            foi = foi / pixel_to_micron_ratio
+
         # figure and axes
         fig, ax = self._get_figure(1)
         ax.imshow(im_junction.data, cmap=plt.cm.gray, alpha=1.0)

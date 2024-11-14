@@ -207,6 +207,7 @@ class PlotParameter(Parameter):
 
         self.outline_width = None
         self.length_scalebar_microns = None
+        self.length_unit = None
 
         self.graphics_output_format = None
         self.dpi = None

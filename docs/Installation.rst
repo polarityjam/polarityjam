@@ -11,6 +11,9 @@ corresponding feature values as columns. Additionally, plots will be created.
 These visualizations can be used for quality control but might also be suitable for a publication.
 
 
+If you encounter any issues during the installation, please refer to the :ref:`faq` section first.
+That section might already contain the solution to your problem.
+
 Manual installation
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 For additional support in segmentation, we suggest to install Polarity-JaM

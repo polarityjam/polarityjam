@@ -5,21 +5,35 @@ Frequently Asked Questions
 .. role:: raw-html(raw)
     :format: html
 
+
+I have problems during installation with imagecodecs, what can i do?
+--------------------------------------------------------------------
+If you have problems installing the imagecodecs package via pip, you can try to install it using the micromamba package manager.
+You activate your polarityjam environment and run the following command:
+
+.. code-block:: bash
+
+    micromamba install -c conda-forge imagecodecs
+
+Pleas note that you need to have the correct environment activated when you run the command (e.g. ``micromamba activate polarityjam``).
+
+Alternatively, you can try installing the imagecodecs package via your system package manager.
+
 How to bring your own segmentation?
 -----------------------------------
-To bring your own segmentation you need to provide a `_seg.npy` file that
+To bring your own segmentation you need to provide a ``_seg.npy`` file that
 lives in the same folder as the images you want to process.
 
-So for example when your image is named `image.tif`, the segmentation file should be named `image_seg.npy`.
+So for example when your image is named ``image.tif``, the segmentation file should be named ``image_seg.npy``.
 
 The segmentation file should be a numpy array with the same shape as the
-image and should contain the segmentation labels with `0` indicating the background.
+image and should contain the segmentation labels with ``0`` indicating the background.
 
 
 You could create such a file by using the `cellpose GUI <https://cellpose.readthedocs.io/en/latest/index.html>`_ and saving the segmentation.
 
 When you bring your segmentation from other sources - or create them on your own, please make sure your npy file
-has an item with the key `masks` that contains the segmentation labels.
+has an item with the key ``masks`` that contains the segmentation labels.
 
 Here is a short code block to create a dummy segmentation file:
 
@@ -35,22 +49,22 @@ Here is a short code block to create a dummy segmentation file:
 Can I bring my own nuclei segmentation?
 ---------------------------------------
 Yes, you can bring your own nuclei segmentation.
-To do so, you need to provide a `_seg_nuc.npy` file that contains the nuclei segmentation.
-It looks the same as the `_seg.npy` file but only contains the nuclei segmentation.
+To do so, you need to provide a ``_seg_nuc.npy`` file that contains the nuclei segmentation.
+It looks the same as the ``_seg.npy`` file but only contains the nuclei segmentation.
 
 You could create such a file by using the `cellpose GUI <https://cellpose.readthedocs.io/en/latest/index.html>`_ and saving the nuclei segmentation.
 
 How can I correct my segmentation?
 ----------------------------------
 When you have a segmentation file, you can correct it using the `cellpose GUI <https://cellpose.readthedocs.io/en/latest/index.html>`_.
-Where you can manually correct the segmentation and save the corrected segmentation, again as a `_seg.npy` file.
+Where you can manually correct the segmentation and save the corrected segmentation, again as a ``_seg.npy`` file.
 
 You then proceed in polarityjam as if you brought your own segmentation.
 
 How does such a segmentation file look?
 ---------------------------------------
-You can look at an example `_seg.npy` file by first downloading our example data `here <https://github.com/polarityjam/polarityjam/blob/main/src/polarityjam/test/resources/data.zip>`_.
-Extracting the zip file and looking at the `_seg.npy` files in the `data/golgi_nuclei/set1/` folder.
+You can look at an example ``_seg.npy`` file by first downloading our example data `here <https://github.com/polarityjam/polarityjam/blob/main/src/polarityjam/test/resources/data.zip>`_.
+Extracting the zip file and looking at the ``_seg.npy`` files in the ``data/golgi_nuclei/set1/`` folder.
 
 Here is a short code block to load the segmentation file and visualize it:
 
@@ -66,13 +80,13 @@ Here is a short code block to load the segmentation file and visualize it:
 How to bring your own model?
 ----------------------------
 Currently, you can only use your own cellpose model.
-To do so, you need to provide the path to the model in the parameter file `model_path`.
+To do so, you need to provide the path to the model in the parameter file ``model_path``.
 
 You can train your own model for example using the cellpose `GUI <https://cellpose.readthedocs.io/en/latest/gui.html>`_ .
 
 What is a parameter file?
 -------------------------
-A parameter file is a JSON file that defines the parameters for:
+A parameter file is a `JSON <https://www.json.org/json-en.html>`_ file that defines the parameters for:
 
 - feature extraction
 - visualization
@@ -111,7 +125,7 @@ It enables data migration without modifying the CSV itself, as the file paths
 are relative to a specified root folder (e.g., inputpath) that you provide
 along with the key file during input.
 
-The key file can be used with the `polarityjam` CLI option `run-key`.
+The key file can be used with the ``polarityjam`` CLI option ``run-key``.
 
 How does a key file look?
 -------------------------
@@ -137,7 +151,7 @@ Why are my paths in the key file not recognized?
 ------------------------------------------------
 One reason could be that you are using the wrong path separator. On Windows, the path separator is a backslash, while on Unix systems it is a forward slash.
 If you are using a Windows system, you need to escape the backslashes in the path.
-For example, if you have a path like `C:\Users\user\Documents\keyfile.txt`, try to write it as `C:\\Users\\user\\Documents\\keyfile.txt`.
-Also, when you swith between Windows and Unix systems, make sure to adjust the path separators accordingly. Linux uses forward slashes `/`.
+For example, if you have a path like ``C:\Users\user\Documents\keyfile.txt``, try to write it as ``C:\\Users\\user\\Documents\\keyfile.txt``.
+Also, when you switch between Windows and Unix systems, make sure to adjust the path separators accordingly. Linux uses forward slashes ``/``.
 
 

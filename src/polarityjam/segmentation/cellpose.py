@@ -245,16 +245,16 @@ class CellposeSegmenter(Segmenter):
         return masks
 
     def _get_segmentation_file_name(self, filepath, cells=True):
-        segmentation = None
-        stem = None
-        if self.params.use_given_mask:
-            stem = Path(filepath).stem
+        if filepath is None:
+            return None, None
 
-            suffix = "_seg.npy" if cells else "_seg_nuc.npy"
+        stem = Path(filepath).stem
 
-            if self.params.manually_annotated_mask:
-                suffix = self.params.manually_annotated_mask
-            segmentation = Path(filepath).parent.joinpath(stem + suffix)
+        suffix = "_seg.npy" if cells else "_seg_nuc.npy"
+
+        if self.params.manually_annotated_mask:
+            suffix = self.params.manually_annotated_mask
+        segmentation = Path(filepath).parent.joinpath(stem + suffix)
 
         return segmentation, stem
 

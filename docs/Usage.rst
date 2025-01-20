@@ -3,6 +3,15 @@
 Usage
 =====
 
+
+Examples
+--------
+To see where Polarity-JaM was used for analysis please refer to the following publications (upto: Jan 2025):
+
+- `Divergent endothelial mechanisms drive arteriovenous malformations in Alk1 and SMAD4 loss-of-function <https://www.biorxiv.org/content/10.1101/2025.01.03.631070v2.full.pdf>`_
+- `Microfluidic vessel-on-chip platform for investigation of cellular defects in venous malformations and responses to various shear stress and flow conditions <https://pubs.rsc.org/en/Content/ArticleLanding/2025/LC/D4LC00824C>`_
+
+
 Napari-Plugin
 -------------
 The following video shows how to install and use the polarityjam napari plugin:

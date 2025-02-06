@@ -112,7 +112,7 @@ class Extractor:
 
         # calculate properties for each cell
         for sc_image in sc_image_list:
-            sc_props_collection = SingleCellPropertyCollector.calc_sc_props(
+            sc_props_collection = SingleCellPropertyCollector.get_sc_props(
                 sc_image, self.params
             )
 
@@ -122,6 +122,7 @@ class Extractor:
                 filename_prefix,
                 bio_med_image.img_hash,
                 sc_image.connected_component_label,
+                self.params,
             )
 
         if self.params.save_sc_image:
@@ -342,6 +343,11 @@ class Extractor:
             img, img_params, segmentation=bio_med_segmentation
         )
 
+        # add all necessary information to the collection
+        PropertyCollector.add_out_path(collection, filename_prefix, output_path)
+        PropertyCollector.add_runtime_params(collection, filename_prefix, self.params)
+        PropertyCollector.add_img(collection, filename_prefix, bio_med_image)
+
         self.extract_cell_features(collection, bio_med_image, filename_prefix)
 
         if self.params.extract_group_features:
@@ -351,9 +357,6 @@ class Extractor:
 
         # mark the beginning of a new image that is potentially extracted
         PropertyCollector.set_reset_index(collection)
-        PropertyCollector.add_out_path(collection, filename_prefix, output_path)
-        PropertyCollector.add_runtime_params(collection, filename_prefix, self.params)
-        PropertyCollector.add_img(collection, filename_prefix, bio_med_image)
 
         get_logger().info("Done feature extraction for file: %s" % str(filename_prefix))
 
@@ -416,16 +419,22 @@ class Extractor:
 
         """
         if len(collection) < 2:
-            get_logger().warn(
+            get_logger().warning(
                 """Neighborhood analysis not possible.
                  Not enough cells to calculate group features!
                  Switch off neighborhood analysis (extract_group_features = False) or improve segmentation!"""
             )
             return
+        foi_ds = collection.get_properties_by_img_name(filename_prefix)
+        # catch whether the feature of interest is present
+        if self.params.feature_of_interest not in foi_ds.columns:
+            get_logger().warning(
+                "Feature of interest not present in dataset."
+                " Did you enable the respective feature class for extraction?"
+            )
+            return
 
-        foi_vec = collection.get_properties_by_img_name(filename_prefix)[
-            self.params.feature_of_interest
-        ].values
+        foi_vec = foi_ds[self.params.feature_of_interest].values
         bio_med_segmentation.set_feature_of_interest(
             self.params.feature_of_interest, foi_vec
         )
@@ -435,7 +444,10 @@ class Extractor:
             bio_med_segmentation, self.params.feature_of_interest
         )
         PropertyCollector.collect_group_statistic(
-            collection, morans_i, len(bio_med_segmentation.segmentation_mask_connected)
+            collection,
+            morans_i,
+            len(bio_med_segmentation.segmentation_mask_connected),
+            self.params,
         )
 
         # neighborhood feature analysis based on FOI
@@ -443,5 +455,5 @@ class Extractor:
             bio_med_segmentation, self.params.feature_of_interest
         )
         PropertyCollector.collect_neighborhood_props(
-            collection, neighborhood_props_list
+            collection, neighborhood_props_list, self.params
         )

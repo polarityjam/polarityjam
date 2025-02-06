@@ -1,0 +1,38 @@
+# ImageParameters
+channel_junction: 3
+channel_nucleus: 2
+channel_expression_marker: 3
+channel_organelle: 0
+pixel_to_micron_ratio: 2.4089
+
+# RuntimeParameter
+extract_group_features: true
+extract_morphology_features: false
+extract_polarity_features: true
+extract_intensity_features: true
+clear_border: true
+
+# PlotParameter
+dpi: 50
+estimated_cell_diameter: 100
+feature_of_interest: cell_shape_orientation_deg
+graphics_output_format:
+  - png
+graphics_width: 7
+manually_annotated_mask: ""
+mask_focal_adhesion: -1
+mask_junction: -1
+membrane_thickness: 5
+min_cell_size: 50
+min_organelle_size: 10
+min_nucleus_size: 10
+outline_width: 2
+plot_orientation: true
+plot_junctions: true
+plot_marker: true
+plot_polarity: true
+plot_ratio_method: true
+plot_cyclic_orientation: true
+show_polarity_angles: true
+use_given_mask: true
+use_gpu: false

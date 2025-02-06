@@ -235,6 +235,9 @@ class PropertiesCollection:
             self.dataset.at[
                 self._index, "nuc_shape_index"
             ] = nucleus_props.perimeter / np.sqrt(nucleus_props.area)
+            self.dataset.at[
+                self._index, "nuc_displacement_distance"
+            ] = nucleus_props.nuc_displacement_distance
 
     def add_sc_general_props(
         self,

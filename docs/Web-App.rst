@@ -4,7 +4,7 @@ Web-App
 We provide a simple means for statistical analysis of circular data that supports both exploratory analysis and the
 generation of graphs for publication. The App is based on the R Shiny inteface and can be started locally on you
 computer or on an web service provided by the Max-Delbrück-Center for Molecular Medicine: 
-`Polarity-JaM Web-App <https://application.posit.mdc-berlin.de/polarityjam/>`_.
+`Polarity-JaM Web-App <http://www.polarityjam.com>`_.
 
 Circular statistics
 -------------------

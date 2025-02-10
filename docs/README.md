@@ -4,14 +4,14 @@ Especially those that refer to the notebooks.
 
 
 ## Build and check the documentation
-1. install conda
-2. install an environment:
+1. install micromamba
+2. install an environment - last tested python version is 3.13:
 ```
-conda create -n sphinx-polarityjam python pip
-conda activate sphinx-polarityjam
+micromamba create -y -n sphinx-polarityjam python pip -c conda-forge
+micromamba activate sphinx-polarityjam
 pip install -r docs/requirements.txt
 ```
-3. make sure "pandoc" is isntalled (on ubuntu: `sudo apt install pandoc`)
+3. make sure "pandoc" is installed (on ubuntu: `sudo apt install pandoc`)
 4. go to docs folder: `cd docs/`
 5. build the documentation locally with `make html`. A folder "_build" should appear (e.g. docs/_build). 
 This is your local version of the documentation!

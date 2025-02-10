@@ -23,7 +23,7 @@ Welcome to polarityjam's documentation!
       :raw-html:`<br />`
 
 
-      The `Polarity-JaM <https://doi.org/10.1101/2024.01.24.577027>`_ suite is a software package that lets you study cell polarity, junctions and morphology.
+      The `Polarity-JaM <https://www.nature.com/articles/s41467-025-56643-x>`_ suite is a software package that lets you study cell polarity, junctions and morphology.
       :raw-html:`<br />`
       :raw-html:`<br />`
       Explore the :ref:`software suite <software suite>` here!

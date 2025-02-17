@@ -15,7 +15,7 @@ Cellpose: `https://www.nature.com/articles/s41592-020-01018-x <https://www.natur
 
 Cellpose2: `https://doi.org/10.1038/s41592-022-01663-4 <https://doi.org/10.1038/s41592-022-01663-4>`_
 
-Cellpose3: ``https://doi.org/10.1038/s41592-025-02595-5 <https://doi.org/10.1038/s41592-025-02595-5>`_
+Cellpose3: `https://doi.org/10.1038/s41592-025-02595-5 <https://doi.org/10.1038/s41592-025-02595-5>`_
 
 Mesmer Deepcell: `https://www.nature.com/articles/s41587-021-01094-0 <https://www.nature.com/articles/s41587-021-01094-0>`_
 

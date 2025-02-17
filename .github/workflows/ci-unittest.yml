@@ -16,14 +16,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8"]
+        python-version: ["3.10"]
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.80
+      - name: Set up Python 3.10
         uses: actions/setup-python@v3
         with:
-          python-version: "3.8"
+          python-version: "3.10"
       - name: Install_linux
         run: |
           python -m pip install --upgrade pip
@@ -38,14 +38,14 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: ["3.8"]
+        python-version: ["3.10"]
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.80
+      - name: Set up Python 3.10
         uses: actions/setup-python@v3
         with:
-          python-version: "3.8"
+          python-version: "3.10"
       - name: Install_windows
         run: |
           python -m pip install --upgrade pip
@@ -57,17 +57,17 @@ jobs:
           python -m unittest discover src/polarityjam/test/
 
   build_macos:
-    runs-on: macos-12
+    runs-on: macos-14
     strategy:
       matrix:
-        python-version: ["3.8"]
+        python-version: ["3.10"]
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.80
+      - name: Set up Python 3.10
         uses: actions/setup-python@v3
         with:
-          python-version: "3.8"
+          python-version: "3.10"
       - name: Install_macos
         run: |
           python -m pip install --upgrade pip

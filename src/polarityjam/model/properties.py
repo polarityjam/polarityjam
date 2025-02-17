@@ -196,6 +196,16 @@ class SingleCellNucleusProps(SingleInstanceProps):
         """Return the contour points of the nucleus."""
         return get_contour(self.mask.data)
 
+    @property
+    def nuc_displacement_distance(self):
+        """Return the distance from nucleus center to cell center."""
+        return compute_marker_vector_norm(
+            self._sc_props.centroid[0],  # single cell center X
+            self._sc_props.centroid[1],
+            self.centroid[0],  # nucleus center X
+            self.centroid[1],
+        )
+
 
 class SingleCellOrganelleProps(SingleInstanceProps):
     """Class representing the properties of a single organelle."""

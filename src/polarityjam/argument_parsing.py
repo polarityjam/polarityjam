@@ -53,7 +53,8 @@ def _create_parser():
     """Create a parser for all known album arguments."""
     parser = PolarityjamParser()
     parser_creators = []
-    for entry_point in entry_points().get("console_parsers_polarityjam", []):
+
+    for entry_point in entry_points(group="console_parsers_polarityjam"):
         try:
             parser_creators.append(entry_point.load())
         except Exception as e:

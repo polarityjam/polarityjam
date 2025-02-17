@@ -32,7 +32,7 @@ class TestExtractionOptions(TestCommon):
         # assert
         df = pd.read_csv(Path(out_path).joinpath("myfile.csv"))
         self.assertEqual(df.shape[0], 2)  # 2 cells
-        self.assertEqual(df.shape[1], 79)  # 79 features
+        self.assertEqual(df.shape[1], 80)  # 79 features
 
     def test_no_polarity_extraction(self):
         # create parameter file
@@ -55,7 +55,7 @@ class TestExtractionOptions(TestCommon):
         # assert
         df = pd.read_csv(Path(out_path).joinpath("myfile.csv"))
         self.assertEqual(df.shape[0], 2)  # 2 cells
-        self.assertEqual(df.shape[1], 62)  # 62 features (no polarity)
+        self.assertEqual(df.shape[1], 63)  # 63 features (no polarity)
 
     def test_no_morphology_extraction(self):
         # create parameter file
@@ -101,7 +101,7 @@ class TestExtractionOptions(TestCommon):
         # assert
         df = pd.read_csv(Path(out_path).joinpath("myfile.csv"))
         self.assertEqual(df.shape[0], 2)  # 2 cells
-        self.assertEqual(df.shape[1], 68)  # 35 features (no intensity)
+        self.assertEqual(df.shape[1], 69)  # 69 features (no intensity)
 
     def test_no_topology_extraction(self):
         # create parameter file
@@ -124,4 +124,4 @@ class TestExtractionOptions(TestCommon):
         # assert
         df = pd.read_csv(Path(out_path).joinpath("myfile.csv"))
         self.assertEqual(df.shape[0], 2)  # 2 cells
-        self.assertEqual(df.shape[1], 68)  # 68 features (no topology)
+        self.assertEqual(df.shape[1], 69)  # 69 features (no topology)

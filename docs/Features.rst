@@ -301,6 +301,8 @@ Target: Nucleus
 +-----------------------------------+----------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 | nuc_displacement_orientation_deg  | polarity       | |nuc_displacement_orientation| | The displacement orientation of the nucleus from the center of the cell in deg.                                                                    |
 +-----------------------------------+----------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+| nuc_displacement_distance         | morphology     | |nuc_displacement_distance|    | The distance of the nucleus from the center of the cell in pixel space.                                                                            |
++-----------------------------------+----------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 | nuc_shape_orientation_rad         | polarity       | |nuc_shape_orientation|        | Long axis of ellipsoid fit of the nucleus in rad.                                                                                                  |
 +-----------------------------------+----------------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 | nuc_shape_orientation_deg         | polarity       | |nuc_shape_orientation|        | Long axis of ellipsoid fit of the nucleus in deg.                                                                                                  |
@@ -344,7 +346,7 @@ Target: Organelle
 +----------------------------+----------------+-----------------------------+--------------------------------------------------------------------------+
 | organelle_Y                | localization   | |organelle_centroid|        | The Y coordinate (vertical axis) of the center of the cell organelle.    |
 +----------------------------+----------------+-----------------------------+--------------------------------------------------------------------------+
-| nuc_organelle_distance     | morphology     | |nuc_organelle_distance|    | Distance from cell organelle to the nucleus.                             |
+| nuc_organelle_distance     | morphology     | |nuc_organelle_distance|    | Distance from cell organelle to the nucleus in pixel space.              |
 +----------------------------+----------------+-----------------------------+--------------------------------------------------------------------------+
 | organelle_orientation_rad  | polarity       | |organelle_orientation|     | The orientation in rad of the organelle to the nucleus                   |
 +----------------------------+----------------+-----------------------------+--------------------------------------------------------------------------+

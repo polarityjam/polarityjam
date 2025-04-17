@@ -63,6 +63,31 @@ The following provides examples of how to run the feature extraction process usi
     polarityjam run-key paramfile.yml inputpath inputkey.csv outputpath
 
 
+Segmentation files
+------------------
+
+You can bring your own segmentation files to the pipeline.
+Polarity-JaM comes native with a `cellpose integration <https://cellpose.readthedocs.io/en/latest/index.html>`_.
+The segmentation files should be in numpy format used in cellpose.
+
+You can bring both own cell segmentation and nuclei segmentation. For Polarity-JaM to use your own segmentation files,
+they must be stored on disk together with the input images. The segmentation files must be named according to the following pattern:
+
+``*_seg.npy`` for the cell segmentation and ``*_seg_nuc.npy`` for the nuclei segmentation.
+
+The following shows an input folder with one image and both segmentation files: ::
+
+
+    my_input_folder/
+    ├── 060721_EGM2_18dyn_02.tif
+    ├── 060721_EGM2_18dyn_02_seg.npy
+    └── 060721_EGM2_18dyn_02_seg_nuc.npy
+
+
+.. note::
+    Cellpose does always save the segmentation files as ``*_seg.npy`` even if the masks contains nuclei. Rename this file according to the pattern above to use it in Polarity-JaM as nuclei mask.
+
+
 Parameter file
 --------------
 
@@ -388,12 +413,6 @@ The corresponding output folder structure would be: ::
     Using OS specific paths in the ``key-file.csv`` might hurt reproducibility! (e.g. windows paths are different than unix paths!)
 
 
-Napari Plugin
--------------
-
-We are working on a short video here. Hang in tight.
-
-
 Web app
 --------
 
@@ -402,6 +421,8 @@ There are several statistics available whose parameters can be adapted/adjusted 
 observe the change in the corresponding visualization. Thus, exploring the data and revealing
 interesting patterns is heavily facilitated. To get to know more about the statics jump to circular
 statistics and continue reading or visit the method section.
+
+You find the web application `here <http://www.polarityjam.com/>`_.
 
 
 Testing

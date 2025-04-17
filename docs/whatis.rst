@@ -8,7 +8,7 @@ Polarity-JaM suite
 
 The `Polarity-JaM <https://www.nature.com/articles/s41467-025-56643-x>`_ suite is a software package that lets you study cell polarity, junctions and morphology.
 
-.. image:: images/sketch-data-analysis-organization-v5_.png
+.. image:: images/figure_7.png
 
 At the heart lies your data that you wish to explore. That usually involves three steps:
 

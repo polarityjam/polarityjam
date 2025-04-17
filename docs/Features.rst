@@ -285,6 +285,9 @@ Target: Single cell
 .. |nuc_shape_index| image:: images/features/nucleus_shape_index.svg
     :width: 200px
 
+.. |nuc_displacement_distance| image:: images/features/nucleus_displacement_distance.svg
+    :width: 200px
+
 
 
 

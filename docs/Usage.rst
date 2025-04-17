@@ -71,7 +71,8 @@ Polarity-JaM comes native with a `cellpose integration <https://cellpose.readthe
 The segmentation files should be in numpy format used in cellpose.
 
 You can bring both own cell segmentation and nuclei segmentation. For Polarity-JaM to use your own segmentation files,
-they must be stored on disk together with the input images. The segmentation files must be named according to the following pattern:
+they must be stored on disk together with the input images. Additionally the parameter ``use_given_mask`` must be set to ``True`` (see paragraph below).
+The segmentation files must be named according to the following pattern:
 
 ``*_seg.npy`` for the cell segmentation and ``*_seg_nuc.npy`` for the nuclei segmentation.
 
@@ -102,20 +103,20 @@ Although they are separated in four different topics, they can be defined in a s
 Image Parameter
 +++++++++++++++
 
-+----------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Parameter                  | Category      | Type                    | Default  | Options     | Description                                                                                                                                                      |
-+============================+===============+=========================+==========+=============+==================================================================================================================================================================+
-+----------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| channel_junction           | image         | integer                 |          | -1,0,1,2    | Specifies which channel in the input image(s) holds information about the junction signals. -1 to indicate there is no channel.                                  |
-+----------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| channel_nucleus            | image         | integer                 |          | -1,0,1,2    | Specifies which channel in the input image(s) holds information about the nucleus. -1 to indicate there is no channel.                                           |
-+----------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| channel_organelle          | image         | integer                 |          | -1,0,1,2    | Specifies which channel in the input image(s) holds information about the organelle (e.g golgi apparatus). -1 to indicate there is no channel.                   |
-+----------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| channel_expression_marker  | image         | integer                 |          | -1,0,1,2    | Specifies which channel in the input image(s) holds information about the expression marker. -1 to indicate there is no channel.                                 |
-+----------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| pixel_to_micron_ratio      | image         | float                   | 1        |             | Specifies the pixel to micron ratio. E.g. a pixel is worth how many micro meter. Default is 1.                                                                   |
-+----------------------------+---------------+-------------------------+----------+-------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++----------------------------+---------------+-------------------------+----------+------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Parameter                  | Category      | Type                    | Default  | Options          | Description                                                                                                                                                      |
++============================+===============+=========================+==========+==================+==================================================================================================================================================================+
++----------------------------+---------------+-------------------------+----------+------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| channel_junction           | image         | integer                 |          | -1,0,1,2,...     | Specifies which channel in the input image(s) holds information about the junction signals. -1 to indicate there is no channel.                                  |
++----------------------------+---------------+-------------------------+----------+------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| channel_nucleus            | image         | integer                 |          | -1,0,1,2,...     | Specifies which channel in the input image(s) holds information about the nucleus. -1 to indicate there is no channel.                                           |
++----------------------------+---------------+-------------------------+----------+------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| channel_organelle          | image         | integer                 |          | -1,0,1,2,...     | Specifies which channel in the input image(s) holds information about the organelle (e.g golgi apparatus). -1 to indicate there is no channel.                   |
++----------------------------+---------------+-------------------------+----------+------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| channel_expression_marker  | image         | integer                 |          | -1,0,1,2,...     | Specifies which channel in the input image(s) holds information about the expression marker. -1 to indicate there is no channel.                                 |
++----------------------------+---------------+-------------------------+----------+------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| pixel_to_micron_ratio      | image         | float                   | 1        |                  | Specifies the pixel to micron ratio. E.g. a pixel is worth how many micro meter. Default is 1.                                                                   |
++----------------------------+---------------+-------------------------+----------+------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
 

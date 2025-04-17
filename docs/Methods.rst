@@ -5,7 +5,7 @@ Methods
 .. role:: raw-html(raw)
     :format: html
 
-The methods that are used in polarityjam are listed on this page. Whenever necessary, a brief summary
+The methods that are used in Polarity-JaM are listed on this page. Whenever necessary, a brief summary
 of the methodology is provided.
 
 Segmentation

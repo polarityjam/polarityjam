@@ -9,7 +9,7 @@ Frequently Asked Questions
 I have problems during installation with imagecodecs, what can i do?
 --------------------------------------------------------------------
 If you have problems installing the imagecodecs package via pip, you can try to install it using the micromamba package manager.
-You activate your polarityjam environment and run the following command:
+You activate your Polarity-JaM environment and run the following command:
 
 .. code-block:: bash
 
@@ -59,7 +59,7 @@ How can I correct my segmentation?
 When you have a segmentation file, you can correct it using the `cellpose GUI <https://cellpose.readthedocs.io/en/latest/index.html>`_.
 Where you can manually correct the segmentation and save the corrected segmentation, again as a ``_seg.npy`` file.
 
-You then proceed in polarityjam as if you brought your own segmentation.
+You then proceed in Polarity-JaM as if you brought your own segmentation.
 
 How does such a segmentation file look?
 ---------------------------------------

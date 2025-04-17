@@ -28,8 +28,8 @@ Manually install Polarity-JaM via:
     pip install polarityjam
 
 
-Manual installation of the napari plugin for polarityjam
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Manual installation of the napari plugin for Polarity-JaM
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Make sure you have Polarity-JaM installed. Then execute the following steps:
 
 .. code-block:: console

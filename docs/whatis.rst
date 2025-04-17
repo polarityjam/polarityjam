@@ -1,12 +1,12 @@
 .. _software suite:
 
-What is PolarityJaM?
-====================
+What is Polarity-JaM?
+=====================
 
-PolarityJaM suite
------------------
+Polarity-JaM suite
+------------------
 
-The `PolarityJaM <https://www.nature.com/articles/s41467-025-56643-x>`_ suite is a software package that lets you study cell polarity, junctions and morphology.
+The `Polarity-JaM <https://www.nature.com/articles/s41467-025-56643-x>`_ suite is a software package that lets you study cell polarity, junctions and morphology.
 
 .. image:: images/sketch-data-analysis-organization-v5_.png
 
@@ -17,9 +17,9 @@ At the heart lies your data that you wish to explore. That usually involves thre
 (3) visualizing the results.
 
 Moreover, you want your work to be reproducible, easily comprehensible and eventually extendable by others.
-PolarityJaM is designed to help you with all of these tasks!
+Polarity-JaM is designed to help you with all of these tasks!
 
-The analysis of images performed by PolarityJaM is divided into two individual processing parts which
+The analysis of images performed by Polarity-JaM is divided into two individual processing parts which
 can be executed independently. Firstly, all necessary information from the input is
 extracted via a feature extraction pipeline. The output will be a ``.csv`` file that can be easily
 shared and interpreted. Secondly, in an independent step these features can be statistically
@@ -41,7 +41,7 @@ To know more about the features, visualizations and methodology behind
 this process check out the :ref:`methods` section.
 
 Often, an analysis performed is barely reproducible due to missing information about version,
-specific parameters and more. PolarityJaM feature extraction pipeline additionally stores all necessary
+specific parameters and more. Polarity-JaM feature extraction pipeline additionally stores all necessary
 meta-information to facilitate the reproduction of the extraction process at a later point in time.
 This includes both, the full log output of the extraction process, as well as the specific parameters
 the pipeline was started with. This allows to perform several analyses on different data and continue

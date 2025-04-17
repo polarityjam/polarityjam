@@ -1,7 +1,7 @@
 Citation
 ========
 
-Please cite our software if you use PolarityJam in your research!
+Please cite our software if you use Polarity-Jam in your research!
 
 The Article is available `https://doi.org/10.1038/s41467-025-56643-x <https://doi.org/10.1038/s41467-025-56643-x>`_.
 

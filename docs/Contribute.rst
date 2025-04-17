@@ -28,11 +28,11 @@ Write us! We talk about it and decide what we can do!
 Looking forward to your ideas and comments!
 
 
-Contributing to PolarityJaM
----------------------------
+Contributing to Polarity-JaM
+----------------------------
 
 
-Clone PolarityJaM repository from source as ::
+Clone Polarity-JaM repository from source as ::
 
     git clone https://github.com/polarityjam/polarityjam
     cd polarityjam

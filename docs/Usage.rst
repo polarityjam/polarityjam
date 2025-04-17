@@ -14,7 +14,7 @@ To see where Polarity-JaM was used for analysis please refer to the following pu
 
 Napari-Plugin
 -------------
-The following video shows how to install and use the polarityjam napari plugin:
+The following video shows how to install and use the Polarity-JaM napari plugin:
 
 .. raw:: html
 
@@ -27,7 +27,7 @@ Unfortunately, embedding is not possible at the moment. Please click on the link
 Run options
 -----------
 To start the feature extraction process, make sure you followed the manual installation
-procedure. Then run polarityjam on the commandline to look at the available run modes.
+procedure. Then run Polarity-JaM on the commandline to look at the available run modes.
 There are 3 options to start the feature extraction process run, run_stack, and run_key which
 are summarized in the table below.
 
@@ -131,7 +131,7 @@ Cellpose Segmentation Parameter
 | Parameter                       | Category      | Type                    | Default                               | Options                                   | Description                                                                                                                                                                                                    |
 +=================================+===============+=========================+=======================================+===========================================+================================================================================================================================================================================================================+
 +---------------------------------+---------------+-------------------------+---------------------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| manually_annotated_mask         | segmentation  | string                  | "_seg.npy"                            |                                           | PolarityJaM looks for an available segmentation in the input path. This parameter specifies the suffix for manually annotated masks. Leave empty to use the suffix "_seg.npy" (cellpose default).              |
+| manually_annotated_mask         | segmentation  | string                  | "_seg.npy"                            |                                           | Polarity-JaM looks for an available segmentation in the input path. This parameter specifies the suffix for manually annotated masks. Leave empty to use the suffix "_seg.npy" (cellpose default).             |
 +---------------------------------+---------------+-------------------------+---------------------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | store_segmentation              | segmentation  | bool                    | False                                 | True, False                               | If true, stores the cellpose segmentation masks in the input path (CAUTION: not in the output path!).                                                                                                          |
 +---------------------------------+---------------+-------------------------+---------------------------------------+-------------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -371,7 +371,7 @@ leaving them with the problem of how to execute a certain tool on a dedicated su
 Not often a lot of time is necessary to spend before the analysis is performed.
 Moreover, performing analysis steps on several experimental conditions often requires repeating the
 whole pipeline several times to get the desired output. To tackle this problem,
-polarityjam offers the execution option run_key that accepts a ``.csv`` file describing the storage
+Polarity-JaM offers the execution option run_key that accepts a ``.csv`` file describing the storage
 structures and conditions. To still be able to migrate the data without altering the csv,
 paths are relative to a given root folder (e.g. inputpath).
 

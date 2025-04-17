@@ -70,13 +70,17 @@ You can bring your own segmentation files to the pipeline.
 Polarity-JaM comes native with a `cellpose integration <https://cellpose.readthedocs.io/en/latest/index.html>`_.
 The segmentation files should be in numpy format used in cellpose.
 
+.. warning::
+    We tested Polarity-JaM with cellpose version >3.0.10. If you use a different version, we cannot assure correct functionality.
+
 You can bring both own cell segmentation and nuclei segmentation. For Polarity-JaM to use your own segmentation files,
 they must be stored on disk together with the input images. Additionally the parameter ``use_given_mask`` must be set to ``True`` (see paragraph below).
 The segmentation files must be named according to the following pattern:
 
 ``*_seg.npy`` for the cell segmentation and ``*_seg_nuc.npy`` for the nuclei segmentation.
 
-The following shows an input folder with one image and both segmentation files: ::
+You can only provide both, one or none of the segmentation files.
+The following shows an input folder with one image and both segmentation files, for cells and nuclei: ::
 
 
     my_input_folder/
@@ -86,7 +90,7 @@ The following shows an input folder with one image and both segmentation files: 
 
 
 .. note::
-    Cellpose does always save the segmentation files as ``*_seg.npy`` even if the masks contains nuclei. Rename this file according to the pattern above to use it in Polarity-JaM as nuclei mask.
+    Cellpose GUI does always save the segmentation files as ``*_seg.npy`` even if the masks contains nuclei. Rename this file according to the pattern above to use it in Polarity-JaM as nuclei mask.
 
 
 Parameter file

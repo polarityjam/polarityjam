@@ -6,10 +6,10 @@ env_file = """name: Polarityjam
 channels:
   - conda-forge
 dependencies:
-  - python=3.8.13
+  - python~3.10
   - pip
   - pip:
-     - polarityjam==0.3.0
+     - polarityjam==0.4.0
 """
 
 album_version = None

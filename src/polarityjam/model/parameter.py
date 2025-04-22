@@ -117,6 +117,9 @@ class RuntimeParameter(Parameter):
         if attrs is None:
             attrs = {}
         self.extract_group_features = None
+        self.extract_morphology_features = None
+        self.extract_polarity_features = None
+        self.extract_intensity_features = None
         self.membrane_thickness = None
         self.junction_threshold = None
         self.feature_of_interest = None
@@ -207,6 +210,7 @@ class PlotParameter(Parameter):
 
         self.outline_width = None
         self.length_scalebar_microns = None
+        self.length_unit = None
 
         self.graphics_output_format = None
         self.dpi = None

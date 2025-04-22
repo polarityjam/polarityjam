@@ -34,7 +34,7 @@ class TestIntegration(TestCommon):
     def test_run(self):
         # prepare
         in_file = str(self.get_test_image_path("060721_EGM2_18dyn_01.tif"))
-        param_file = str(self.get_test_parameter_file("parameters_golgi_nuclei.yml"))
+        param_file = str(self.get_test_file("parameters_golgi_nuclei.yml"))
         out_path = str(self.output_path.joinpath("run"))
 
         # build arguments
@@ -58,7 +58,7 @@ class TestIntegration(TestCommon):
         self.assertAlmostEqual(df.shape[0], 97, delta=10)
 
         # number of features should not change
-        self.assertEqual(79, df.shape[1])
+        self.assertEqual(80, df.shape[1])
 
         # only one csv file in output
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))
@@ -70,7 +70,7 @@ class TestIntegration(TestCommon):
     )
     def test_run_stack(self):
         in_path = str(self.get_test_image_folder("gn").joinpath("set_2"))
-        param_file = str(self.get_test_parameter_file("parameters_golgi_nuclei.yml"))
+        param_file = str(self.get_test_file("parameters_golgi_nuclei.yml"))
         out_path = str(self.output_path.joinpath("run_stack"))
 
         # build arguments
@@ -89,8 +89,8 @@ class TestIntegration(TestCommon):
         self.assertAlmostEqual(99, df2.shape[0], delta=10)
 
         # number of features should not change
-        self.assertEqual(79, df1.shape[1])
-        self.assertEqual(79, df2.shape[1])
+        self.assertEqual(80, df1.shape[1])
+        self.assertEqual(80, df2.shape[1])
 
         # two csv file in output
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))
@@ -102,7 +102,7 @@ class TestIntegration(TestCommon):
     )
     def test_run_stack_no_golgi(self):
         in_path = str(self.get_test_image_folder("g"))
-        param_file = str(self.get_test_parameter_file("parameters_no_golgi.yml"))
+        param_file = str(self.get_test_file("parameters_no_golgi.yml"))
         out_path = str(self.output_path.joinpath("run_stack_no_golgi"))
 
         # build arguments
@@ -129,9 +129,9 @@ class TestIntegration(TestCommon):
         self.assertAlmostEqual(58, df3.shape[0], delta=7)
 
         # number of features should not change
-        self.assertEqual(74, df1.shape[1])
-        self.assertEqual(74, df2.shape[1])
-        self.assertEqual(74, df3.shape[1])
+        self.assertEqual(75, df1.shape[1])
+        self.assertEqual(75, df2.shape[1])
+        self.assertEqual(75, df3.shape[1])
         # three csv file in output
         num_csv = len(glob.glob(str(Path(out_path).joinpath("*.csv"))))
         self.assertEqual(4, num_csv)
@@ -142,7 +142,7 @@ class TestIntegration(TestCommon):
     )
     def test_run_stack_no_nuclei(self):
         in_path = str(self.get_test_image_folder("n"))
-        param_file = str(self.get_test_parameter_file("parameters_no_nuclei.yml"))
+        param_file = str(self.get_test_file("parameters_no_nuclei.yml"))
         out_path = str(self.output_path.joinpath("run_stack_no_nuclei"))
 
         # build arguments
@@ -192,7 +192,7 @@ class TestIntegration(TestCommon):
     def test_run_key(self):
         in_path = str(self.get_test_image_folder("gn"))
         in_key = str(self.get_test_key_file())
-        param_file = str(self.get_test_parameter_file("parameters_golgi_nuclei.yml"))
+        param_file = str(self.get_test_file("parameters_golgi_nuclei.yml"))
         out_path = str(self.output_path.joinpath("run_key"))
 
         # build arguments

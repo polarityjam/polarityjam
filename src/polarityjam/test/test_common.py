@@ -68,7 +68,7 @@ class TestCommon(unittest.TestCase):
         else:
             return None
 
-    def get_test_parameter_file(self, name):
+    def get_test_file(self, name):
         return self.current_path.joinpath("resources", name)
 
     def get_test_key_file(self):

@@ -488,6 +488,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "organelle_orientation_deg" in list(collection.dataset.columns), (
+            "Feature %s not available." % "organelle_orientation_deg"
+        )
 
         im_junction = img.junction.data
         con_inst_seg_mask = img.segmentation.segmentation_mask_connected
@@ -632,6 +636,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "nuc_displacement_orientation_deg" in list(collection.dataset.columns), (
+            "Feature %s not available." % "nuc_displacement_orientation_deg"
+        )
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
         r_params = collection.get_runtime_params_by_img_name(img_name)
@@ -763,6 +771,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "marker_mean_expression" in list(collection.dataset.columns), (
+            "Feature %s not available." % "marker_mean_expression"
+        )
 
         im_marker = img.marker
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -926,6 +938,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "marker_centroid_orientation_deg" in list(collection.dataset.columns), (
+            "Feature %s not available." % "marker_centroid_orientation_deg"
+        )
 
         im_marker = img.marker
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -1056,6 +1072,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "marker_nucleus_orientation_deg" in list(collection.dataset.columns), (
+            "Feature %s not available." % "marker_nucleus_orientation_deg"
+        )
 
         im_junction = img.junction.data
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -1194,6 +1214,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "junction_interface_occupancy" in list(
+            collection.dataset.columns
+        ), "Junction features %s not available."
 
         im_junction = img.junction
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -1340,6 +1364,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "junction_centroid_orientation_deg" in list(
+            collection.dataset.columns
+        ), ("Features %s not available." % "junction_centroid_orientation_deg")
 
         im_junction = img.junction
         cell_mask = img.segmentation.segmentation_mask_connected
@@ -1448,6 +1476,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "cell_corner_points" in list(collection.dataset.columns), (
+            "Features %s not available." % "cell_corner_points"
+        )
 
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
 
@@ -1500,10 +1532,17 @@ class Plotter:
                 whether to close the figure after saving
 
         """
-        # todo: fix me
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "cell_eccentricity" in list(collection.dataset.columns), (
+            "Features %s not available." % "cell_eccentricity"
+        )
 
         im_junction = img.junction
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -1697,6 +1736,14 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "cell_length_to_width_ratio" in list(collection.dataset.columns), (
+            "Features %s not available." % "cell_length_to_width_ratio"
+        )
+        assert "cell_shape_orientation_rad" in list(collection.dataset.columns), (
+            "Features %s not available."
+            % "cell_shape_orientation_rad. Needed for orientation of the major axis."
+        )
 
         im_junction = img.junction
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -1909,6 +1956,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "cell_circularity" in list(collection.dataset.columns), (
+            "Features %s not available." % "cell_circularity"
+        )
 
         im_junction = img.junction
         segmentation_mask = img.segmentation.segmentation_mask_connected
@@ -2070,6 +2121,10 @@ class Plotter:
         assert (
             img_name in pandas.Series(list(collection.dataset["filename"])).unique()
         ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "marker_cue_directional_intensity_ratio" in list(
+            collection.dataset.columns
+        ), ("Features %s not available." % "marker_cue_directional_intensity_ratio")
 
         params = collection.get_runtime_params_by_img_name(img_name)
 
@@ -2136,6 +2191,14 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
         assert img.junction is not None, "Junction channel not available"
+        assert collection.dataset.empty is False, "No data available"
+        assert (
+            img_name in pandas.Series(list(collection.dataset["filename"])).unique()
+        ), "There seems to be no data for the image you selected"
+        # assert feature
+        assert "junction_cue_directional_intensity_ratio" in list(
+            collection.dataset.columns
+        ), ("Features %s not available." % "junction_cue_directional_intensity_ratio")
 
         params = collection.get_runtime_params_by_img_name(img_name)
 
@@ -2286,7 +2349,16 @@ class Plotter:
         foi_name = collection.get_runtime_params_by_img_name(
             img_name
         ).feature_of_interest
+        # assert feature
+        assert foi_name in list(single_cell_dataset.columns), (
+            "Features %s not available." % foi_name
+        )
+
         foi = single_cell_dataset[foi_name]
+
+        # normalize for length_unit (e.g. microns)
+        if self.params.length_unit == "microns":
+            foi = foi * pixel_to_micron_ratio
 
         # figure and axes
         fig, ax = self._get_figure(1)
@@ -2929,43 +3001,89 @@ class Plotter:
                 self.plot_threshold_segmentation_mask(collection, key, close)
 
             if self.params.plot_polarity and img.has_nuclei() and img.has_organelle():
-                self.plot_organelle_polarity(collection, key, close)
-                if img.has_nuclei():
-                    self.plot_nuc_displacement_orientation(collection, key, close)
+                if r_params.extract_polarity_features:
+                    self.plot_organelle_polarity(collection, key, close)
+                    if img.has_nuclei():
+
+                        self.plot_nuc_displacement_orientation(collection, key, close)
 
             if self.params.plot_marker and img.has_marker():
-                self.plot_marker_expression(collection, key, close)
-                self.plot_marker_polarity(collection, key, close)
-                if img.has_nuclei():
+                if r_params.extract_intensity_features:
+                    self.plot_marker_expression(collection, key, close)
+
+                if r_params.extract_polarity_features:
+                    self.plot_marker_polarity(collection, key, close)
+
+                if img.has_nuclei() and r_params.extract_polarity_features:
                     self.plot_marker_nucleus_orientation(collection, key, close)
 
-                if self.params.plot_ratio_method:
-                    self.plot_marker_cue_intensity_ratio(collection, key, close)
+                if self.params.plot_ratio_method and r_params.extract_polarity_features:
+                    if r_params.extract_morphology_features:
+                        self.plot_marker_cue_intensity_ratio(collection, key, close)
+                    else:
+                        get_logger().warning(
+                            "Cannot cue intensity ratio without morphology features."
+                        )
 
             if self.params.plot_junctions and img.has_junction():
-                self.plot_junction_features(collection, key, close)
-                self.plot_junction_polarity(collection, key, close)
-                self.plot_corners(collection, key, close)
+                if r_params.extract_morphology_features:
+                    self.plot_junction_features(collection, key, close)
+                    self.plot_corners(collection, key, close)
+
+                if r_params.extract_polarity_features:
+                    self.plot_junction_polarity(collection, key, close)
 
             if self.params.plot_elongation:
-                self.plot_length_to_width_ratio(collection, key, close)
+                if r_params.extract_morphology_features:
+                    if r_params.extract_polarity_features:
+                        self.plot_length_to_width_ratio(collection, key, close)
+                    else:
+                        get_logger().warning(
+                            "Cannot plot elongation without polarity features."
+                        )
                 # self.plot_eccentricity(collection, key, close)
 
-            if self.params.plot_symmetry:
-                self.plot_symmetry(collection, key, close)
+            if self.params.plot_symmetry and r_params.extract_polarity_features:
+                if r_params.extract_morphology_features:
+                    self.plot_symmetry(collection, key, close)
+                else:
+                    get_logger().warning(
+                        "Cannot plot elongation without morphology features."
+                    )
 
-            if self.params.plot_circularity:
+            if self.params.plot_circularity and r_params.extract_morphology_features:
                 self.plot_circularity(collection, key, close)
 
-            if self.params.plot_ratio_method:
-                self.plot_junction_cue_intensity_ratio(collection, key, close)
+            if self.params.plot_ratio_method and r_params.extract_polarity_features:
+                if r_params.extract_morphology_features:
+                    self.plot_junction_cue_intensity_ratio(collection, key, close)
+                else:
+                    get_logger().warning(
+                        "Cannot plot cue intensity ratio without morphology features."
+                    )
 
-            if self.params.plot_shape_orientation:
-                self.plot_shape_orientation(collection, key, close)
+            if (
+                self.params.plot_shape_orientation
+                and r_params.extract_polarity_features
+            ):
+                if r_params.extract_morphology_features:
+                    self.plot_shape_orientation(collection, key, close)
+                else:
+                    get_logger().warning(
+                        "Cannot plot shape orientation without morphology features."
+                    )
 
             if self.params.plot_foi:
                 if r_params.extract_group_features:
-                    self.plot_foi(collection, key, close)
+                    # check if feature of interest is available
+                    if r_params.feature_of_interest in collection.dataset.columns:
+                        self.plot_foi(collection, key, close)
+                    else:
+                        get_logger().warning(
+                            'Cannot plot feature of interest "%s". '
+                            "Did you enable the respective feature class for extraction?"
+                            % r_params.feature_of_interest
+                        )
 
             if self.params.plot_sc_image:
                 self.plot_single_cell_centered_masks(collection, key, close)

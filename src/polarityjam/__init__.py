@@ -1,5 +1,5 @@
 __import__("pkg_resources").declare_namespace(__name__)
-__version__ = "0.3.1"
+__version__ = "0.4.0"
 __author__ = "Jan Philipp Albrecht, Wolfgang Giese"
 
 # imports for python API - do not delete!

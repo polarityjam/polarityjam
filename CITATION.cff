@@ -16,4 +16,4 @@ repository: "https://github.com/polarityjam/polarityjam.git"
 type: software
 identifiers:
   - type: doi
-    value: 10.1101/2024.01.24.577027
+    value: 10.1038/s41467-025-56643-x

@@ -70,4 +70,7 @@ Version control: `git <https://git-scm.com/>`_ :raw-html:`<br />`
 Continuous integration: `github actions <https://github.com/features/actions>`_ :raw-html:`<br />`
 Sketching: `inkscape <https://inkscape.org/>`_ :raw-html:`<br />`
 Data Management: `omero <https://www.openmicroscopy.org/omero/>`_ :raw-html:`<br />`
+Web-App: `shiny <https://shiny.rstudio.com/>`_ :raw-html:`<br />`
+Statistics: `R <https://www.r-project.org/>`_ :raw-html:`<br />`
+
 

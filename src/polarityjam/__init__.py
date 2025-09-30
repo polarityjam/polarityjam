@@ -1,4 +1,8 @@
-__import__("pkg_resources").declare_namespace(__name__)
+"""polarityjam - A Python package for the analysis of polarity and junction morphology."""
+from pkgutil import extend_path
+
+__path__ = extend_path(__path__, __name__)
+
 __version__ = "0.4.1"
 __author__ = "Jan Philipp Albrecht, Wolfgang Giese"
 

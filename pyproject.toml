@@ -40,7 +40,7 @@ dependencies = [
     "urllib3~=1.26",
     "aenum==3.1.0",
     "tifffile==2023.2.28",
-    "album==0.10.3",
+    "album~=0.12",
     "jupyter~=1.0",
     "scikit-learn~=1.6",
 ]

@@ -20,6 +20,7 @@ We use the following:
 
 ### Changed
 
+- improved handling for segmentation plugins
 - project.toml for packaging
 - replace deprecated pkg_resources with importlib.metadata
 

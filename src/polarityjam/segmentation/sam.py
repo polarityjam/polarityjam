@@ -22,13 +22,16 @@ dependencies:
 
 def setup_album():
     """Initialize the album api."""
-    import os
     from pathlib import Path
 
     from album.api import Album
 
+    from polarityjam.settings import Settings
+
+    Path(Settings.installation_base.value).mkdir(parents=True, exist_ok=True)
+
     # create a collection inside the solution calling "album in album"
-    album_base_path = Path(os.path.abspath(__file__)).parent
+    album_base_path = Path(Settings.installation_base.value)
     album_api = Album.Builder().base_cache_path(album_base_path).build()
     album_api.load_or_create_collection()
 
@@ -78,7 +81,7 @@ setup(
     license="Apache License 2.0",
     documentation=["https://github.com/facebookresearch/segment-anything"],
     covers=[],
-    album_api_version="0.5.5",
+    album_api_version="0.7.0",
     args=[
         {
             "name": "input_path",
@@ -118,13 +121,12 @@ class SamSegmenter:
 
     def __init__(self, params):
         """Initialize the segmenter with the given parameters."""
-        import os
         from pathlib import Path
 
+        from polarityjam.settings import Settings
+
         self.params = params
-        self.DOWNLOAD_PATH_REL = Path(
-            os.path.dirname(os.path.realpath(__file__))
-        ).joinpath("SAM")
+        self.DOWNLOAD_PATH_REL = Path(Settings.model_base.value).joinpath("SAM")
         self.model_url = params.model_url  # type: ignore
         self.model_name = params.model_name  # type: ignore
         self.model_path = self.DOWNLOAD_PATH_REL.joinpath(self.model_name)

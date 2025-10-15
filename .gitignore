@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# intellij
+.idea
+
 # Distribution / packaging
 .Python
 build/
@@ -130,4 +133,3 @@ dmypy.json
 
 # emacs
 *~
-

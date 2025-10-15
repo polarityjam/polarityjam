@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "polarityjam"
+version = "0.4.2"
+authors = [
+  {name = "Jan Philipp Albrecht", email = "j.p.albrecht@fu-berlin.de"},
+    {name = "Wolfgang Giese", email = "wolfgang.giese@mdc-berlin.de"}
+]
+description = "Feature extraction pipeline for vascular cell data"
+license = "MIT"
+license-files = ["LICENSE"]
+readme = "README.md"
+keywords = ["vascular cell", "imaging", "data analysis", "polarity"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Utilities"
+]
+requires-python = "~=3.10"
+dependencies = [
+    "numpy~=1.26",
+    "cellpose~=3.0",
+    "pandas~=2.2",
+    "scipy~=1.11",
+    "scikit-image~=0.19",
+    "matplotlib~=3.10",
+	"PyYAML~=6.0",
+	"cmocean~=4.0",
+	"pyunpack==0.2.2",
+    "networkx==2.6.3",
+    "Shapely==1.8.2",
+    "requests~=2.25",
+    "urllib3~=1.26",
+    "aenum==3.1.0",
+    "tifffile==2023.2.28",
+    "album~=0.12",
+    "jupyter~=1.0",
+    "scikit-learn~=1.6",
+]
+
+[project.urls]
+Documentation = "https://polarityjam.readthedocs.io"
+Homepage = "https://www.polarityjam.com"
+DeveloperDocumentation = "https://github.com/polarityjam/polarityjam/wiki"
+Repository = "https://github.com/polarityjam/polarityjam"
+Tracker= "https://github.com/polarityjam/polarityjam/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+polarityjam="polarityjam.__main__:main"
+polarityjam_test="polarityjam.test.__main__:main"
+
+[project.entry-points."console_parsers_polarityjam"]
+run = "polarityjam.argument_parsing:create_run_parser"
+run_stack = "polarityjam.argument_parsing:create_run_stack_parser"
+run_key = "polarityjam.argument_parsing:create_run_key_parser"

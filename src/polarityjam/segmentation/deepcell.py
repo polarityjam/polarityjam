@@ -22,13 +22,16 @@ dependencies:
 
 def setup_album():
     """Initialize the album api."""
-    import os
     from pathlib import Path
 
     from album.api import Album
 
+    from polarityjam.settings import Settings
+
+    Path(Settings.installation_base.value).mkdir(parents=True, exist_ok=True)
+
     # create a collection inside the solution calling "album in album"
-    album_base_path = Path(os.path.abspath(__file__)).parent
+    album_base_path = Path(Settings.installation_base.value)
     album_api = Album.Builder().base_cache_path(album_base_path).build()
     album_api.load_or_create_collection()
 
@@ -171,7 +174,7 @@ setup(
         }
     ],
     covers=[],
-    album_api_version="0.5.5",
+    album_api_version="0.7.0",
     args=[
         {
             "name": "input_path",

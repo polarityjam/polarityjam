@@ -14,7 +14,7 @@ dependencies:
   - pytorch>=2.0.0
   - torchvision>=0.15.0
   - pytorch-cuda=11.7
-  - micro_sam=0.3.0post1
+  - micro_sam=1.6.2
   - pip
 """
 
@@ -48,7 +48,7 @@ def run():
     import os
 
     # inline backend from jupyter notebook does ot work
-    _mpl_backend = os.environ.get("MPLBACKEND")
+    _mpl_backend = os.environ.get("MPLBACKEND", "")
     if "backend_inline" in _mpl_backend:
         os.environ["MPLBACKEND"] = "qtagg"
         get_active_logger().info(
@@ -89,7 +89,7 @@ def run():
     amg.initialize(img_channel, embeddings, verbose=True)
     instances_amg = amg.generate(pred_iou_thresh=args.pred_iou_thresh)
     instances_amg = instance_segmentation.mask_data_to_segmentation(
-        instances_amg, shape=img_channel.shape, with_background=True
+        instances_amg, with_background=True
     )
 
     # save masks
@@ -121,7 +121,7 @@ setup(
     license="MIT",
     documentation=["https://github.com/computational-cell-analytics/micro-sam.git"],
     covers=[],
-    album_api_version="0.5.5",
+    album_api_version="0.7.0",
     args=[
         {
             "name": "input_path",
@@ -170,8 +170,6 @@ setup(
 
 class MicrosamSegmenter:
     """Microsam segmentation class."""
-
-    DOWNLOAD_PATH_REL = None
 
     def __init__(self, params):
         """Initialize the segmenter with the given parameters."""

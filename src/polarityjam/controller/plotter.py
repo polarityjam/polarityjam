@@ -18,7 +18,11 @@ from polarityjam.compute.shape import get_divisor_lines
 from polarityjam.compute.statistics import compute_polarity_index
 from polarityjam.model.collection import PropertiesCollection
 from polarityjam.model.image import BioMedicalChannel, BioMedicalImage
-from polarityjam.model.masks import BioMedicalInstanceSegmentationMask, BioMedicalMask
+from polarityjam.model.masks import (
+    BioMedicalInstanceSegmentationMask,
+    BioMedicalJunctionSegmentation,
+    BioMedicalMask,
+)
 from polarityjam.model.parameter import ImageParameter, PlotParameter
 from polarityjam.polarityjam_logging import get_logger
 from polarityjam.vizualization.plot import (
@@ -53,7 +57,7 @@ class Plotter:
         self,
         im_marker: BioMedicalChannel,
         cell_mask: BioMedicalInstanceSegmentationMask,
-        nuclei_mask: BioMedicalInstanceSegmentationMask,
+        nuclei_mask: Optional[BioMedicalInstanceSegmentationMask],
         single_cell_dataset: pandas.DataFrame,
     ) -> List[np.ndarray]:
         inlines_cell = BioMedicalInstanceSegmentationMask.empty(im_marker.data.shape)
@@ -67,7 +71,7 @@ class Plotter:
             intensity_cell = feature_row["marker_mean_expression"].values[0]
             intensity_mem = feature_row["marker_mean_expression_mem"].values[0]
 
-            intensity_nuc = None
+            intensity_nuc = 1
             if nuclei_mask is not None:
                 intensity_nuc = feature_row["marker_mean_expression_nuc"].values[0]
 
@@ -498,6 +502,9 @@ class Plotter:
         inst_nuclei_mask = img.segmentation.segmentation_mask_nuclei
         inst_organelle_mask = img.segmentation.segmentation_mask_organelle
 
+        assert inst_organelle_mask is not None, "Organelle mask not available"
+        assert inst_nuclei_mask is not None, "Nuclei mask not available"
+
         pixel_to_micron_ratio = img.img_params.pixel_to_micron_ratio
         r_params = collection.get_runtime_params_by_img_name(img_name)
         cue_direction = r_params.cue_direction
@@ -672,6 +679,10 @@ class Plotter:
         color_bar = fig.colorbar(cax, ax=ax, shrink=0.3)  # , extend='both')
         color_bar.set_label("polarity angle")
         color_bar.ax.set_yticks([0, 90, 180, 270, 360])
+
+        assert (
+            img.segmentation.segmentation_mask_nuclei is not None
+        ), "Nuclei Segmentation is not available"
 
         nuclei_mask = img.segmentation.segmentation_mask_nuclei.to_semantic_mask()
 
@@ -2875,7 +2886,9 @@ class Plotter:
         img = collection.get_image_by_img_name(img_name)
         assert img.segmentation is not None, "Segmentation is not available"
 
-        masks = []
+        masks: List[
+            Union[BioMedicalInstanceSegmentationMask, BioMedicalJunctionSegmentation]
+        ] = []
         titles = []
         num_fig = 2
         if img.segmentation.segmentation_mask_nuclei is not None:

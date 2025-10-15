@@ -213,7 +213,7 @@ def get_divisor_lines(origin: List[int], div_line: LineString, num_partitions: i
 def center_single_cell(
     img_list: Sequence[Union[BioMedicalChannel, BioMedicalMask, np.ndarray]],
     contours: Union[np.ndarray, Polygon],
-) -> List[np.ndarray]:
+) -> Tuple[List[np.ndarray], List[np.ndarray]]:
     """Centers a sequence of images around the contours of a single cell.
 
     Args:
@@ -238,6 +238,7 @@ def center_single_cell(
         x, y, w, h = cv2.boundingRect(contours)
 
     cropped_img_list = []
+    shift_list = []
     for img in img_list:
 
         if not isinstance(img, np.ndarray):
@@ -255,9 +256,13 @@ def center_single_cell(
         # crop the image to the bounding box
         img_cropped = img[y_max - h : y_max, x : x + w]  # noqa: E203
 
-        cropped_img_list.append(img_cropped)
+        # how much the centroid is shifted
+        shift = np.array([x, y_max - h])
 
-    return cropped_img_list
+        cropped_img_list.append(img_cropped)
+        shift_list.append(shift)
+
+    return cropped_img_list, shift_list
 
 
 def _bounding_box(x_coordinates, y_coordinates):

@@ -25,7 +25,7 @@ class Mask:
         self.data = mask.astype(bool)
 
         if self._warn and self.data.sum() == 0:
-            warnings.warn("Mask is empty!")
+            warnings.warn("Mask is empty!", stacklevel=2)
 
     def warn(self, warn: bool) -> None:
         """Set the warning flag.
@@ -379,6 +379,7 @@ class BioMedicalJunctionSegmentation:
         self.junction_masks = junction_masks
         self.junction_ids = junction_ids
         self.junction_cell_ids = junction_cell_ids
+        self.data = None
 
     def get_single_instance_mask(self, instance_label) -> BioMedicalMask:
         """Get the single cell mask given its label."""
@@ -497,7 +498,7 @@ class BioMedicalInstanceSegmentation:
             self.update_graphs()
 
     @property
-    def segmentation_mask_nuclei(self):
+    def segmentation_mask_nuclei(self) -> Optional[BioMedicalInstanceSegmentationMask]:
         """Get the nuclei segmentation mask."""
         return self._segmentation_mask_nuclei
 
@@ -512,7 +513,9 @@ class BioMedicalInstanceSegmentation:
             )
 
     @property
-    def segmentation_mask_organelle(self):
+    def segmentation_mask_organelle(
+        self,
+    ) -> Optional[BioMedicalInstanceSegmentationMask]:
         """Get the organelle segmentation mask."""
         return self._segmentation_mask_organelle
 
@@ -527,7 +530,7 @@ class BioMedicalInstanceSegmentation:
             )
 
     @property
-    def segmentation_mask_junction(self):
+    def segmentation_mask_junction(self) -> Optional[BioMedicalJunctionSegmentation]:
         """Get the junction segmentation mask."""
         return self._segmentation_mask_junction
 
@@ -546,7 +549,7 @@ class BioMedicalInstanceSegmentation:
 
         """
         if not self.connection_graph:
-            warnings.warn("Connection graph is disabled.")
+            warnings.warn("Connection graph is disabled.", stacklevel=2)
             return []
 
         island_list = self.remove_islands()
@@ -625,7 +628,7 @@ class BioMedicalInstanceSegmentation:
 
         """
         if not self.connection_graph:
-            warnings.warn("Connection graph is disabled.")
+            warnings.warn("Connection graph is disabled.", stacklevel=2)
             return []
 
         # Get list of islands - nodes with no neighbours

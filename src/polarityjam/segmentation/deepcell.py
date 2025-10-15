@@ -174,7 +174,7 @@ setup(
         }
     ],
     covers=[],
-    album_api_version="0.5.5",
+    album_api_version="0.7.0",
     args=[
         {
             "name": "input_path",

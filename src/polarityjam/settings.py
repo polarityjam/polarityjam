@@ -13,3 +13,4 @@ class Settings(Enum):
 
     # installation base
     installation_base = str(Path.home().joinpath(".polarityjam", "collection"))
+    model_base = str(Path.home().joinpath(".polarityjam", "model"))

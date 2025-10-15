@@ -725,7 +725,7 @@ class SingleCellImage(AbstractBioMedicalImage):
             The centered mask.
 
         """
-        return BioMedicalMask(center_single_cell([mask], self.contour)[0])
+        return BioMedicalMask(center_single_cell([mask], self.contour)[0][0])
 
     def center_channel(self, channel: BioMedicalChannel) -> BioMedicalChannel:
         """Center the channel on the contour.
@@ -738,7 +738,7 @@ class SingleCellImage(AbstractBioMedicalImage):
             The centered channel.
 
         """
-        return BioMedicalChannel(center_single_cell([channel], self.contour)[0])
+        return BioMedicalChannel(center_single_cell([channel], self.contour)[0][0])
 
     def get_contour_width(self) -> float:
         """Get the width of the contour."""

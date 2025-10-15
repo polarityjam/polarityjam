@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "polarityjam"
-version = "0.4.1"
+version = "0.4.2"
 authors = [
   {name = "Jan Philipp Albrecht", email = "j.p.albrecht@fu-berlin.de"},
     {name = "Wolfgang Giese", email = "wolfgang.giese@mdc-berlin.de"}

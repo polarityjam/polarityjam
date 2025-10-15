@@ -8,7 +8,7 @@ dependencies:
   - python~3.10
   - pip
   - pip:
-     - polarityjam==0.4.1
+     - polarityjam==0.4.2
 """
 
 

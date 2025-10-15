@@ -16,13 +16,14 @@ We use the following:
 
 ## [Unreleased]
 
-## [0.4.2]
+## [0.4.2] - 2025-10-15
 
 ### Changed
 
 - improved handling for segmentation plugins
 - project.toml for packaging
 - replace deprecated pkg_resources with importlib.metadata
+- update microSAM version
 
 ## [0.4.1] - 2025-07-03
 
@@ -178,7 +179,8 @@ We use the following:
 
 - pypi package for Polarity-Jam.
 
-[unreleased]: https://github.com/polarityjam/polarityjam/compare/v0.4.1...HEAD
+[unreleased]: https://github.com/polarityjam/polarityjam/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/polarityjam/polarityjam/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/polarityjam/polarityjam/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/polarityjam/polarityjam/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/polarityjam/polarityjam/compare/v0.2.2...v0.3.0

@@ -3,7 +3,7 @@ from pkgutil import extend_path
 
 __path__ = extend_path(__path__, __name__)
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 __author__ = "Jan Philipp Albrecht, Wolfgang Giese"
 
 # imports for python API - do not delete!

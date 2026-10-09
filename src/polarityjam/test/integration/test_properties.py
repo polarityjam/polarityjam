@@ -1,4 +1,5 @@
 import numpy as np
+from skimage.draw import ellipse
 
 from polarityjam import (
     BioMedicalImage,
@@ -10,6 +11,7 @@ from polarityjam import (
 from polarityjam.compute.corner import get_contour
 from polarityjam.compute.shape import mirror_along_cue_direction
 from polarityjam.model.image import SingleCellImage
+from polarityjam.model.properties import SingleCellNucleusProps, SingleCellProps
 from polarityjam.test.test_common import TestCommon
 
 
@@ -392,3 +394,28 @@ class TestSingleCellProps(TestCommon):
         self.assertAlmostEqual(iou_cone, 0.37, delta=0.01)
         self.assertGreater(iou_round, 0.99)
         self.assertAlmostEqual(iou_oval, 0.37, delta=0.01)
+
+    def test_nucleus_membrane_position(self):
+        def ellipse_mask(center, radius_row, radius_col):
+            mask = np.zeros((200, 300), dtype=bool)
+            mask[ellipse(*center, radius_row, radius_col, shape=mask.shape)] = True
+            return BioMedicalMask(mask)
+
+        cell_mask = ellipse_mask((100, 150), 40, 100)
+        sc_props = SingleCellProps(cell_mask, cell_mask, 0, 0)
+
+        # call
+        centered = SingleCellNucleusProps(ellipse_mask((100, 150), 15, 15), sc_props)
+        off_center = SingleCellNucleusProps(ellipse_mask((85, 190), 15, 15), sc_props)
+        touching = SingleCellNucleusProps(ellipse_mask((75, 150), 15, 15), sc_props)
+        # long nucleus axis along the short cell axis
+        rotated = SingleCellNucleusProps(ellipse_mask((100, 150), 25, 12), sc_props)
+
+        # assert
+        self.assertEqual(centered.nuc_membrane_distance, 25)
+        self.assertAlmostEqual(centered.nuc_membrane_position_index, 1)
+        self.assertAlmostEqual(off_center.nuc_membrane_position_index, 0.24)
+        self.assertEqual(touching.nuc_membrane_distance, 0)
+        self.assertEqual(touching.nuc_membrane_position_index, 0)
+        self.assertEqual(rotated.nuc_membrane_distance, 15)
+        self.assertAlmostEqual(rotated.nuc_membrane_position_index, 1)

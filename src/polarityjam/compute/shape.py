@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union
 
 import cv2
 import numpy as np
+from scipy import ndimage as ndi
 from shapely.affinity import rotate
 from shapely.geometry import LineString
 from shapely.geometry.polygon import Polygon
@@ -525,3 +526,64 @@ def get_shanon_estimated_pdf_angle(
     shannon_entropy = -np.sum(kd_vals_data1 * np.log2(kd_vals_data1))
 
     return shannon_entropy
+
+
+def _membrane_distance_map(cell_mask: np.ndarray) -> np.ndarray:
+    """Calculate the distance of each pixel to the closest pixel outside the cell."""
+    # holes are no membrane, padding keeps the background around a cropped cell
+    return ndi.distance_transform_edt(np.pad(ndi.binary_fill_holes(cell_mask), 1))
+
+
+def get_nucleus_membrane_distance(
+    cell_mask: np.ndarray, nucleus_mask: np.ndarray
+) -> float:
+    """Calculate the shortest distance between the nucleus and the cell membrane.
+
+    Args:
+        cell_mask:
+            The single cell mask
+        nucleus_mask:
+            The single nucleus mask of the same shape as the cell mask
+
+    Returns:
+        The distance in pixels, 0 if the nucleus touches the membrane
+
+    """
+    membrane_distance = _membrane_distance_map(cell_mask)
+
+    # nucleus pixels next to the membrane have a distance of 1
+    return max(membrane_distance[np.pad(nucleus_mask.astype(bool), 1)].min() - 1, 0.0)
+
+
+def get_max_nucleus_membrane_distance(
+    cell_mask: np.ndarray, nucleus_mask: np.ndarray
+) -> float:
+    """Calculate the largest distance to the cell membrane the nucleus can have.
+
+    The nucleus keeps its shape and orientation and is shifted to the position in the
+    cell that is farthest away from the membrane.
+
+    Args:
+        cell_mask:
+            The single cell mask
+        nucleus_mask:
+            The single nucleus mask of the same shape as the cell mask
+
+    Returns:
+        The distance in pixels, 0 if the nucleus cannot be placed without touching the membrane
+
+    """
+    membrane_distance = _membrane_distance_map(cell_mask)
+
+    nucleus_mask = nucleus_mask.astype(bool)
+    nucleus = nucleus_mask[ndi.find_objects(nucleus_mask.astype(np.uint8))[0]]
+
+    # without local minima in the hole free cell, the minimum below the nucleus is on its outline
+    nucleus_outline = nucleus & ~ndi.binary_erosion(nucleus, structure=np.ones((3, 3)))
+
+    # shortest distance between nucleus and membrane for each position of the nucleus
+    nucleus_distances = ndi.minimum_filter(
+        membrane_distance, footprint=nucleus_outline, mode="constant"
+    )
+
+    return max(nucleus_distances.max() - 1, 0.0)

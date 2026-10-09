@@ -101,6 +101,13 @@ Nucleus features
 +-----------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 | nuc_shape_index                   | Nucleus shape index computed from cell_perimeter / np.sqrt(cell_area).                                                                             |
 +-----------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+| nuc_displacement_distance         | Distance between the center of the cell and the center of the nucleus.                                                                             |
++-----------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+| nuc_membrane_distance             | Shortest distance between the nucleus and the cell membrane (outline of the cell). 0 if the nucleus touches the membrane.                          |
++-----------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
+| nuc_membrane_position_index       | nuc_membrane_distance relative to the largest such distance the nucleus can have in the cell, i.e. if shifted (with its shape and                  |
+|                                   | orientation) to the position farthest away from the membrane. Between 0 (nucleus touches the membrane) and 1 (most central position).              |
++-----------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
 

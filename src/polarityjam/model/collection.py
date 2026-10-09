@@ -238,6 +238,12 @@ class PropertiesCollection:
             self.dataset.at[
                 self._index, "nuc_displacement_distance"
             ] = nucleus_props.nuc_displacement_distance
+            self.dataset.at[
+                self._index, "nuc_membrane_distance"
+            ] = nucleus_props.nuc_membrane_distance
+            self.dataset.at[
+                self._index, "nuc_membrane_position_index"
+            ] = nucleus_props.nuc_membrane_position_index
 
     def add_sc_general_props(
         self,

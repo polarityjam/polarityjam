@@ -257,6 +257,44 @@ class BioMedicalInstanceSegmentationMask(Mask):
         """Convert the mask to a semantic (boolean) mask."""
         return BioMedicalMask(self.data.astype(bool))
 
+    def assign_to_instance_segmentation(
+        self, instance_mask: BioMedicalInstanceSegmentationMask
+    ) -> BioMedicalInstanceSegmentationMask:
+        """Assign each instance to the instance of another segmentation it overlaps most.
+
+        Each instance is cropped to its assigned instance and labeled like it.
+        Instances overlapping most with the background are removed.
+
+        Args:
+            instance_mask:
+                The instance segmentation to assign to, e.g. the cell segmentation.
+
+        Returns:
+            The mask with the labels of the assigned instances.
+
+        """
+        foreground = self.data != self.background_label
+        num_labels = int(instance_mask.data.max()) + 1
+
+        # number of pixels each instance shares with each instance and the background
+        pairs, counts = np.unique(
+            self.data[foreground] * num_labels + instance_mask.data[foreground],
+            return_counts=True,
+        )
+        labels, assigned_labels = np.divmod(pairs, num_labels)
+
+        # sorted by size, the last overlap of each instance is its largest
+        order = np.lexsort((counts, labels))
+        labels, assigned_labels = labels[order], assigned_labels[order]
+        is_largest = np.diff(labels, append=-1) != 0
+
+        assignment = np.zeros(self.data.max() + 1, dtype=instance_mask.data.dtype)
+        assignment[labels[is_largest]] = assigned_labels[is_largest]
+
+        return BioMedicalInstanceSegmentationMask(
+            np.where(assignment[self.data] == instance_mask.data, instance_mask.data, 0)
+        )
+
     def element_mult(
         self, mask: Union[BioMedicalInstanceSegmentationMask, np.ndarray]
     ) -> BioMedicalInstanceSegmentationMask:
@@ -506,10 +544,9 @@ class BioMedicalInstanceSegmentation:
     def segmentation_mask_nuclei(self, value: BioMedicalInstanceSegmentationMask):
         """Set the nuclei segmentation mask."""
         if value is not None:
-            self._segmentation_mask_nuclei = (
-                value.to_semantic_mask().overlay_instance_segmentation(
-                    self.segmentation_mask_connected
-                )
+            # parts of a nucleus reaching into a neighboring cell must not count for it
+            self._segmentation_mask_nuclei = value.assign_to_instance_segmentation(
+                self.segmentation_mask_connected
             )
 
     @property

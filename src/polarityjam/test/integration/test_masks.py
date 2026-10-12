@@ -1,5 +1,7 @@
 from unittest.mock import patch
 
+import numpy as np
+
 from polarityjam import (
     BioMedicalInstanceSegmentation,
     BioMedicalInstanceSegmentationMask,
@@ -110,6 +112,33 @@ class TestBioMedicalInstanceSegmentation(TestCommon):
         self.assertEqual(
             9, len(r.segmentation_mask_nuclei.get_labels())
         )  # same labels as mask
+
+    def test_segmentation_mask_nuclei_assigned_to_cell(self):
+        # prepare two cells, the cell right of them has been removed
+        cells = np.zeros((30, 90), dtype=int)
+        cells[5:25, 5:30] = 1
+        cells[5:25, 30:55] = 2
+
+        nuclei = np.zeros_like(cells)
+        nuclei[10:20, 20:33] = 1  # nucleus of cell 1, reaching into cell 2
+        nuclei[10:20, 38:46] = 2  # nucleus of cell 2
+        nuclei[10:20, 52:65] = 3  # nucleus of the removed cell, reaching into cell 2
+
+        # call
+        r = BioMedicalInstanceSegmentation(
+            BioMedicalInstanceSegmentationMask(cells), connection_graph=False
+        )
+        r.segmentation_mask_nuclei = BioMedicalInstanceSegmentationMask(nuclei)
+
+        # assert
+        self.assertListEqual([1, 2], r.segmentation_mask_nuclei.get_labels())
+        np.testing.assert_array_equal(
+            (nuclei == 1) & (cells == 1),
+            r.segmentation_mask_nuclei.get_single_instance_mask(1).data,
+        )
+        np.testing.assert_array_equal(
+            nuclei == 2, r.segmentation_mask_nuclei.get_single_instance_mask(2).data
+        )
 
     def test_segmentation_mask_organelle(self):
         # prepare

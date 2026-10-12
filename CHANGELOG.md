@@ -16,6 +16,10 @@ We use the following:
 
 ## [Unreleased]
 
+### Fixed
+
+- nucleus masks could contain parts of neighbouring nuclei: each nucleus is now only assigned to the cell it overlaps most, cells left without a nucleus are excluded via "min_nucleus_size"
+
 ## [0.4.2] - 2025-10-15
 
 ### Changed

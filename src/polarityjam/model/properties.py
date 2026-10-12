@@ -19,6 +19,8 @@ from polarityjam.compute.compute import (
 )
 from polarityjam.compute.corner import get_contour, get_corner
 from polarityjam.compute.shape import (
+    get_max_nucleus_membrane_distance,
+    get_nucleus_membrane_distance,
     get_shanon_estimated_pdf_center_distance,
     mirror_along_cue_direction,
 )
@@ -205,6 +207,29 @@ class SingleCellNucleusProps(SingleInstanceProps):
             self.centroid[0],  # nucleus center X
             self.centroid[1],
         )
+
+    @property
+    def nuc_membrane_distance(self):
+        """Return the shortest distance between the nucleus and the cell membrane."""
+        return get_nucleus_membrane_distance(
+            self._sc_props.image, self.mask.data[self._sc_props.slice]
+        )
+
+    @property
+    def nuc_membrane_position_index(self):
+        """Return the nucleus membrane distance relative to the largest one possible in the cell."""
+        max_distance = get_max_nucleus_membrane_distance(
+            self._sc_props.image, self.mask.data[self._sc_props.slice]
+        )
+
+        if max_distance == 0:
+            get_logger().warning(
+                "Warning: Nucleus does not fit into the cell without touching the membrane.",
+                stacklevel=2,
+            )
+            return np.nan
+
+        return self.nuc_membrane_distance / max_distance
 
 
 class SingleCellOrganelleProps(SingleInstanceProps):

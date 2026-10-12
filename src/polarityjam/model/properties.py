@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, List, Optional
+from functools import cached_property
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 import numpy as np
 import skimage.measure
@@ -19,8 +20,12 @@ from polarityjam.compute.compute import (
 )
 from polarityjam.compute.corner import get_contour, get_corner
 from polarityjam.compute.shape import (
+    get_cue_side,
+    get_linear_fit,
     get_max_nucleus_membrane_distance,
     get_nucleus_membrane_distance,
+    get_radial_intensity_profile,
+    get_radial_position,
     get_shanon_estimated_pdf_center_distance,
     mirror_along_cue_direction,
 )
@@ -482,15 +487,24 @@ class SingleCellMarkerNucleiProps(SingleInstanceProps):
 class SingleCellMarkerCytosolProps(SingleInstanceProps):
     """Class representing the properties of a single cell marker cytosol signal."""
 
+    # number of rings of the radial intensity profile from the nucleus to the membrane
+    num_radial_rings = 10
+
     def __init__(
         self,
         single_cytosol_mask: BioMedicalMask,
         im_marker: BioMedicalChannel,
         sc_marker_nuclei_props: SingleCellMarkerNucleiProps,
+        single_cell_mask: BioMedicalMask,
+        single_membrane_mask: BioMedicalMask,
+        cue_direction: int,
     ):
         """Initialize the properties with the given mask and intensity."""
         super().__init__(single_cytosol_mask, im_marker)
         self.sc_marker_nuclei_props = sc_marker_nuclei_props
+        self.cell_mask = single_cell_mask
+        self.membrane_mask = single_membrane_mask
+        self.cue_direction = cue_direction
 
     @property
     def marker_sum_expression_cyt(self):
@@ -501,6 +515,116 @@ class SingleCellMarkerCytosolProps(SingleInstanceProps):
     def marker_cytosol_ratio(self):
         """Return the ratio of the marker cytosol expression and the marker nucleus mean intensity."""
         return self.sc_marker_nuclei_props.mean_intensity / self.mean_intensity
+
+    @cached_property
+    def _radial_pixels(self):
+        """Return radial position, nucleus distance, cue side and intensity of the cytosol pixels without membrane."""
+        cell_mask = self.cell_mask.data.astype(bool)
+        nucleus_mask = self.sc_marker_nuclei_props.mask.data.astype(bool)
+
+        # crop to cell and nucleus, the nucleus might reach beyond the cell
+        sl = ndi.find_objects((cell_mask | nucleus_mask).astype(np.uint8))[0]
+        nucleus_mask = nucleus_mask[sl]
+
+        cytosol_mask, nucleus_distance, position = get_radial_position(
+            cell_mask[sl], nucleus_mask, self.membrane_mask.data[sl]
+        )
+
+        if not cytosol_mask.any():
+            get_logger().warning(
+                "Warning: No cytosol between nucleus and membrane.", stacklevel=2
+            )
+
+        cue_side = get_cue_side(
+            cytosol_mask, ndi.center_of_mass(nucleus_mask), self.cue_direction
+        )
+        intensity = self.intensity.data[sl][cytosol_mask].astype(float)
+
+        return position, nucleus_distance, cue_side, intensity
+
+    def _radial_profile(self, pixels: Optional[np.ndarray] = None) -> np.ndarray:
+        """Return the mean marker intensity of the rings from the nucleus to the membrane."""
+        position, _, _, intensity = self._radial_pixels
+
+        # all cytosol pixels if no selection is given
+        if pixels is not None:
+            position, intensity = position[pixels], intensity[pixels]
+
+        return get_radial_intensity_profile(
+            position, intensity, np.linspace(0, 1, self.num_radial_rings + 1)
+        )
+
+    def _radial_gradient(
+        self, pixels: Optional[np.ndarray] = None
+    ) -> Tuple[float, float, float]:
+        """Return slope, intercept and R² of a line fitted to the radial intensity profile."""
+        ring_centers = (np.arange(self.num_radial_rings) + 0.5) / self.num_radial_rings
+
+        return get_linear_fit(ring_centers, self._radial_profile(pixels))
+
+    def _normalize_radial_gradient(self, gradient: float) -> float:
+        """Return the gradient relative to the mean intensity of the radial profile."""
+        profile = self._radial_profile()
+
+        if np.isnan(profile).all() or np.nanmean(profile) == 0:
+            return np.nan
+
+        return gradient / np.nanmean(profile)
+
+    @property
+    def marker_radial_gradient(self):
+        """Return the change of the marker intensity from the nucleus to the membrane."""
+        return self._radial_gradient()[0]
+
+    @property
+    def marker_radial_gradient_norm(self):
+        """Return the marker radial gradient relative to the mean marker intensity."""
+        return self._normalize_radial_gradient(self.marker_radial_gradient)
+
+    @property
+    def marker_radial_gradient_r2(self):
+        """Return how well the radial marker intensity profile follows its gradient."""
+        return self._radial_gradient()[2]
+
+    @property
+    def marker_radial_gradient_px(self):
+        """Return the change of the marker intensity per pixel distance from the nucleus."""
+        _, nucleus_distance, _, intensity = self._radial_pixels
+
+        if nucleus_distance.size == 0:
+            return np.nan
+
+        # rings of one pixel width
+        ring_edges = np.arange(np.ceil(nucleus_distance.max()) + 1)
+        profile = get_radial_intensity_profile(nucleus_distance, intensity, ring_edges)
+
+        return get_linear_fit(ring_edges[:-1] + 0.5, profile)[0]
+
+    @property
+    def marker_radial_intensity_ratio(self):
+        """Return the marker intensity of the outer third of the cytosol relative to the inner third."""
+        position, _, _, intensity = self._radial_pixels
+        inner = intensity[position < 1 / 3]
+        outer = intensity[position >= 2 / 3]
+
+        if inner.size == 0 or outer.size == 0 or inner.mean() == 0:
+            return np.nan
+
+        return outer.mean() / inner.mean()
+
+    @property
+    def marker_radial_gradient_norm_cue_front(self):
+        """Return the normalized marker radial gradient in front of the nucleus in cue direction."""
+        _, _, cue_side, _ = self._radial_pixels
+
+        return self._normalize_radial_gradient(self._radial_gradient(cue_side > 0)[0])
+
+    @property
+    def marker_radial_gradient_norm_cue_back(self):
+        """Return the normalized marker radial gradient behind the nucleus in cue direction."""
+        _, _, cue_side, _ = self._radial_pixels
+
+        return self._normalize_radial_gradient(self._radial_gradient(cue_side < 0)[0])
 
 
 class SingleCellJunctionProps:

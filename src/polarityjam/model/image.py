@@ -684,6 +684,9 @@ class SingleCellImage(AbstractBioMedicalImage):
             self.cytosol_mask,
             self.img.marker,
             self.get_marker_nucleus_properties(param),
+            self.cell_mask,
+            self.cell_membrane_mask,
+            param.cue_direction,
         )
 
     def get_junction_properties(

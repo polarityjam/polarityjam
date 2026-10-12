@@ -412,6 +412,22 @@ class PropertiesCollection:
                 marker_nuc_props.mean_intensity / marker_nuc_cyt_props.mean_intensity
             )
 
+            self.dataset.at[
+                self._index, "marker_radial_gradient"
+            ] = marker_nuc_cyt_props.marker_radial_gradient
+            self.dataset.at[
+                self._index, "marker_radial_gradient_norm"
+            ] = marker_nuc_cyt_props.marker_radial_gradient_norm
+            self.dataset.at[
+                self._index, "marker_radial_gradient_r2"
+            ] = marker_nuc_cyt_props.marker_radial_gradient_r2
+            self.dataset.at[
+                self._index, "marker_radial_gradient_px"
+            ] = marker_nuc_cyt_props.marker_radial_gradient_px
+            self.dataset.at[
+                self._index, "marker_radial_intensity_ratio"
+            ] = marker_nuc_cyt_props.marker_radial_intensity_ratio
+
         if runtime_params.extract_polarity_features:
             self.dataset.at[
                 self._index, "marker_nucleus_orientation_rad"
@@ -419,6 +435,13 @@ class PropertiesCollection:
             self.dataset.at[
                 self._index, "marker_nucleus_orientation_deg"
             ] = marker_nuc_props.marker_nucleus_orientation_deg
+
+            self.dataset.at[
+                self._index, "marker_radial_gradient_norm_cue_front"
+            ] = marker_nuc_cyt_props.marker_radial_gradient_norm_cue_front
+            self.dataset.at[
+                self._index, "marker_radial_gradient_norm_cue_back"
+            ] = marker_nuc_cyt_props.marker_radial_gradient_norm_cue_back
 
     def add_sc_marker_membrane_props(
         self,

@@ -587,3 +587,129 @@ def get_max_nucleus_membrane_distance(
     )
 
     return max(nucleus_distances.max() - 1, 0.0)
+
+
+def get_radial_position(
+    cell_mask: np.ndarray, nucleus_mask: np.ndarray, membrane_mask: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Calculate where each cytosol pixel lies on its way from the nucleus to the membrane.
+
+    The membrane is no part of the cytosol, the way ends at its inner border.
+
+    Args:
+        cell_mask:
+            The single cell mask
+        nucleus_mask:
+            The single nucleus mask of the same shape as the cell mask
+        membrane_mask:
+            The single membrane mask of the same shape as the cell mask
+
+    Returns:
+        The cytosol mask, the distance of each cytosol pixel to the nucleus in pixels
+        and its position relative to the way from the nucleus (0) to the membrane (1)
+
+    """
+    nucleus_mask = nucleus_mask.astype(bool)
+    membrane_mask = membrane_mask.astype(bool)
+
+    # membrane pixels enclosed by the cytosol are no cytosol, but do not end the way
+    inner_cell_mask = ndi.binary_fill_holes(
+        ndi.binary_fill_holes(cell_mask) & ~membrane_mask
+    )
+    cytosol_mask = inner_cell_mask & ~membrane_mask & ~nucleus_mask
+
+    # a pixel center is half a pixel away from the border of its neighbour pixel
+    nucleus_distance = ndi.distance_transform_edt(~nucleus_mask)[cytosol_mask] - 0.5
+    membrane_distance = (
+        _membrane_distance_map(inner_cell_mask)[1:-1, 1:-1][cytosol_mask] - 0.5
+    )
+
+    return (
+        cytosol_mask,
+        nucleus_distance,
+        nucleus_distance / (nucleus_distance + membrane_distance),
+    )
+
+
+def get_cue_side(
+    mask: np.ndarray, origin: Sequence[float], cue_direction: Union[int, float]
+) -> np.ndarray:
+    """Calculate on which side of the origin each mask pixel lies in cue direction.
+
+    Args:
+        mask:
+            The mask
+        origin:
+            The (row, column) coordinates of the origin
+        cue_direction:
+            The orientation of the cue (e.g. flow) in degrees, counter clockwise
+            from the x-axis as for the partitions of the single cell mask
+
+    Returns:
+        The distance of each mask pixel to the line through the origin orthogonal to
+        the cue direction, positive in front of the origin and negative behind it
+
+    """
+    rows, columns = np.nonzero(mask)
+    cue_direction_rad = np.deg2rad(cue_direction)
+
+    # the y-axis points down in the image, but the cue direction is counter clockwise
+    # in the image as it is displayed
+    return (columns - origin[1]) * np.cos(cue_direction_rad) - (
+        rows - origin[0]
+    ) * np.sin(cue_direction_rad)
+
+
+def get_radial_intensity_profile(
+    position: np.ndarray, intensity: np.ndarray, ring_edges: np.ndarray
+) -> np.ndarray:
+    """Calculate the mean intensity in rings around the nucleus.
+
+    Args:
+        position:
+            The radial position of each pixel
+        intensity:
+            The intensity of each pixel
+        ring_edges:
+            The radial positions of the ring borders
+
+    Returns:
+        The mean intensity of each ring, NaN for rings without pixels
+
+    """
+    pixel_count, _ = np.histogram(position, ring_edges)
+    intensity_sum, _ = np.histogram(position, ring_edges, weights=intensity)
+
+    with np.errstate(invalid="ignore"):
+        return intensity_sum / pixel_count
+
+
+def get_linear_fit(x: np.ndarray, y: np.ndarray) -> Tuple[float, float, float]:
+    """Fit a line to the given points, ignoring points with a NaN value.
+
+    Args:
+        x:
+            The x coordinates of the points
+        y:
+            The y coordinates of the points
+
+    Returns:
+        The slope, the intercept and the coefficient of determination (R²) of the line.
+        All NaN for less than two points, R² is NaN if all points have the same value.
+
+    """
+    valid = ~np.isnan(y)
+    x, y = x[valid], y[valid]
+
+    if len(x) < 2:
+        return np.nan, np.nan, np.nan
+
+    slope, intercept = np.polyfit(x, y, 1)
+
+    if np.allclose(y, y[0]):
+        return slope, intercept, np.nan
+
+    sum_squares_residual = np.sum((y - slope * x - intercept) ** 2)
+    sum_squares_total = np.sum((y - y.mean()) ** 2)
+
+    return slope, intercept, 1 - sum_squares_residual / sum_squares_total

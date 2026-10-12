@@ -16,6 +16,10 @@ We use the following:
 
 ## [Unreleased]
 
+### Added
+
+- features "nuc_membrane_distance" and "nuc_membrane_position_index" for the position of the nucleus relative to its closest cell membrane
+
 ## [0.4.2] - 2025-10-15
 
 ### Changed

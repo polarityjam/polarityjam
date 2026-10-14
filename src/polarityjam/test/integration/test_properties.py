@@ -5,7 +5,9 @@ from polarityjam import (
     BioMedicalImage,
     BioMedicalInstanceSegmentation,
     BioMedicalMask,
+    Extractor,
     ImageParameter,
+    PropertiesCollection,
     RuntimeParameter,
 )
 from polarityjam.compute.corner import get_contour
@@ -653,3 +655,75 @@ class TestSingleCellProps(TestCommon):
             # the first half mask lies in cue direction, differences only on the divisor line
             agreement = np.mean(front == half_masks[0][cell_mask].astype(bool))
             self.assertGreater(agreement, 0.98)
+
+    def extract_radial_marker_img(self, marker_file, cue_direction=0):
+        """Extract the features of the single cell with the given marker image."""
+        junction = np.load(self.get_test_single_cell("cytosol.npy"))
+        nucleus = np.load(self.get_test_single_cell("nucleus.npy"))
+        marker = np.load(self.get_test_single_cell(marker_file))
+        label = np.load(self.get_test_single_cell("label.npy")) > 127
+
+        img_param = ImageParameter()
+        img_param.channel_junction = 0
+        img_param.channel_nucleus = 1
+        img_param.channel_organelle = -1
+        img_param.channel_expression_marker = 2
+
+        runtime_param = RuntimeParameter()
+        runtime_param.connection_graph = False  # a single cell has no neighbours
+        runtime_param.cue_direction = cue_direction
+
+        collection = PropertiesCollection()
+        Extractor(runtime_param).extract(
+            np.stack([junction, nucleus, marker], axis=-1),
+            img_param,
+            label.astype(np.uint8),
+            marker_file,
+            self.output_path,
+            collection,
+            segmentation_mask_nuclei=(nucleus > 127).astype(np.uint8),
+        )
+
+        return collection.dataset.iloc[0]
+
+    def test_marker_radial_gradient_img(self):
+        # call
+        # radial positive and negative effect, intensity triples from nucleus to membrane or vice versa
+        re_p = self.extract_radial_marker_img("marker_re_p.npy")
+        re_n = self.extract_radial_marker_img("marker_re_n.npy")
+        # radial no effect, but bright junctions
+        rne = self.extract_radial_marker_img("marker_rne.npy")
+        # radial positive effect only right of the nucleus, i.e. in front of it for cue direction 0
+        rde_p = self.extract_radial_marker_img("marker_rde_p.npy")
+        rde_p_reverse_cue = self.extract_radial_marker_img(
+            "marker_rde_p.npy", cue_direction=180
+        )
+
+        # assert
+        self.assertAlmostEqual(re_p["marker_radial_gradient_norm"], 1, delta=0.05)
+        self.assertGreater(re_p["marker_radial_gradient_r2"], 0.99)
+        self.assertGreater(re_p["marker_radial_gradient_px"], 0)
+        self.assertAlmostEqual(re_p["marker_radial_intensity_ratio"], 2, delta=0.1)
+
+        self.assertAlmostEqual(re_n["marker_radial_gradient_norm"], -1, delta=0.05)
+        self.assertGreater(re_n["marker_radial_gradient_r2"], 0.99)
+        self.assertLess(re_n["marker_radial_gradient_px"], 0)
+        self.assertAlmostEqual(re_n["marker_radial_intensity_ratio"], 0.5, delta=0.05)
+
+        # the junctions are part of the membrane, which is excluded
+        self.assertAlmostEqual(rne["marker_radial_gradient_norm"], 0, delta=0.01)
+        self.assertAlmostEqual(rne["marker_radial_intensity_ratio"], 1, delta=0.01)
+
+        self.assertAlmostEqual(rde_p["marker_radial_gradient_norm"], 0.5, delta=0.05)
+        self.assertAlmostEqual(
+            rde_p["marker_radial_gradient_norm_cue_front"], 1, delta=0.05
+        )
+        self.assertAlmostEqual(
+            rde_p["marker_radial_gradient_norm_cue_back"], 0, delta=0.01
+        )
+        self.assertAlmostEqual(
+            rde_p_reverse_cue["marker_radial_gradient_norm_cue_front"], 0, delta=0.01
+        )
+        self.assertAlmostEqual(
+            rde_p_reverse_cue["marker_radial_gradient_norm_cue_back"], 1, delta=0.05
+        )

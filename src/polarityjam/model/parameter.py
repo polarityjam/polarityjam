@@ -128,6 +128,7 @@ class RuntimeParameter(Parameter):
         self.min_organelle_size = None
         self.dp_epsilon = None
         self.cue_direction = None
+        self.num_radial_rings = None
         self.connection_graph = None
         self.segmentation_algorithm = None
         self.remove_small_objects_size = None

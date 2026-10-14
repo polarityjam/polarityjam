@@ -132,41 +132,67 @@ Organelle features
 
 Marker features
 ---------------
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| Feature                              | Explanation                                                                                         |
-+======================================+=====================================================================================================+
-| marker_mean_expression               | Mean expression of the channel with the marker.                                                     |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_sum_expression                | The absolute sum of the expression of the marker.                                                   |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_centroid_X                    | The X coordinate (horizontal axis) of the center of the marker expression.                          |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_centroid_Y                    | The Y coordinate (vertical axis) of the center of the marker expression.                            |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_centroid_orientation_rad      | Intrinsic asymmetry of the cell.                                                                    |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_centroid_orientation_deg      | Intrinsic asymmetry of the cell.                                                                    |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_mean_expression_mem           | Mean membrane expression.                                                                           |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_sum_expression_mem            | The absolut sum of the membrane expression.                                                         |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_mean_expression_nuc           | The mean expression of the nucleus.                                                                 |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_sum_expression_nuc            | The absolut sum of the nucleus expression.                                                          |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_mean_expression_cyt           | The mean expression of the cell cytosol.                                                            |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_sum_expression_cyt            | The absolut sum of the cell cytosol expression.                                                     |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_nucleus_orientation_rad       | The orientation in rad of the marker centroid to the nucleus.                                       |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_nucleus_orientation_deg       | The orientation in rad of the marker centroid to the nucleus.                                       |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_cue_intensity_ratio           | The ratio of the left vs right cell membrane intensity in cue direction.                            |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_axial_cue_intensity_ratio     | The ratio of the sum of cell membrane quarters in cue direction and the total membrane intensity.   |
-+--------------------------------------+-----------------------------------------------------------------------------------------------------+
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| Feature                                | Explanation                                                                                         |
++========================================+=====================================================================================================+
+| marker_mean_expression                 | Mean expression of the channel with the marker.                                                     |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_sum_expression                  | The absolute sum of the expression of the marker.                                                   |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_centroid_X                      | The X coordinate (horizontal axis) of the center of the marker expression.                          |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_centroid_Y                      | The Y coordinate (vertical axis) of the center of the marker expression.                            |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_centroid_orientation_rad        | Intrinsic asymmetry of the cell.                                                                    |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_centroid_orientation_deg        | Intrinsic asymmetry of the cell.                                                                    |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_mean_expression_mem             | Mean membrane expression.                                                                           |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_sum_expression_mem              | The absolut sum of the membrane expression.                                                         |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_mean_expression_nuc             | The mean expression of the nucleus.                                                                 |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_sum_expression_nuc              | The absolut sum of the nucleus expression.                                                          |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_mean_expression_cyt             | The mean expression of the cell cytosol.                                                            |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_sum_expression_cyt              | The absolut sum of the cell cytosol expression.                                                     |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_nucleus_orientation_rad         | The orientation in rad of the marker centroid to the nucleus.                                       |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_nucleus_orientation_deg         | The orientation in rad of the marker centroid to the nucleus.                                       |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_cue_intensity_ratio             | The ratio of the left vs right cell membrane intensity in cue direction.                            |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_axial_cue_intensity_ratio       | The ratio of the sum of cell membrane quarters in cue direction and the total membrane intensity.   |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_radial_gradient                 | Change of the marker intensity from the nucleus to the membrane. Slope of a line fitted to the mean |
+|                                        | intensities of num_radial_rings rings (runtime parameter, default 10) in the cytosol between the    |
+|                                        | border of the nucleus (0) and the inner border of the membrane (1). The membrane (see               |
+|                                        | membrane_thickness) is excluded. The ring of a pixel is given by its distance d_nuc to the nucleus  |
+|                                        | and d_mem to the membrane as d_nuc / (d_nuc + d_mem).                                               |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_radial_gradient_norm            | marker_radial_gradient divided by the mean intensity of the rings. Comparable between cells of      |
+|                                        | different shape and brightness, e.g. 1 for an intensity rising linearly from 10 at the nucleus to   |
+|                                        | 30 at the membrane, -1 for the inverse.                                                             |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_radial_gradient_r2              | Coefficient of determination of the line fitted for marker_radial_gradient. Close to 1 if the       |
+|                                        | intensity changes linearly from the nucleus to the membrane, NaN for a constant intensity.          |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_radial_gradient_px              | Change of the marker intensity per pixel distance from the nucleus. Slope of a line fitted to the   |
+|                                        | mean intensities of rings of one pixel width around the nucleus, the membrane is excluded. Depends  |
+|                                        | on cell size and shape, far rings exist only along the long cell axis.                              |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_radial_intensity_ratio          | Mean marker intensity of the outer third of the cytosol (towards the membrane) divided by the mean  |
+|                                        | intensity of its inner third (towards the nucleus), with the rings of marker_radial_gradient.       |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_radial_gradient_norm_cue_front  | marker_radial_gradient_norm of the cytosol in front of the nucleus in cue direction, i.e. beyond    |
+|                                        | the line through the nucleus center orthogonal to the cue direction. Divided by the mean intensity  |
+|                                        | of the rings of the whole cytosol.                                                                  |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
+| marker_radial_gradient_norm_cue_back   | As marker_radial_gradient_norm_cue_front for the cytosol behind the nucleus in cue direction.       |
++----------------------------------------+-----------------------------------------------------------------------------------------------------+
 
 
 

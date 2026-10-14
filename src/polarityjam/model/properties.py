@@ -487,9 +487,6 @@ class SingleCellMarkerNucleiProps(SingleInstanceProps):
 class SingleCellMarkerCytosolProps(SingleInstanceProps):
     """Class representing the properties of a single cell marker cytosol signal."""
 
-    # number of rings of the radial intensity profile from the nucleus to the membrane
-    num_radial_rings = 10
-
     def __init__(
         self,
         single_cytosol_mask: BioMedicalMask,
@@ -498,13 +495,22 @@ class SingleCellMarkerCytosolProps(SingleInstanceProps):
         single_cell_mask: BioMedicalMask,
         single_membrane_mask: BioMedicalMask,
         cue_direction: int,
+        num_radial_rings: int,
     ):
         """Initialize the properties with the given mask and intensity."""
         super().__init__(single_cytosol_mask, im_marker)
+
+        if num_radial_rings < 2:
+            raise ValueError(
+                "At least two radial rings are needed to fit the marker radial gradient."
+            )
+
         self.sc_marker_nuclei_props = sc_marker_nuclei_props
         self.cell_mask = single_cell_mask
         self.membrane_mask = single_membrane_mask
         self.cue_direction = cue_direction
+        # number of rings of the radial intensity profile from the nucleus to the membrane
+        self.num_radial_rings = num_radial_rings
 
     @property
     def marker_sum_expression_cyt(self):

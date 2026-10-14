@@ -687,6 +687,7 @@ class SingleCellImage(AbstractBioMedicalImage):
             self.cell_mask,
             self.cell_membrane_mask,
             param.cue_direction,
+            param.num_radial_rings,
         )
 
     def get_junction_properties(

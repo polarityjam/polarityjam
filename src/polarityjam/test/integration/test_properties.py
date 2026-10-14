@@ -455,7 +455,12 @@ class TestSingleCellProps(TestCommon):
         return cell_mask, nucleus_mask, np.clip(position, 0, 1)
 
     @staticmethod
-    def get_marker_cytosol_props(cell_mask, nucleus_mask, intensity, cue_direction=0):
+    def get_marker_cytosol_props(
+        cell_mask, nucleus_mask, intensity, cue_direction=0, num_radial_rings=None
+    ):
+        if num_radial_rings is None:
+            num_radial_rings = RuntimeParameter().num_radial_rings
+
         cell_mask = BioMedicalMask(cell_mask)
         nucleus_mask = BioMedicalMask(nucleus_mask)
         marker = BioMedicalChannel(intensity)
@@ -475,6 +480,7 @@ class TestSingleCellProps(TestCommon):
             cell_mask,
             cell_mask.get_outline_from_mask(5),
             cue_direction,
+            num_radial_rings,
         )
 
     def test_marker_radial_gradient(self):
@@ -593,6 +599,45 @@ class TestSingleCellProps(TestCommon):
         self.assertTrue(np.isnan(props.marker_radial_gradient_px))
         self.assertTrue(np.isnan(props.marker_radial_intensity_ratio))
         self.assertTrue(np.isnan(props.marker_radial_gradient_norm_cue_front))
+
+    def test_marker_radial_gradient_num_rings(self):
+        cell_mask, nucleus_mask, position = self.setup_radial_marker(60, 60)
+        intensity = np.where(nucleus_mask, 100, 10 + 20 * position)
+
+        # call
+        default_rings = self.get_marker_cytosol_props(
+            cell_mask, nucleus_mask, intensity
+        )
+        few_rings = self.get_marker_cytosol_props(
+            cell_mask, nucleus_mask, intensity, num_radial_rings=4
+        )
+        many_rings = self.get_marker_cytosol_props(
+            cell_mask, nucleus_mask, intensity, num_radial_rings=20
+        )
+
+        # assert
+        self.assertEqual(RuntimeParameter().num_radial_rings, 10)
+        self.assertEqual(RuntimeParameter({"num_radial_rings": 4}).num_radial_rings, 4)
+        self.assertEqual(len(default_rings._radial_profile()), 10)
+        self.assertEqual(len(few_rings._radial_profile()), 4)
+        self.assertEqual(len(many_rings._radial_profile()), 20)
+
+        # a linear gradient does not depend on the number of rings
+        self.assertAlmostEqual(
+            few_rings.marker_radial_gradient_norm,
+            default_rings.marker_radial_gradient_norm,
+            delta=0.02,
+        )
+        self.assertAlmostEqual(
+            many_rings.marker_radial_gradient_norm,
+            default_rings.marker_radial_gradient_norm,
+            delta=0.02,
+        )
+
+        with self.assertRaises(ValueError):
+            self.get_marker_cytosol_props(
+                cell_mask, nucleus_mask, intensity, num_radial_rings=1
+            )
 
     def test_cue_side_matches_half_masks(self):
         cell_mask, _, _ = self.setup_radial_marker(40, 100)

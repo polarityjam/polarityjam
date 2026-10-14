@@ -21,6 +21,7 @@ We use the following:
 - features "nuc_membrane_distance" and "nuc_membrane_position_index" for the position of the nucleus relative to its closest cell membrane
 - features "marker_radial_gradient", "marker_radial_gradient_norm", "marker_radial_gradient_r2", "marker_radial_gradient_px" and "marker_radial_intensity_ratio" for the change of the marker intensity in the cytosol from the nucleus to the membrane (membrane excluded)
 - features "marker_radial_gradient_norm_cue_front" and "marker_radial_gradient_norm_cue_back" for this change in front of and behind the nucleus in cue direction
+- runtime parameter "num_radial_rings" (default 10) for the number of rings from the nucleus to the membrane used by these features
 
 ## [0.4.2] - 2025-10-15
 

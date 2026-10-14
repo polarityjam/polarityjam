@@ -168,11 +168,12 @@ Marker features
 | marker_axial_cue_intensity_ratio       | The ratio of the sum of cell membrane quarters in cue direction and the total membrane intensity.   |
 +----------------------------------------+-----------------------------------------------------------------------------------------------------+
 | marker_radial_gradient                 | Change of the marker intensity from the nucleus to the membrane. Slope of a line fitted to the mean |
-|                                        | intensities of 10 rings in the cytosol between the border of the nucleus (0) and the inner border   |
-|                                        | of the membrane (1). The membrane (see membrane_thickness) is excluded. The ring of a pixel is      |
-|                                        | given by its distance d_nuc to the nucleus and d_mem to the membrane as d_nuc / (d_nuc + d_mem).    |
+|                                        | intensities of num_radial_rings rings (runtime parameter, default 10) in the cytosol between the    |
+|                                        | border of the nucleus (0) and the inner border of the membrane (1). The membrane (see               |
+|                                        | membrane_thickness) is excluded. The ring of a pixel is given by its distance d_nuc to the nucleus  |
+|                                        | and d_mem to the membrane as d_nuc / (d_nuc + d_mem).                                               |
 +----------------------------------------+-----------------------------------------------------------------------------------------------------+
-| marker_radial_gradient_norm            | marker_radial_gradient divided by the mean intensity of the 10 rings. Comparable between cells of   |
+| marker_radial_gradient_norm            | marker_radial_gradient divided by the mean intensity of the rings. Comparable between cells of      |
 |                                        | different shape and brightness, e.g. 1 for an intensity rising linearly from 10 at the nucleus to   |
 |                                        | 30 at the membrane, -1 for the inverse.                                                             |
 +----------------------------------------+-----------------------------------------------------------------------------------------------------+
